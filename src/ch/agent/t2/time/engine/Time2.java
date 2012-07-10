@@ -1,0 +1,447 @@
+/*
+ *   Copyright 2011 Hauser Olsson GmbH
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * 
+ * Package: ch.agent.t2.time.engine
+ * Type: Time2
+ * Version: 1.0.0
+ */
+package ch.agent.t2.time.engine;
+
+import java.util.Formatter;
+
+import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Msg;
+import ch.agent.t2.time.Adjustment;
+import ch.agent.t2.time.DayOfWeek;
+import ch.agent.t2.time.DefaultExternalFormat;
+import ch.agent.t2.time.ExternalTimeFormat;
+import ch.agent.t2.time.TimeDomain;
+import ch.agent.t2.time.TimeIndex;
+import ch.agent.t2.time.TimeParts;
+import ch.agent.t2.time.Resolution;
+
+
+/**
+ * Time2 implements the behavior of {@link TimeIndex} as an immutable object.
+ * The design goals of <em>Time2</em> are flexibility and performance.
+ * It is not a replacement for {@link java.util.Date java.util.Date} and is not
+ * a competitor to <a href="http://joda-time.sourceforge.net/">Joda Time</a>.
+ * <em>Time2</em> has no time zones, no daylight savings, no
+ * locales, no Gregorian cutover. Dates before October 15 1582 do
+ * not correspond to historical dates. The base of <em>Time2</em> time is 
+ * zero microseconds into January 1st of year zero:
+ * <p>
+ * <blockquote>
+ * <code>0000-01-01 00:00:00.000000</code>
+ * </blockquote>
+ * <p>
+ * It corresponds to the numerical time index 0L.
+ * 
+ * @author Jean-Paul Vetterli
+ * @version 1.0.0
+ */
+public class Time2 implements TimeIndex {
+
+	private int hash; // a Time is immmutable, so hash needs to be computed only once
+	
+	private TimeFactory domain;
+
+	private long internalTime;
+
+	private boolean internalTimeModified;
+
+	private TimeParts tp;
+	
+	/**
+	 * The parameterless constructor is not used.
+	 */
+	@SuppressWarnings("unused")
+	private Time2() {
+	}
+	
+	/**
+	 * Construct a time index with the given time domain.
+	 * An <b>unchecked</b> exception is thrown if the concrete time domain
+	 * is not a {@link TimeFactory}.
+	 * 
+	 * @param domain a non-null {@link TimeFactory}
+	 */
+	private Time2(TimeDomain domain) {
+		if (domain == null)
+			throw new IllegalArgumentException("domain null");
+		try {
+			this.domain = (TimeFactory) domain;
+		} catch (ClassCastException e) {
+			throw new IllegalArgumentException("domain " + domain.getLabel() + " is not a " +  TimeFactory.class.getSimpleName());
+		}
+	}
+	
+	/**
+	 * Construct a time index with the given time domain and numerical time index.
+	 * An <b>unchecked</b> exception is thrown if the concrete time domain
+	 * is not a {@link TimeFactory} or if the numerical time index is
+	 * out of range. The range depends on the domain but is very large. 
+	 * 
+	 * @param domain a non-null {@link TimeFactory}
+	 * @param time a valid numerical time index
+	 */
+	protected Time2(TimeDomain domain, long time) {
+		this(domain);
+		try {
+			this.domain.valid(time, false);
+			setInternalTime(time);
+		} catch (KeyedException e) {
+			throw new IllegalArgumentException("time", e);
+		}
+	}
+	
+	/**
+	 * Construct a time index with the given time domain and parameters.
+	 * An <b>unchecked</b> exception is thrown if the concrete time domain
+	 * is not a {@link TimeFactory}.
+	 * If necessary the time is adjusted as allowed by the last argument.
+	 * 
+	 * @param domain a non-null {@link TimeFactory}
+	 * @param year a year, which can be unusually large, depending on the domain
+	 * @param month a number between 1 and 12
+	 * @param day the day in the month, starting with 1
+	 * @param hour an hour in the range 0-23
+	 * @param min a minute in the range 0-59
+	 * @param sec a second in the range 0-59
+	 * @param usec the number of microseconds in the current second in the range 0-999999
+	 * @param adjust a non-null allowed adjustment mode
+	 * @throws KeyedException
+	 */
+	protected Time2(TimeDomain domain, long year, int month, int day, int hour, int min, int sec,
+			int usec, Adjustment adjust) throws KeyedException {
+		this(domain);
+		TimeParts tp = new TimeParts();
+		tp.setYear(year);
+		tp.setMonth(month);
+		tp.setDay(day);
+		tp.setHour(hour);
+		tp.setMin(min);
+		tp.setSec(sec);
+		tp.setUsec(usec);
+		set(tp, adjust);
+	}
+	
+	/**
+	 * Construct a time index with the given time domain and string, with possible adjustment.
+	 * An <b>unchecked</b> exception is thrown if the concrete time domain
+	 * is not a {@link TimeFactory}.
+	 * The string is interpreted by an instance of {@link ExternalTimeFormat}
+	 * configured. By default it is {@link DefaultExternalFormat}.
+	 * <p>
+	 * If necessary the time is adjusted as allowed by the last argument.
+	 * 
+	 * @param domain a non-null {@link TimeFactory}
+	 * @param time a string containing a representation of a date and time
+	 * @param adjustment a non-null allowed adjustment mode
+	 * @throws KeyedException
+	 */
+	protected Time2(TimeDomain domain, String time, Adjustment adjustment) throws KeyedException {
+		this(domain);
+		set(time, adjustment);
+	}
+	
+	/**
+	 * Construct a time index with the given time domain and string.
+	 * An <b>unchecked</b> exception is thrown if the concrete time domain
+	 * is not a {@link TimeFactory}.
+	 * The string is interpreted by an instance of {@link ExternalTimeFormat}
+	 * configured. By default it is {@link DefaultExternalFormat}.
+	 * <p>
+	 * No adjustment is allowed.
+	 * 
+	 * @param domain a non-null {@link TimeFactory}
+	 * @param time a string containing a representation of a date and time
+	 * @throws KeyedException
+	 */
+	protected Time2(TimeDomain domain, String time) throws KeyedException {
+		this(domain, time, Adjustment.NONE);
+	}
+	
+	private Time2(TimeIndex timeIndex, long increment) throws KeyedException {
+		this(timeIndex.getTimeDomain());
+		long t = timeIndex.asLong();
+		long incrT = t + increment;
+		// overflow?
+		if (t > 0 && incrT < 0 || t < 0 && incrT > 0)
+			throw T2Msg.exception(32220, timeIndex.toString(), increment);
+		try {
+			domain.valid(incrT, false);
+		} catch (KeyedException e) {
+			throw T2Msg.exception(e, 32220, timeIndex.toString(), increment);
+		}
+		setInternalTime(incrT);
+	}
+	
+	@Override
+	public TimeIndex convert(TimeDomain domain) throws KeyedException {
+		return convert(domain, Adjustment.NONE);
+	}
+	
+	@Override
+	public TimeIndex convert(TimeDomain domain, Adjustment adjustment) throws KeyedException {
+		/*
+		 * This domain conversion method is a quick-shot. Not sure it works in
+		 * all cases, or that it provides the best conversion.
+		 */
+		return new Time2(domain, toString(), adjustment);
+	}
+
+	@Override
+	public TimeDomain getTimeDomain() {
+		return domain;
+	}
+
+	@Override
+	public long asLong() {
+		return getInternalTime();
+	}
+	
+	@Override
+	public int asOffset() throws KeyedException {
+		long time = getInternalTime() - domain.getOrigin();
+		if (time < Integer.MIN_VALUE || time > Integer.MAX_VALUE)
+			throw T2Msg.exception(32170, domain.getResolution(), time);
+		return (int) time;
+	}
+	
+	@Override
+	public TimeIndex add(long increment) throws KeyedException {
+		return new Time2(this, increment);
+	}
+	
+	@Override
+	public long sub(TimeIndex time) throws KeyedException {
+		if (getTimeDomain().equals(time.getTimeDomain())) {
+			return asLong() - time.asLong();
+		} else
+			throw T2Msg.exception(32181, time.toString(), toString(), 
+					time.getTimeDomain().getLabel(), getTimeDomain().getLabel());
+	}
+	
+	/**
+	 * Return the time as a time parts object.
+	 * 
+	 * @return the time as a time parts object
+	 */
+	TimeParts getTimeParts() {
+		// package private
+		resolve();
+		return tp;
+	}
+
+	@Override
+	public long getYear() {
+		resolve();
+		return tp.getYear();
+	}
+
+	@Override
+	public int getMonth() {
+		resolve();
+		return tp.getMonth();
+	}
+
+	@Override
+	public int getDay() {
+		resolve();
+		return tp.getDay();
+	}
+
+	@Override
+	public int getHour() {
+		resolve();
+		return tp.getHour();
+	}
+
+	@Override
+	public int getMinute() {
+		resolve();
+		return tp.getMin();
+	}
+
+	@Override
+	public int getSecond() {
+		resolve();
+		return tp.getSec();
+	}
+
+	@Override
+	public int getMicrosecond() {
+		resolve();
+		return tp.getUsec();
+	}
+
+	@Override
+	public DayOfWeek getDayOfWeek() throws KeyedException {
+		return domain.getDayOfWeek(this);
+	}
+
+	@Override
+	public TimeIndex getDayByRank(Resolution basePeriod, DayOfWeek day, int rank) throws KeyedException {
+		switch(basePeriod) {
+		case MONTH:
+			return TimeTools.getDayOfMonthByRank(this, day, rank);
+		case YEAR:
+			return TimeTools.getDayOfYearByRank(this, day, rank);
+		default:
+			throw T2Msg.exception(32129, basePeriod.name());
+		}
+	}
+	
+	/**
+	 * Return a string representation of the time. In a <i>full</i>
+	 * representation, all components are always included, from years to
+	 * microseconds. In a standard representation, the formatting is delegated
+	 * to {@link ExternalTimeFormat#format(Resolution, TimeParts)}.
+	 * 
+	 * @param full
+	 *            if true, returns a full representation
+	 * @return a string representation of the time
+	 */
+	public String toString(boolean full) {
+		resolve();
+		if (full) {
+			StringBuilder sb = new StringBuilder();
+			Formatter fmt = new Formatter(sb);
+			fmt.format("%04d-%02d-%02d %02d:%02d:%02d.%06d", tp.getYear(), tp.getMonth(),
+					tp.getDay(), tp.getHour(), tp.getMin(), tp.getSec(), tp.getUsec());
+			return sb.toString();
+		} else
+			return domain.format(domain.getResolution(), tp);
+	}
+	
+	@Override
+	public String toString(String format) {
+		if (format == null)
+			return toString();
+		resolve();
+		if (format.length() == 0) {
+			// TODO: should be localized (e.g. m/d yy)
+			String yy = tp.getYear() + "";
+			if (yy.length() >= 3)
+				yy = yy.substring(2);
+			return String.format("%d.%d.%s", tp.getDay(), tp.getMonth(), yy);
+		}
+		StringBuilder sb = new StringBuilder();
+		Formatter fmt = new Formatter(sb);
+		fmt.format(format, tp.getYear(), tp.getMonth(), tp.getDay(), tp.getHour(), tp.getMin(), tp.getSec(), tp.getUsec());
+		return sb.toString();
+	}
+
+	@Override
+	public String toString() {
+		return toString(false);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (!(obj instanceof Time2))
+			return false;
+		return (asLong() == ((Time2)obj).asLong()) && domain.equals(((Time2)obj).getTimeDomain());
+	}
+
+	@Override
+	public int hashCode() {
+		if (hash == 0)
+			hash = 31 * domain.hashCode() + (new Long(asLong())).hashCode();
+		return hash;
+	}
+
+	/**
+	 * Compare this time to the argument interpreting "earlier" as "smaller".
+	 * Throw an <b>unchecked</b> exception if the time domains differ. 
+	 * 
+	 * @param time a non-null time index
+	 * @return a negative (positive) number if this time is earlier (later) than the argument
+	 */
+	@Override
+	public int compareTo(TimeIndex time) {
+		if (time == null)
+			throw new IllegalArgumentException("t null");
+		if (time.getTimeDomain().equals(getTimeDomain())) {
+			long l1 = asLong();
+			long l2 = time.asLong();
+			if (l1 < l2)
+				return -1;
+			else if (l1 > l2)
+				return 1;
+			else
+				return 0;
+		}
+		throw new RuntimeException(new T2Msg(32008, getTimeDomain().getLabel(), 
+				time.getTimeDomain().getLabel()).toString());		
+	}
+	
+	/**
+	 * Set the time from a time parts object.
+	 * Silently ignore elements finer than the resolution.
+	 * 
+	 * @param tp a non-null time parts object
+	 * @param adjust a non-null allowed adjustment mode
+	 * @throws KeyedException
+	 */
+	private void set(TimeParts tp, Adjustment adjust) throws KeyedException {
+		setInternalTime(domain.pack(tp, adjust));
+	}
+
+	/**
+	 * Set the time from a string.
+	 * Silently ignore elements finer than the resolution.
+	 * @param date a non-null string
+	 * @param adjust a non-null allowed adjustment mode
+	 * @throws KeyedException
+	 */
+	private void set(String date, Adjustment adjust) throws KeyedException {
+		TimeParts tp = domain.scan(date);
+		set(tp, adjust);
+	}
+	
+	/**
+	 * If not yet done, resolve a numerical time index into its constituent elements.
+	 */
+	private void resolve() {
+		if (internalTimeModified) {
+			tp = domain.unpack(getInternalTime());
+			internalTimeModified = false;
+		}
+	}
+	
+	/**
+	 * Return the numerical time index.
+	 * 
+	 * @return the numerical time index
+	 */
+	private long getInternalTime() {
+		return internalTime;
+	}
+	
+	/**
+	 * Set the numerical time index. 
+	 * 
+	 * @param time the numerical time index
+	 */
+	private void setInternalTime(long time) {
+		internalTimeModified = true;
+		internalTime = time;
+	}
+
+}

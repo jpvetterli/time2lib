@@ -1,0 +1,95 @@
+<html>
+<style type="text/css">
+<!--/* <![CDATA[ */
+hr {border-width: 0; border-top-width: 1;}
+body {background: #d8eef7; color: black; font-family: monospace; font-size: medium;}
+xmp {background: white; border: 1px dashed; padding: 10px}
+/* ]]> */--></style>
+<title>T2 LIBRARY - README 1st</title>
+<body>
+
+<h1>T2 LIBRARY - README 1st</h1>
+
+<small>2011-08-17/jpv</small>
+
+<xmp>Copyright 2011 Hauser Olsson GmbH.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+</xmp>
+
+This document explains how to compile and execute a small
+demo application using the Time2 Library with the <em>javac</em> 
+and <em>java</em> commands. 
+The command line syntax assumes Linux.  
+<p>
+Step 1. Copy the following code into <em>/tmp/Olympics.java</em>:
+<xmp>import ch.agent.t2.time.*;
+import ch.agent.t2.timeseries.*;
+
+/**
+ * Olympics is a small demo for the Time2 library.
+ * @author Jean-Paul Vetterli
+ */
+public class Olympics {
+
+    public static void main(String[] args) {
+        try {
+            /* define time domain "once every fourth year" */
+            TimeDomainDefinition year4def = new TimeDomainDefinition("year4", 
+                Resolution.YEAR, 0L, new Cycle(true, false, false, false));
+            TimeDomain year4 = TimeDomainManager.getFactory().get(year4def, true);
+            
+            /* define "missing value" for String (else, the default is null) */
+            String missingValue = "(missing)";
+            TimeSeriesFactory.getInstance().define(String.class, missingValue);
+
+            TimeAddressable<String> olympics = TimeSeriesFactory.make(year4, String.class);
+            olympics.put(year4.time("1896"), new String[] 
+                {"Athens", "Paris", "Saint-Louis", "London", "Stockholm"});
+            olympics.put(year4.time("1920"), new String[] 
+                {"Antwerp", "Paris", "Amsterdam", "Los Angeles", "Berlin"});
+            
+            for (Observation<String> oly : olympics) {
+                System.out.println(oly.toString());
+            }
+        } catch (Exception e) {
+            System.err.println("Oops...\n" + e.getMessage());
+        }
+    }
+}
+</xmp>
+Step 2. Download a version of the Time2 Library into the same directory as
+Olympics.java:
+<xmp>$ wget -P /tmp http://agent.ch/timeseries/t2/download/t2-1.0.0.jar
+</xmp>
+Step 3. Change to the directory and compile Olympics.java:
+<xmp>$ cd /tmp
+$ javac -cp t2-1.0.0.jar Olympics.java
+</xmp>
+Step 4. Execute the demo:
+<xmp>$ java -cp .:t2-1.0.0.jar Olympics
+1896=Athens
+1900=Paris
+1904=Saint-Louis
+1908=London
+1912=Stockholm
+1916=(missing)
+1920=Antwerp
+1924=Paris
+1928=Amsterdam
+1932=Los Angeles
+1936=Berlin
+$
+</xmp>
+
+</html>
