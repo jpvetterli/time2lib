@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.t2.time
  * Type: Range
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.time;
 
@@ -33,7 +33,7 @@ import ch.agent.t2.T2Msg;
  * A Range is an immutable object.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  */
 public class Range implements Iterable<TimeIndex> {
 
@@ -41,9 +41,6 @@ public class Range implements Iterable<TimeIndex> {
 
 	/**
 	 * RangeIterator is a {@link Iterator} return TimeIndex objects.
-	 *
-	 * @author Jean-Paul Vetterli
-	 * @version 1.0.0
 	 */
 	public class RangeIterator implements Iterator<TimeIndex> {
 

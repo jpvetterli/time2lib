@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.t2.timeseries
  * Type: SparseTimeSeries
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.timeseries;
 
@@ -37,7 +37,7 @@ import ch.agent.t2.time.TimeDomain;
  * The implementation is not thread-safe.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  * @param <T>
  */
 public class SparseTimeSeries<T> extends AbstractTimeSeries<T> implements TimeAddressable<T> {
@@ -45,9 +45,6 @@ public class SparseTimeSeries<T> extends AbstractTimeSeries<T> implements TimeAd
 	/**
 	 * IrregularTimeSeriesIterator is an {@link Iterator} returning
 	 * {@link Observation} objects.
-	 * 
-	 * @author Jean-Paul Vetterli
-	 * @version 1.0.0
 	 */
 	public class IrregularTimeSeriesIterator implements Iterator<Observation<T>> {
 

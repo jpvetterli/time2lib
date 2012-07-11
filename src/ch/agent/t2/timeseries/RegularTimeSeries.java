@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.t2.timeseries
  * Type: RegularTimeSeries
- * Version: 1.0.0
+ * Version: 1.1.0
  */
 package ch.agent.t2.timeseries;
 
@@ -37,16 +37,13 @@ import ch.agent.t2.time.TimeDomain;
  * The implementation is not thread-safe.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.1.0
  * @param <T> the value type
  */
 public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeIndexable<T> {
 
 	/**
 	 * TimeSeriesIterator is an {@link Iterator} returning {@link Observation} objects.
-	 *
-	 * @author Jean-Paul Vetterli
-	 * @version 1.0.0
 	 */
 	public class TimeSeriesIterator implements Iterator<Observation<T>> {
 
@@ -359,12 +356,14 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 	}
 	
 	@Override
-	public int fill(T replacement, long tailLength) {
-		if (replacement == null)
-			return fill(tailLength);
+	public int fill(T replacement, long tailLength) throws KeyedException {
+		T mv = getMissingValue();
 		
-		if (replacement.equals(getMissingValue()) && tailLength > 0) 
-			throw new IllegalArgumentException("replacement with missing value and positive tail length");
+		if (replacement == null && mv != null)
+			throw T2Msg.exception(40118);
+		
+		if (replacement.equals(mv) && tailLength > 0) 
+			throw T2Msg.exception(40124);
 			
 		int count = 0;
 		T[] val = getArray();
@@ -388,13 +387,7 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 		return count;
 	}
 	
-	/**
-	 * Fill holes with the last known value and append the last value many times.
-	 * Return the total number of values added.
-	 * 
-	 * @param tailLength the number of times the last value must be appended
-	 * @return the total number of values added
-	 */
+	@Override
 	public int fill(long tailLength) {
 		int count = 0;
 		T[] val = getArray();
@@ -420,7 +413,7 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 	}
 	
 	@Override
-	public int fill(Filler<T> interpolator) {
+	public int fill(Filler<T> interpolator) throws KeyedException {
 		int count = 0;
 		T[] val = getArray();
 		if (val == null)
@@ -433,8 +426,18 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 				if (mvStart == -1)
 					mvStart = i;
 			} else {
-				if (mvStart > 0) // i.e. don't interpolate when first element is a missing value
-					interpolator.fillHole(val, mvStart - 1, i);
+				if (mvStart > 0) {
+					// i.e. don't interpolate when first element is a missing value
+					try {
+						interpolator.fillHole(val, mvStart - 1, i);
+					} catch (Exception e) {
+						Range range = new Range(getTimeDomain(), getFirstIndex() + mvStart,	getFirstIndex() + i - 1);
+						throw T2Msg.exception(e, 40121, range.toString());
+					}
+					for (int j = mvStart; j < i; j++) {
+						val[j] = normalizeMissingValue(val[j]);
+					}
+				}
 				mvStart = -1;
 			}
 		}

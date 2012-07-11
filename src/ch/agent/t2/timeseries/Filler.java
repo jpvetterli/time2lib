@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.t2.timeseries
  * Type: Filler
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.timeseries;
 
@@ -23,7 +23,7 @@ package ch.agent.t2.timeseries;
  * Filler defines an interface for filling holes in a time series.
  *
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  * @param <T>
  */
 public interface Filler<T> {
@@ -40,7 +40,8 @@ public interface Filler<T> {
 	 *            index of last non-missing value before hole in val
 	 * @param last
 	 *            index of first non-missing value after hole in val
+	 * @throws Exception
 	 */
-	void fillHole(T[] val, int first, int last);
+	void fillHole(T[] val, int first, int last) throws Exception;
 	
 }

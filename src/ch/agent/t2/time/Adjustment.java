@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.t2.time
  * Type: Adjustment
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.time;
 
@@ -33,8 +33,8 @@ package ch.agent.t2.time;
  * <li>Do not adjust and produce an error.
  * </ol>
  * 
- * @author jp
- * 
+ * @author Jean-Paul Vetterli
+ * @version 1.0.1
  */
 public enum Adjustment {
 	/**

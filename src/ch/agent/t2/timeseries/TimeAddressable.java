@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.t2.timeseries
  * Type: TimeAddressable
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.timeseries;
 
@@ -31,7 +31,7 @@ import ch.agent.t2.time.TimeIndex;
  * axis.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  * @param <T>
  *            the value type
  */
@@ -130,17 +130,22 @@ public interface TimeAddressable<T> extends Iterable<Observation<T>> {
 	TimeAddressable<T> get(Range range) throws KeyedException;
 	
 	/**
-	 * Put a value identified by a time index to the time series.
+	 * Put a value identified by a time index into the time series. The value
+	 * can only be null when null was defined to represent missing values in
+	 * {@link TimeSeriesFactory}.
 	 * 
-	 * @param time a non-null time index
-	 * @param value a value
+	 * @param time
+	 *            a non-null time index
+	 * @param value
+	 *            a value
 	 * @throws KeyedException
 	 */
 	void put(TimeIndex time, T value) throws KeyedException;
 
 	/**
 	 * Put an array of values identified with time index of its first element
-	 * into the time series.
+	 * into the time series. Values elements can only be null when null was
+	 * defined to represent missing values in {@link TimeSeriesFactory}.
 	 * 
 	 * @param time
 	 *            a non-null time index
@@ -152,16 +157,22 @@ public interface TimeAddressable<T> extends Iterable<Observation<T>> {
 	
 	/**
 	 * Put a value identified by a numerical time index into the time series.
+	 * The value can only be null when null was defined to represent missing
+	 * values in {@link TimeSeriesFactory}.
 	 * 
-	 * @param time a numerical time index
-	 * @param value a value
+	 * @param time
+	 *            a numerical time index
+	 * @param value
+	 *            a value
 	 * @throws KeyedException
 	 */
 	void put(long time, T value) throws KeyedException;
 
 	/**
 	 * Put an array of values identified with the numerical time index of its
-	 * first element into the time series.
+	 * first element into the time series. Values elements can only be null when
+	 * null was defined to represent missing values in {@link TimeSeriesFactory}
+	 * .
 	 * 
 	 * @param time
 	 *            a numerical time index
@@ -175,6 +186,10 @@ public interface TimeAddressable<T> extends Iterable<Observation<T>> {
 	 * Conditionally put all values from another time series into this time series.
 	 * The condition is that, if not null, the reviewer accepts all new values.
 	 * With a null reviewer, all values are always accepted.
+	 * <p>
+	 * <b>Important note.</b> When the implementation of the <em>values</em> time series 
+	 * does not explicitly represent missing values (see {@link SparseTimeSeries} for example), 
+	 * this method cannot be relied upon for "deleting" values of the target.
 	 * 
 	 * @param values a non-null time series
 	 * @param reviewer a reviewer

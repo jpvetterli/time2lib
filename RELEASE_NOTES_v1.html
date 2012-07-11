@@ -10,7 +10,7 @@ xmp {background: white; border: 1px dashed; padding: 10px}
 
 <h1>T2 LIBRARY RELEASE NOTES</h1>
 
-<small>2011-08-17/jpv</small>
+<small>2011-08-22/jpv</small>
 
 <xmp>Copyright 2011 Hauser Olsson GmbH.
 
@@ -26,8 +26,18 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 </xmp>
+<hr/>
+<!-- ************************************************************* -->
+<h2>ABOUT VERSION NUMBERS</h2>
+Version numbers are in 3 parts: a major, a medium, and a minor number.
+The major number is incremented very rarely, when the software is
+modified in such a way that clients using it need to be recoded or even 
+redesigned. The medium number is incremented when modifications break 
+backward compatibility. For all other modifications, only the minor 
+number is incremented.
 
 <hr/>
+<!-- ************************************************************* -->
 <a name="first_release">2011-07-15/jpv</a>
 <p>
 The Time2 Library is released as a beta version on SourceForge 
@@ -41,6 +51,7 @@ The release consists of two jars:
 
 <hr/>
 
+<!-- ************************************************************* -->
 <a name="v1_0_0">2011-08-17/jpv</a>
 <p>
 The same version (1.0.0) of the Time2 Library is released again.
@@ -67,6 +78,83 @@ Compared to the 2011-07-15 release,
 <li>ch/agent/core/KeyedMessage.java
 <li>ch/agent/t2/T2Msg.java
 </ul>
+</ul>
+<hr/>
+
+<!-- ************************************************************* -->
+<a name="v1_1_0">2011-08-22/jpv</a>
+<p>
+<h3>Version 1.1.0 &mdash; Null elements forbidden unless they represent a missing value</h3>
+There is now a consistently enforced rule that elements of time series cannot be 
+null unless null has been defined to represent missing values. The rule is not new,
+but its implementation has been cleaned up.
+<p>
+The new version of the library includes
+modifications in TimeIndexable and RegularTimeSeries which are not backward compatible.
+These changes are highlighted below.
+<p>
+Various pieces of javadoc comment have been updated.
+<p>
+The release consists of two jars:
+<ul>
+<li><em>t2-1.1.0.jar</em> (binaries)
+<li><em>t2-1.1.0.source.jar</em> (sources only)
+</ul>
+</p>
+Compared to version 1.0.0, the following files have been modified 
+(new file version number in parentheses):
+<ul>
+<li>ch/agent/t2/T2Msg.java (1.0.1)
+<ul>
+<li>header with copyright added
+<li>40116 modified
+<li>40117, 40118, 40121, 40124 added
+</ul>
+
+<li>ch/agent/t2/time/{Adjustment, Resolution}.java (1.0.1)
+<ul>
+<li>add @version in javadoc
+</ul>
+
+<li>ch/agent/t2/time/Range.java (1.0.1)
+<ul>
+<li>remove @version from javadoc of a nested class
+</ul>
+
+<li>ch/agent/t2/timeseries/AbstractTimeSeries.java (1.0.1)
+<ul>
+<li>normalizeMissingValue() modified
+</ul>
+
+<li>ch/agent/t2/timeseries/Filler.java (1.0.1)
+<ul>
+<li>fillHole() now throws an Exception
+</ul>
+
+<li>ch/agent/t2/timeseries/RegularTimeSeries.java (1.1.0)
+<ul>
+<li>fill(long) now defined in interface TimeIndexable
+<li>fill(T, long) <b>now throws a KeyedException</b> (breaks backward compatibility) 
+<li>fill(Filler) <b>now throws a KeyedException</b> (breaks backward compatibility) 
+</ul>
+
+<li>ch/agent/t2/timeseries/SparseTimeSeries (1.0.1)
+<ul>
+<li>remove @version from javadoc of a nested class
+</ul>
+
+<li>ch/agent/t2/timeseries/TimeAddressable.java (1.0.1)
+<ul>
+<li>all put() methods: javadoc modified
+</ul>
+
+<li>ch/agent/t2/timeseries/TimeIndexable.java (1.1.0)
+<ul>
+<li>fill(long) added
+<li>fill(T, long) <b>now throws a KeyedException</b> (breaks backward compatibility) 
+<li>fill(Filler) <b>now throws a KeyedException</b> (breaks backward compatibility) 
+</ul>
+
 </ul>
 <hr/>
 

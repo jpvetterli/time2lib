@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.t2.timeseries
  * Type: TimeIndexable
- * Version: 1.0.0
+ * Version: 1.1.0
  */
 package ch.agent.t2.timeseries;
 
@@ -40,7 +40,7 @@ import ch.agent.t2.time.Range;
  *  
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.1.0
  * @param <T> the value type
  */
 public interface TimeIndexable<T> extends TimeAddressable<T> {
@@ -71,8 +71,7 @@ public interface TimeIndexable<T> extends TimeAddressable<T> {
 	/**
 	 * Fill holes in the time series with the given value and append a
 	 * tail of the given length. A hole is a run of missing values. Return the
-	 * number of missing values replaced. If the replacement value is null, use
-	 * the last known value.
+	 * number of missing values replaced. 
 	 * <p>
 	 * Note: the method can be used to count missing values by specify a missing
 	 * value as replacement. In this case it is illegal to specify a positive
@@ -81,16 +80,29 @@ public interface TimeIndexable<T> extends TimeAddressable<T> {
 	 * @param replacement the replacement value
 	 * @param tailLength the length of the tail to append
 	 * @return the number of values filled
+	 * @throws KeyedException
 	 */
-	int fill(T replacement, long tailLength);
+	int fill(T replacement, long tailLength) throws KeyedException;
+	
+	/**
+	 * Fill holes in the time series by repeating the last value before each
+	 * hole and append a tail by repeating the last value a given number of
+	 * times. Return the number of values filled and appended.
+	 * 
+	 * @param tailLength
+	 *            the number of times the last value must be repeated
+	 * @return the number of values added
+	 */
+	int fill(long tailLength);
 
 	/**
 	 * Fill holes using the given procedure.
 	 * 
 	 * @param filler a non-null filler
 	 * @return the number of values filled
+	 * @throws KeyedException
 	 */
-	int fill(Filler<T> filler);
+	int fill(Filler<T> filler) throws KeyedException;
 	
 	@Override
 	TimeIndexable<T> copy() throws KeyedException;

@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.t2.timeseries
  * Type: AbstractTimeSeries
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.timeseries;
 
@@ -33,7 +33,7 @@ import ch.agent.t2.time.TimeIndex;
  * AbstractTimeseries is the basis for {@link RegularTimeSeries} and {@link SparseTimeSeries}.
  *
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  * @param <T>
  */
 public abstract class AbstractTimeSeries<T> implements TimeAddressable<T> {
@@ -251,32 +251,23 @@ public abstract class AbstractTimeSeries<T> implements TimeAddressable<T> {
 	}
 
 	/**
-	 * Replace all objects equal to the missing value with the "official" missing value object.
+	 * Replace all objects equal to the missing value with the "official"
+	 * missing value object.
 	 * <p>
-	 * <em>Temporary note. This method plays a temporary role as a verification function.
-	 * In previous versions, null values were also changed to the missing value. In the future
-	 * nulls will be allowed (if not representing missing values). In a temporary phase, to detect  
-	 * cases where the software misuses null to put missing values into time series, nulls
-	 * are considered illegal and an IllegalArgumentException is thrown.</em>
+	 * Null values are illegal and produce an exception, unless they represent
+	 * missing values.
 	 * 
-	 * @param value the value to normalize
+	 * @param value
+	 *            the value to normalize
 	 * @return the value, normalized
+	 * @throws KeyedException
 	 */
-	protected T normalizeMissingValue(T value) {
-		
-		// previously, nulls were systematically replaced with missing values
-		// now they are treated like 1st class citizens
-		
-		// temporary phase:
-		int removeTemporaryRestriction; // restriction set on 26.6.2011, remove on 26.8.2011
-		if (value == null)
-			throw new IllegalArgumentException("null values temporarily illegal");
-
-		if (value == null){
+	protected T normalizeMissingValue(T value) throws KeyedException {
+		if (value == null) {
 			if (missingValue == null)
 				return value;
 			else
-				return value;
+				throw T2Msg.exception(40117);
 		} else {
 			if (value.equals(missingValue))
 				return missingValue;
@@ -284,7 +275,7 @@ public abstract class AbstractTimeSeries<T> implements TimeAddressable<T> {
 				return value;
 		}
 	}
-	
+
 	/**
 	 * Return the number of updates rejected by the reviewer. A result of 0 means all
 	 * updates have been accepted

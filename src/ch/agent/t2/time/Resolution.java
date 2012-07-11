@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.t2.time
  * Type: Resolution
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.time;
 
@@ -28,6 +28,8 @@ package ch.agent.t2.time;
  * with USEC (microseconds). It is however recommended to compare resolutions with 
  * {@link TimeDomain#compareResolutionTo(Resolution)}, rather than relying on the natural ordering of this enum.
  * 
+ * @author Jean-Paul Vetterli
+ * @version 1.0.1
  */
 public enum Resolution {
 	/**
