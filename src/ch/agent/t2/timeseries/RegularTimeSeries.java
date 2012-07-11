@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.t2.timeseries
  * Type: RegularTimeSeries
- * Version: 1.1.1
+ * Version: 1.1.2
  */
 package ch.agent.t2.timeseries;
 
@@ -25,8 +25,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
+import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.Range;
 import ch.agent.t2.time.TimeDomain;
 
@@ -37,7 +38,7 @@ import ch.agent.t2.time.TimeDomain;
  * The implementation is not thread-safe.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.1.1
+ * @version 1.1.2
  * @param <T> the value type
  */
 public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeIndexable<T> {
@@ -118,7 +119,7 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 	 * @param ts the non-null time series to copy 
 	 * @param fromOffset start offset of the view (inclusive)
 	 * @param toOffset  end offset of the view (exclusive)
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
 	private RegularTimeSeries(RegularTimeSeries<T> ts, int fromOffset, int toOffset) {
 		// no need to clone domain, template, empty, or missingValue
@@ -141,7 +142,7 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 	}
 	
 	@Override
-	public TimeAddressable<T> get(Range range) throws KeyedException {
+	public TimeAddressable<T> get(Range range) throws T2Exception {
 		getTimeDomain().requireEquality(range.getTimeDomain());
 		if (range.isEmpty())
 			return new RegularTimeSeries<T>(this, 0, -1);
@@ -150,11 +151,11 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 	}
 
 	@Override
-	public TimeAddressable<T> get(long first, long last) throws KeyedException {
+	public TimeAddressable<T> get(long first, long last) throws T2Exception {
 		if (first > last) {
 			if (first == 0 && last == -1)
 				return new RegularTimeSeries<T>(this, 0, -1);
-			throw T2Msg.exception(40120, getTimeDomain().time(first).toString(), 
+			throw T2Msg.exception(K.T5016, getTimeDomain().time(first).toString(), 
 					getTimeDomain().time(last).toString());
 		}
 		
@@ -191,7 +192,7 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 	}
 	
 	@Override
-	protected Observation<T> internalGetLast(long index) throws KeyedException {
+	protected Observation<T> internalGetLast(long index) throws T2Exception {
 		T value = get(index);
 		if (isMissing(value)) {
 			long last = internalGetLastIndex();
@@ -215,7 +216,7 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 	}
 	
 	@Override
-	protected Observation<T> internalGetFirst(long index) throws KeyedException {
+	protected Observation<T> internalGetFirst(long index) throws T2Exception {
 		T value = get(index);
 		if (isMissing(value)) {
 			long first = internalGetFirstIndex();
@@ -264,12 +265,12 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 	}
 	
 	@Override
-	public TimeIndexable<T> asIndexable() throws KeyedException {
+	public TimeIndexable<T> asIndexable() throws T2Exception {
 		return this;
 	}
 
 	@Override
-	public TimeIndexable<T> copy() throws KeyedException {
+	public TimeIndexable<T> copy() throws T2Exception {
 		TimeIndexable<T> ts = makeEmptyCopy();
 		ts.put(this, null);
 		return ts;
@@ -283,7 +284,7 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 	}
 	
 	@Override
-	public T[] getArray(Range range) throws KeyedException {
+	public T[] getArray(Range range) throws T2Exception {
 		long first = range.getFirstIndex();
 		long last = range.getLastIndex();
 		if (start < 0)
@@ -299,7 +300,7 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 	}
 	
 	@Override
-	public void put(long index, T[] values) throws KeyedException {
+	public void put(long index, T[] values) throws T2Exception {
 		if (getSize() != 0)
 			super.put(index, values);
 		else {
@@ -328,7 +329,7 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 	}
 
 	@Override
-	public void put(TimeAddressable<T> values, UpdateReviewer<T> reviewer) throws KeyedException {
+	public void put(TimeAddressable<T> values, UpdateReviewer<T> reviewer) throws T2Exception {
 		if (reviewer != null || getSize() != 0 || !values.isIndexable())
 			super.put(values, reviewer);
 		else {
@@ -356,14 +357,14 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 	}
 	
 	@Override
-	public int fill(T replacement, long tailLength) throws KeyedException {
+	public int fill(T replacement, long tailLength) throws T2Exception {
 		T mv = getMissingValue();
 		
 		if (replacement == null && mv != null)
-			throw T2Msg.exception(40118);
+			throw T2Msg.exception(K.T5015);
 		
 		if (replacement.equals(mv) && tailLength > 0) 
-			throw T2Msg.exception(40124);
+			throw T2Msg.exception(K.T5020);
 		else
 			replacement = mv;
 			
@@ -415,7 +416,7 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 	}
 	
 	@Override
-	public int fill(Filler<T> interpolator) throws KeyedException {
+	public int fill(Filler<T> interpolator) throws T2Exception {
 		int count = 0;
 		T[] val = getArray();
 		if (val == null)
@@ -434,7 +435,7 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 						interpolator.fillHole(val, mvStart - 1, i);
 					} catch (Exception e) {
 						Range range = new Range(getTimeDomain(), getFirstIndex() + mvStart,	getFirstIndex() + i - 1);
-						throw T2Msg.exception(e, 40121, range.toString());
+						throw T2Msg.exception(e, K.T5017, range.toString());
 					}
 					for (int j = mvStart; j < i; j++) {
 						val[j] = normalizeMissingValue(val[j]);
@@ -458,7 +459,7 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 	}
 
 	@Override
-	protected T internalGet(long index) throws KeyedException {
+	protected T internalGet(long index) throws T2Exception {
 		if (start < 0)
 			return getMissingValue();
 		int offset = offset(index, start);
@@ -491,7 +492,7 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 	}
 
 	@Override
-	protected void internalPut(long index, T value) throws KeyedException {
+	protected void internalPut(long index, T value) throws T2Exception {
 		if (index < 0)
 			throw new IllegalArgumentException("index < 0");
 		
@@ -536,7 +537,7 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 				int padSize = -offset - 1;
 				if (padSize > 0) {
 					if (padSize > maxGap)
-						throw T2Msg.exception(40122, padSize, maxGap, getTimeDomain().time(index).toString());
+						throw T2Msg.exception(K.T5018, padSize, maxGap, getTimeDomain().time(index).toString());
 					List<T> pad = new ArrayList<T>(padSize);
 					for (int i = 0; i < padSize; i++)
 						pad.add(getMissingValue());
@@ -549,7 +550,7 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 				int padSize = offset - data.size();
 				if (padSize > 0) {
 					if (padSize > maxGap) // versions 1.26 to 1.49 had "padSize > 10* MAX_GAP" ???
-						throw T2Msg.exception(40123, padSize, maxGap, getTimeDomain().time(index).toString());
+						throw T2Msg.exception(K.T5019, padSize, maxGap, getTimeDomain().time(index).toString());
 					List<T> pad = new ArrayList<T>(padSize);
 					for (int i = 0; i < padSize; i++)
 						pad.add(getMissingValue());
@@ -561,12 +562,12 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 	}
 
 	@Override
-	protected void internalRemove(long index) throws KeyedException {
+	protected void internalRemove(long index) throws T2Exception {
 		internalPut(index, getMissingValue());
 	}
 
 	@Override
-	protected void internalSetBounds(long first, long last) throws KeyedException {
+	protected void internalSetBounds(long first, long last) throws T2Exception {
 		// - the range becomes smaller, so the long-to-int casts are okay by definition
 		// - here it is okay to keep the subList because the original won't be used by anyone
 		data = data.subList((int)(first - start), (int) (last - start + 1));
@@ -601,12 +602,12 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 	 * @param index a numerical time index
 	 * @param start the numerical time index of the start of the series
 	 * @return the difference between index and start
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	private int offset(long index, long start) throws KeyedException {
+	private int offset(long index, long start) throws T2Exception {
 		long offset = index - start;
 		if (offset < Integer.MIN_VALUE || offset > Integer.MAX_VALUE)
-			throw T2Msg.exception(32172, index, start);
+			throw T2Msg.exception(K.T1058, index, start);
 		return (int) offset;
 	}
 	

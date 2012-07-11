@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,13 @@
  * 
  * Package: ch.agent.t2.time
  * Type: TimeDomainFactory
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.time;
 
 import java.util.Collection;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 import ch.agent.t2.time.engine.AbstractTimeDomainFactory;
 
 /**
@@ -66,7 +66,7 @@ import ch.agent.t2.time.engine.AbstractTimeDomainFactory;
  * It is possible to bypass the factory mechanism, but this requires using non-public methods.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  * @see TimeDomainDefinition
  * @see DefaultTimeDomainFactory
  */
@@ -117,9 +117,9 @@ public interface TimeDomainFactory {
 	 * 
 	 * @param label non-null string
 	 * @return a time domain
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	TimeDomain get(String label) throws KeyedException;
+	TimeDomain get(String label) throws T2Exception;
 	
 	/**
 	 * Return the collection of time domains currently defined in the factory.

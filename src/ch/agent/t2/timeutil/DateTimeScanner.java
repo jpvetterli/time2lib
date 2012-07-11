@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.t2.timeutil
  * Type: DateTimeScanner
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.timeutil;
 
@@ -25,8 +25,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
+import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.Adjustment;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeIndex;
@@ -47,7 +48,7 @@ import ch.agent.t2.time.TimeIndex;
  * </xmp>
  *
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  */
 public class DateTimeScanner {
 
@@ -69,18 +70,18 @@ public class DateTimeScanner {
 	 *            a pattern or null
 	 * @param groups
 	 *            an array of indexes or null
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public DateTimeScanner(String pattern, int[] groups) throws KeyedException {
+	public DateTimeScanner(String pattern, int[] groups) throws T2Exception {
 		if (pattern != null) {
 			try {
 				matcher = Pattern.compile(pattern).matcher("");
 			} catch (PatternSyntaxException e) {
-				throw T2Msg.exception(e, 32144, pattern);
+				throw T2Msg.exception(e, K.T7015, pattern);
 			}
 			int n = matcher.groupCount();
 			if (n < 1 || n > 7)
-				throw T2Msg.exception(32145, pattern);							
+				throw T2Msg.exception(K.T7016, pattern);							
 
 			if (groups != null) {
 				verifyGroups(n, groups);
@@ -95,7 +96,7 @@ public class DateTimeScanner {
 		this.twoDigitYearThreshold = -1;
 	}
 	
-	private void verifyGroups(int requiredLength, int[] groups) throws KeyedException {
+	private void verifyGroups(int requiredLength, int[] groups) throws T2Exception {
 		boolean error = false;
 		if (groups.length != requiredLength)
 			error = true;
@@ -114,7 +115,7 @@ public class DateTimeScanner {
 			}
 		}
 		if (error)
-			throw T2Msg.exception(32146, requiredLength);
+			throw T2Msg.exception(K.T7017, requiredLength);
 	}
 
 	
@@ -171,9 +172,9 @@ public class DateTimeScanner {
 	 * 
 	 * @param date a non-null date/time
 	 * @return a TimeIndex in the default domain
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public TimeIndex scan(String date) throws KeyedException {
+	public TimeIndex scan(String date) throws T2Exception {
 		return scan(domain, date);
 	}
 	
@@ -183,9 +184,9 @@ public class DateTimeScanner {
 	 * @param domain a non-null time domain
 	 * @param date a non-null date/time
 	 * @return a TimeIndex in the given domain
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public TimeIndex scan(TimeDomain domain, String date) throws KeyedException {
+	public TimeIndex scan(TimeDomain domain, String date) throws T2Exception {
 		if (domain == null)
 			throw new IllegalArgumentException("domain == null");
 		if (date == null)
@@ -198,9 +199,10 @@ public class DateTimeScanner {
 				int[] t = new int[] { 0, 1, 1, 0, 0, 0, 0};
 				for (int i = 0; i < patternGroups.length; i++) {
 					if (months != null && i == 1) {
-						Integer m = months.get(matcher.group(patternGroups[i]));
+						String month = matcher.group(patternGroups[i]);
+						Integer m = months.get(month);
 						if (m == null)
-							throw T2Msg.exception(32147, date, matcher.pattern().toString());
+							throw T2Msg.exception(K.T7019, date, month);
 						t[i] = m;
 					} else
 						t[i] = Integer.valueOf(matcher.group(patternGroups[i]));
@@ -215,7 +217,7 @@ public class DateTimeScanner {
 				}
 				return domain.time(t[0], t[1],	t[2], t[3], t[4], t[5], t[6], Adjustment.NONE);
 			} else
-				throw T2Msg.exception(32147, date, matcher.pattern().toString());
+				throw T2Msg.exception(K.T7018, date, matcher.pattern().toString());
 		} 
 	}
 	

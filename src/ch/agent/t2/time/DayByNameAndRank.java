@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,13 @@
  * 
  * Package: ch.agent.t2.time
  * Type: DayByNameAndRank
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.time;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
+import ch.agent.t2.T2Msg.K;
 
 /**
  * DayByNameAndRank defines a day by its name and its rank within a month or a
@@ -31,7 +32,7 @@ import ch.agent.t2.T2Msg;
  * with -1 for the last day.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  */
 public class DayByNameAndRank {
 
@@ -59,16 +60,16 @@ public class DayByNameAndRank {
 	 * 
 	 * @param unit the resolution
 	 * @return the maximum rank for the given resolution
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	protected int getMaxRank(Resolution unit) throws KeyedException {
+	protected int getMaxRank(Resolution unit) throws T2Exception {
 		switch (unit) {
 		case MONTH:
 			return MONTH_MAX_RANK;
 		case YEAR:
 			return YEAR_MAX_RANK;
 		default:
-			throw T2Msg.exception(32129, unit.name());
+			throw T2Msg.exception(K.T1052, unit.name());
 		}
 	}
 	
@@ -77,12 +78,12 @@ public class DayByNameAndRank {
 	 * 
 	 * @param rank a number 
 	 * @param unit a non-null resolution
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	protected void checkRank(int rank, Resolution unit) throws KeyedException {
+	protected void checkRank(int rank, Resolution unit) throws T2Exception {
 		int m = getMaxRank(unit);
 		if (rank == 0 || rank < -m || rank > m)
-			throw T2Msg.exception(32123, rank, -m, m);
+			throw T2Msg.exception(K.T1051, rank, -m, m);
 	}
 	
 	/**

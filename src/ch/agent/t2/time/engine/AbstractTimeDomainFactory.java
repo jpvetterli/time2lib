@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.t2.time.engine
  * Type: AbstractTimeDomainFactory
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.time.engine;
 
@@ -29,8 +29,9 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
+import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.DefaultExternalFormat;
 import ch.agent.t2.time.ExternalTimeFormat;
 import ch.agent.t2.time.TimeDomain;
@@ -75,7 +76,7 @@ public class CustomTimeDomainFactory extends AbstractTimeDomainFactory {
  * is via the {@link TimeDomainManager}.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  */
 public abstract class AbstractTimeDomainFactory implements TimeDomainFactory {
 
@@ -117,10 +118,10 @@ public abstract class AbstractTimeDomainFactory implements TimeDomainFactory {
 	}
 
 	@Override
-	public TimeDomain get(String label) throws KeyedException {
+	public TimeDomain get(String label) throws T2Exception {
 		TimeDomain domain = domains.get(label);
 		if (domain == null)
-			throw T2Msg.exception(32222, label, getTimeDomainLabels().toString());
+			throw T2Msg.exception(K.T0006, label, getTimeDomainLabels().toString());
 		return domain;
 	}
 	
@@ -131,8 +132,10 @@ public abstract class AbstractTimeDomainFactory implements TimeDomainFactory {
 			if (register)
 				domain = define(def);
 		} else {
-			if (def.getLabel() != null && !domain.getLabel().equals(def.getLabel()))
-				throw new RuntimeException(new T2Msg(32004, domain.toString(), def.getLabel()).toString());
+			if (def.getLabel() != null && !domain.getLabel().equals(def.getLabel())) {
+				Exception cause = T2Msg.exception(K.T0009, domain.toString(),	def.getLabel());
+				throw T2Msg.runtimeException(K.T0001, cause);
+			}
 		}
 		return domain;
 	}
@@ -200,8 +203,10 @@ public abstract class AbstractTimeDomainFactory implements TimeDomainFactory {
 				def.setLabel(inventLabel());
 			} else {
 				domain = domains.get(def.getLabel());
-				if (domain != null)
-					throw new RuntimeException(new T2Msg(32002, domain.toString()).toString());
+				if (domain != null) {
+					Exception cause = T2Msg.exception(K.T0007, domain.toString());
+					throw T2Msg.runtimeException(K.T0001, cause);
+				}
 			}
 			ExternalTimeFormat externalFormat = getExternalTimeFormat();
 			if (externalFormat == null)
@@ -294,8 +299,9 @@ public abstract class AbstractTimeDomainFactory implements TimeDomainFactory {
 					((TimeFactory) d).markBuiltIn(i);
 					builtIns[i] = d;
 					i++;
-				} catch (KeyedException e) {
-					throw new RuntimeException(new T2Msg(32003, this.getClass().getCanonicalName()).toString(), e);
+				} catch (T2Exception e) {
+					Exception cause = T2Msg.exception(e, K.T0008, this.getClass().getCanonicalName());
+					throw T2Msg.runtimeException(K.T0001, cause);
 				}
 			}
 		}

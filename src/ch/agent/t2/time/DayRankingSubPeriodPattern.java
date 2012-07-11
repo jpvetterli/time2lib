@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,15 @@
  * 
  * Package: ch.agent.t2.time
  * Type: DayRankingSubperiodPattern
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.time;
 
 import java.util.Arrays;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
+import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.engine.TimeTools;
 
 /**
@@ -31,7 +32,7 @@ import ch.agent.t2.time.engine.TimeTools;
  * is possible to define more complex patterns.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  * @see SimpleSubPeriodPattern
  */
 public class DayRankingSubPeriodPattern implements SubPeriodPattern {
@@ -64,7 +65,7 @@ public class DayRankingSubPeriodPattern implements SubPeriodPattern {
 	 *            a non-null resolution
 	 * @param ranks
 	 *            an array of day definitions
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
 	public DayRankingSubPeriodPattern(Resolution basePeriod,
 			DayByNameAndRank[] ranks) {
@@ -76,7 +77,7 @@ public class DayRankingSubPeriodPattern implements SubPeriodPattern {
 		this.ranks = ranks;
 		try {
 			validateRanks();
-		} catch (KeyedException e) {
+		} catch (T2Exception e) {
 			throw new IllegalArgumentException("ranks invalid", e);
 		}
 	}
@@ -98,7 +99,7 @@ public class DayRankingSubPeriodPattern implements SubPeriodPattern {
 
 	@Override
 	public long adjustForSubPeriod(long time, Adjustment adjust, TimeParts tp)
-			throws KeyedException {
+			throws T2Exception {
 		time *= getSize();
 		switch (basePeriodUnit) {
 		case YEAR:
@@ -110,7 +111,7 @@ public class DayRankingSubPeriodPattern implements SubPeriodPattern {
 					tp.getDay(), adjust, ranks);
 			break;
 		default:
-			throw T2Msg.exception(32136, basePeriodUnit.name(), getSubPeriod()
+			throw T2Msg.exception(K.T1118, basePeriodUnit.name(), getSubPeriod()
 					.name());
 		}
 		return time;
@@ -137,10 +138,10 @@ public class DayRankingSubPeriodPattern implements SubPeriodPattern {
 						ranks[subPeriod].getRank()));
 				break;
 			default:
-				throw T2Msg.exception(32136, basePeriodUnit.name(),
+				throw T2Msg.exception(K.T1118, basePeriodUnit.name(),
 						getSubPeriod().name());
 			}
-		} catch (KeyedException e) {
+		} catch (T2Exception e) {
 			// errors not expected when unpacking, so this can only be a bug
 			throw new RuntimeException("bug", e);
 		}
@@ -175,14 +176,14 @@ public class DayRankingSubPeriodPattern implements SubPeriodPattern {
 	 * @param inc
 	 *            an increment
 	 * @return the incremented numeric time index
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	private long increment(long time, int inc) throws KeyedException {
+	private long increment(long time, int inc) throws T2Exception {
 		long result = time;
 		time += inc;
 		// overflow?
 		if (result < 0 && time > 0 || result > 0 && time < 0)
-			throw T2Msg.exception(32134);
+			throw T2Msg.exception(K.T1116);
 		return time;
 	}
 
@@ -206,11 +207,11 @@ public class DayRankingSubPeriodPattern implements SubPeriodPattern {
 	 * @param ranks
 	 *            the array of day definitions
 	 * @return the adjusted time
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
 	private long increment(boolean yearMode, long time, long year, int month,
 			int day, Adjustment adjust, DayByNameAndRank[] ranks)
-			throws KeyedException {
+			throws T2Exception {
 		if (yearMode) {
 			day += TimeTools.daysToMonth(year, month);
 			month = 0;
@@ -238,7 +239,7 @@ public class DayRankingSubPeriodPattern implements SubPeriodPattern {
 					}
 					break; // continue loop
 				case NONE:
-					throw T2Msg.exception(32135);
+					throw T2Msg.exception(K.T1117);
 				default:
 					throw new RuntimeException("bug: " + adjust.name());
 				}
@@ -252,7 +253,7 @@ public class DayRankingSubPeriodPattern implements SubPeriodPattern {
 									// previous base period
 					break loop;
 				case NONE:
-					throw T2Msg.exception(32135);
+					throw T2Msg.exception(K.T1117);
 				default:
 					throw new RuntimeException("bug: " + adjust.name());
 				}
@@ -267,9 +268,9 @@ public class DayRankingSubPeriodPattern implements SubPeriodPattern {
 	 * Verify the validity of the ranks array. See the comment of the
 	 * constructor for details.
 	 * 
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	private void validateRanks() throws KeyedException {
+	private void validateRanks() throws T2Exception {
 		int m = ranks[0].getMaxRank(basePeriodUnit); // 5 or 53
 		int previousR = Integer.MIN_VALUE;
 		boolean inUse[] = new boolean[m];
@@ -283,21 +284,21 @@ public class DayRankingSubPeriodPattern implements SubPeriodPattern {
 			 * and >= in the next test.
 			 */
 			if (r <= -m || r >= m || r == 0)
-				throw T2Msg.exception(32123, r, -m + 1, m - 1);
+				throw T2Msg.exception(K.T1051, r, -m + 1, m - 1);
 			if (r > 0) {
 				if (r <= previousR)
-					throw T2Msg.exception(32128);
+					throw T2Msg.exception(K.T1055);
 				if (inUse[r - 1])
-					throw T2Msg.exception(32126, r);
+					throw T2Msg.exception(K.T1053, r);
 				inUse[r - 1] = true;
 				previousR = r;
 			} else {
 				int virtualR1 = m + 1 + r;
 				if (virtualR1 <= previousR)
-					throw T2Msg.exception(32128);
+					throw T2Msg.exception(K.T1055);
 				int virtualR2 = m + r;
 				if (inUse[virtualR1 - 1] || inUse[virtualR2 - 1])
-					throw T2Msg.exception(32127, r, virtualR1, virtualR2);
+					throw T2Msg.exception(K.T1054, r, virtualR1, virtualR2);
 				inUse[virtualR1 - 1] = true;
 				inUse[virtualR2 - 1] = true;
 				previousR = virtualR1;

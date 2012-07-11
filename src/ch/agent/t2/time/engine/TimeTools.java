@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,15 @@
  * 
  * Package: ch.agent.t2.time.engine
  * Type: TimeTools
- * Version: 1.0.1
+ * Version: 1.0.2
  */
 package ch.agent.t2.time.engine;
 
 import java.util.Arrays;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
+import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.Day;
 import ch.agent.t2.time.DayOfWeek;
 import ch.agent.t2.time.Resolution;
@@ -34,7 +35,7 @@ import ch.agent.t2.time.TimeParts;
  * These methods do not need any state.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.1
+ * @version 1.0.2
  */
 public class TimeTools {
 	
@@ -213,10 +214,10 @@ public class TimeTools {
 	 * @param unit a non-null resolution
 	 * @param tp a non-null time parts object
 	 * @return a numeric time index
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
 	@Deprecated
-	public static long makeRawIndex(Resolution unit, TimeParts tp) throws KeyedException {
+	public static long makeRawIndex(Resolution unit, TimeParts tp) throws T2Exception {
 		return tp.asRawIndex(unit);
 	}
 	
@@ -226,9 +227,9 @@ public class TimeTools {
 	 * @param unit a non- null resolution
 	 * @param time a non-negative numerical time index
 	 * @return a number of days
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public static long dayIndex(Resolution unit, long time) throws KeyedException {
+	public static long dayIndex(Resolution unit, long time) throws T2Exception {
 		long dayIndex;
 		switch (unit) {
 		case DAY:
@@ -250,7 +251,7 @@ public class TimeTools {
 			dayIndex = time / (24L * 60L * 60L * 1000000L);
 			break;
 		default:
-			throw T2Msg.exception(32140, unit);
+			throw T2Msg.exception(K.T1060, unit);
 		}
 		return dayIndex;
 	}
@@ -261,9 +262,9 @@ public class TimeTools {
 	 * 
 	 * @param time an uncompressed numerical time
 	 * @return a {@link DayOfWeek}
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public static DayOfWeek getDayOfWeek(Resolution unit, long time) throws KeyedException {
+	public static DayOfWeek getDayOfWeek(Resolution unit, long time) throws T2Exception {
 		int day = (int)(TimeTools.dayIndex(unit, time) % 7); // 0 -> Saturday
 		if (day == 0)
 			day = 6;
@@ -283,14 +284,14 @@ public class TimeTools {
 	 * @param name the day of week
 	 * @param rank a non-zero number in the range [-5, 5] or [-53, 53]
 	 * @return the day of the month or the year, starting with 1 
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public static int getDayByRank(long year, int month, DayOfWeek name, int rank) throws KeyedException {
+	public static int getDayByRank(long year, int month, DayOfWeek name, int rank) throws T2Exception {
 		int max = 5;
 		if (month == 0)
 			max = 53;
 		if (rank == 0 || rank < -max || rank > max)
-			throw T2Msg.exception(32123, rank, -max, max);
+			throw T2Msg.exception(K.T1051, rank, -max, max);
 		int daysInPeriod;
 		if (month == 0) {
 			month = 1;
@@ -338,11 +339,11 @@ public class TimeTools {
 	 * @param rank
 	 *            a non-zero number in the range [-5, 5]
 	 * @return the day 
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public static Day getDayOfMonthByRank(TimeIndex time, DayOfWeek dayName, int rank) throws KeyedException {
+	public static Day getDayOfMonthByRank(TimeIndex time, DayOfWeek dayName, int rank) throws T2Exception {
 		if (time.getTimeDomain().compareResolutionTo(Resolution.MONTH) > 0)
-			throw T2Msg.exception(32124, time.toString(), Resolution.MONTH.name());
+			throw T2Msg.exception(K.T1059, time.toString(), Resolution.MONTH.name());
 		long y = time.getYear();
 		int m = time.getMonth();
 		int day = getDayByRank(y, m, dayName, rank);
@@ -364,9 +365,9 @@ public class TimeTools {
 	 * @param rank
 	 *            a non-zero number in the range [-53, 53]
 	 * @return the day
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public static Day getDayOfYearByRank(TimeIndex time, DayOfWeek dayName, int rank) throws KeyedException {
+	public static Day getDayOfYearByRank(TimeIndex time, DayOfWeek dayName, int rank) throws T2Exception {
 		long y = time.getYear();
 		int yearDay = getDayByRank(y, 0, dayName, rank);
 		if (yearDay == 0)

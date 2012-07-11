@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,23 +15,24 @@
  * 
  * Package: ch.agent.t2.time.engine
  * Type: TimeFactory
- * Version: 1.0.2
+ * Version: 1.0.3
  */
 package ch.agent.t2.time.engine;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
+import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.Adjustment;
 import ch.agent.t2.time.BasePeriodPattern;
 import ch.agent.t2.time.DayOfWeek;
 import ch.agent.t2.time.ExternalTimeFormat;
+import ch.agent.t2.time.Resolution;
 import ch.agent.t2.time.SubPeriodPattern;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeDomainDefinition;
 import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.time.TimePacker;
 import ch.agent.t2.time.TimeParts;
-import ch.agent.t2.time.Resolution;
 
 /**
  * A TimeFactory makes {@link TimeIndex} objects and
@@ -47,7 +48,7 @@ import ch.agent.t2.time.Resolution;
  * <p>
  *
  * @author Jean-Paul Vetterli
- * @version 1.0.2
+ * @version 1.0.3
  * @see Resolution
  * @see BasePeriodPattern
  * @see SubPeriodPattern
@@ -156,9 +157,9 @@ public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
 	}
 
 	@Override
-	public void requireEquality(TimeDomain domain) throws KeyedException {
+	public void requireEquality(TimeDomain domain) throws T2Exception {
 		if (!equals(domain))
-			throw T2Msg.exception(32230, getLabel(), domain.getLabel());
+			throw T2Msg.exception(K.T1074, getLabel(), domain.getLabel());
 	}
 
 	/**
@@ -239,17 +240,17 @@ public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
 
 	@Override
 	public TimeIndex time(long year, int month, int day, int hour, int min,
-			int sec, int usec, Adjustment adjust) throws KeyedException {
+			int sec, int usec, Adjustment adjust) throws T2Exception {
 		return new Time2(this, year, month, day, hour, min, sec, usec, adjust);
 	}
 
 	@Override
-	public TimeIndex time(String date) throws KeyedException {
+	public TimeIndex time(String date) throws T2Exception {
 		return new Time2(this, date, Adjustment.NONE);
 	}
 	
 	@Override
-	public TimeIndex time(String date, Adjustment adjust) throws KeyedException {
+	public TimeIndex time(String date, Adjustment adjust) throws T2Exception {
 		return new Time2(this, date, adjust);
 	}
 
@@ -302,7 +303,7 @@ public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
 	}
 
 	@Override
-	public boolean valid(long t, boolean testOnly) throws KeyedException {
+	public boolean valid(long t, boolean testOnly) throws T2Exception {
 		/*
 		 * In the first version, time overflow was detected here when t was
 		 * negative, because incrementing the maximum long value by 1 wrapped
@@ -319,7 +320,7 @@ public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
 			if (testOnly)
 				return false;
 			else
-				throw T2Msg.exception(32151, t);
+				throw T2Msg.exception(K.T1070, t);
 		}
 	}
 
@@ -336,7 +337,7 @@ public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
 	}
 
 	@Override
-	public TimeParts scan(String time) throws KeyedException {
+	public TimeParts scan(String time) throws T2Exception {
 		return externalFormat.scan(time);
 	}
 
@@ -346,7 +347,7 @@ public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
 	}
 
 	@Override
-	public long pack(TimeParts tp, Adjustment adjust) throws KeyedException {
+	public long pack(TimeParts tp, Adjustment adjust) throws T2Exception {
 		try {
 			// input values validated in asRawIndex
 			long time = tp.asRawIndex(this.baseUnit);
@@ -358,9 +359,9 @@ public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
 				time = subPeriodPattern.adjustForSubPeriod(time, adjust, tp);
 			}
 			return time;
-		} catch (KeyedException e) {
-			int message = subPeriodPattern == null ? 32148 : 32149;
-			throw T2Msg.exception(e, message, tp.toString(), getLabel());
+		} catch (T2Exception e) {
+			String messageKey = subPeriodPattern == null ? K.T1068 : K.T1069;
+			throw T2Msg.exception(e, messageKey, tp.toString(), getLabel());
 		}
 	}
 
@@ -440,13 +441,13 @@ public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
 	}
 
 	@Override
-	public DayOfWeek getDayOfWeek(TimeIndex time) throws KeyedException {
+	public DayOfWeek getDayOfWeek(TimeIndex time) throws T2Exception {
 		if (subPeriodPattern != null) {
 			if (compareResolutionTo(Resolution.DAY) <= 0) {
 				long numTime = ((Time2) time).getTimeParts().asRawIndex(Resolution.DAY);
 				return TimeTools.getDayOfWeek(Resolution.DAY, numTime);
 			} else
-				throw T2Msg.exception(32140, getResolution());
+				throw T2Msg.exception(K.T1060, getResolution());
 		} else {
 			long t;
 			if (basePeriodPattern == null)
@@ -467,12 +468,12 @@ public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
 	 * @param adjust
 	 *            the type of adjustment allowed, if any
 	 * @return the compressed numeric time index
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	private long compress(long time, Adjustment adjust) throws KeyedException {
+	private long compress(long time, Adjustment adjust) throws T2Exception {
 		if (basePeriodPattern != null) {
 			if (time < 0) // not yet compressed, so don't use domain.invalid()
-				throw T2Msg.exception(32151, time);
+				throw T2Msg.exception(K.T1070, time);
 			if (adjust == Adjustment.NONE)
 				time = basePeriodPattern.makeIndex(time);
 			else {
@@ -484,7 +485,7 @@ public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
 					try {
 						time = basePeriodPattern.makeIndex(time);
 						break;
-					} catch (KeyedException e) {
+					} catch (T2Exception e) {
 						time = adjust(time, adjust == Adjustment.UP);
 					}
 				}
@@ -501,9 +502,9 @@ public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
 	 * @param time the numeric time index to adjust
 	 * @param up true if adjustment is up
 	 * @return the adjusted numeric time index
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	private long adjust(long time, boolean up) throws KeyedException {
+	private long adjust(long time, boolean up) throws T2Exception {
 		long result = time;
 		if (up)
 			result++;
@@ -511,7 +512,7 @@ public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
 			result--;
 		// overflow?
 		if (result < 0 && time > 0 || result > 0 && time < 0)
-			throw T2Msg.exception(32155);
+			throw T2Msg.exception(K.T1072);
 		return result;
 	}
 
@@ -543,7 +544,7 @@ public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
 			for (int i = 0; i < basePattern.getSize(); i++) {
 				try {
 					return basePattern.makeIndex(maxIndex - i);
-				} catch (KeyedException e) {
+				} catch (T2Exception e) {
 					continue;
 				}
 			}

@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,15 @@
  * 
  * Package: ch.agent.t2.time
  * Type: Cycle
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.time;
 
 import java.util.Arrays;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
+import ch.agent.t2.T2Msg.K;
 
 /**
  * A Cycle is a {@link BasePeriodPattern} with a repeating sequence of ON and
@@ -30,7 +31,7 @@ import ch.agent.t2.T2Msg;
  * A cycle is defined using a boolean array. 
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  */
 public class Cycle implements BasePeriodPattern {
 
@@ -64,7 +65,7 @@ public class Cycle implements BasePeriodPattern {
 	}
 
 	@Override
-	public long makeIndex(long time) throws KeyedException {
+	public long makeIndex(long time) throws T2Exception {
 		if (time < 0)
 			throw new IllegalArgumentException("time negative");
 		if (pattern == null)
@@ -73,7 +74,7 @@ public class Cycle implements BasePeriodPattern {
 		int remainder = (int) (time - cycles * cycleLength);
 		int offset = map[remainder];
 		if (offset < 0)
-			throw T2Msg.exception(32150, time, remainder);
+			throw T2Msg.exception(K.T1071, time, remainder);
 		return cycles * compressedLength + offset;
 	}
 	

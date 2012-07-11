@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,25 +15,26 @@
  * 
  * Package: ch.agent.t2.timeutil
  * Type: DateHolder
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.timeutil;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
+import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.Adjustment;
 import ch.agent.t2.time.Day;
 import ch.agent.t2.time.Range;
+import ch.agent.t2.time.Resolution;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeIndex;
-import ch.agent.t2.time.Resolution;
 
 /**
  * A DateHolder helps applications manipulate times.
  * When necessary, times are adjusted downwards. 
  *
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  */
 public class DateHolder {
 
@@ -128,9 +129,9 @@ public class DateHolder {
 	 * 
 	 * @param domain the non-null new time domain
 	 * 
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public void reset(TimeDomain domain) throws KeyedException {
+	public void reset(TimeDomain domain) throws T2Exception {
 		if (domain == null)
 			throw new IllegalArgumentException("domain null");
 		if (this.domain.equals(domain))
@@ -156,15 +157,15 @@ public class DateHolder {
 	 * Refer to {@link DayExpression} for the valid syntax of dates.
 	 * 
 	 * @param date a day expression
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 * @see DateHolder#allowEmptyDate(boolean)
 	 */
-	public void setDate(String date) throws KeyedException {
+	public void setDate(String date) throws T2Exception {
 		if (date == null || date.length() == 0) {
 			if (isEmptyOkay) {
 				expr = null;
 			} else
-				throw T2Msg.exception(32006);
+				throw T2Msg.exception(K.T7021);
 		} else {
 			if (expr == null) {
 				expr = new DayExpression(Adjustment.DOWN);
@@ -179,7 +180,7 @@ public class DateHolder {
 	 * 
 	 * @param increment a positive or negative number
 	 */
-	public void incrDate(int increment) throws KeyedException {
+	public void incrDate(int increment) throws T2Exception {
 		if (increment == 0)
 			return;
 		if (expr == null)
@@ -194,9 +195,9 @@ public class DateHolder {
 	 * 
 	 * @param up if true increase, else decrease
 	 * @param large if true use a large amount, else a single unit
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public void incrDate(boolean up, boolean large) throws KeyedException {
+	public void incrDate(boolean up, boolean large) throws T2Exception {
 		int incr = 1;
 		if (large) {
 			if (expr.isToday())
@@ -235,7 +236,7 @@ public class DateHolder {
 	 * 
 	 * @return a time index or null when date is set
 	 */
-	public TimeIndex getDate() throws KeyedException {
+	public TimeIndex getDate() throws T2Exception {
 		if (expr == null)
 			return null;
 		else
@@ -249,9 +250,9 @@ public class DateHolder {
 	 * 
 	 * @param context a non-null range
 	 * @return a time index or null when no date is set
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public TimeIndex getDate(Range context) throws KeyedException {
+	public TimeIndex getDate(Range context) throws T2Exception {
 		if (expr == null)
 			return null;
 		else

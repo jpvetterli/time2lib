@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,13 @@
  * 
  * Package: ch.agent.t2.time
  * Type: ThirdFriday
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.time;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
+import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.engine.Time2;
 
 /**
@@ -28,7 +29,7 @@ import ch.agent.t2.time.engine.Time2;
  * on the 3d Friday. The domain label is <em>friday3</em>.
  *
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  */
 public class ThirdFriday extends Time2 {
 
@@ -51,12 +52,12 @@ public class ThirdFriday extends Time2 {
 	/**
 	 * Construct a <q>friday3</q> time from another time object. 
 	 * @param time a non-null time in the domain <q>friday3</q>
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public ThirdFriday(TimeIndex time) throws KeyedException {
+	public ThirdFriday(TimeIndex time) throws T2Exception {
 		super(DOMAIN, time.asLong());
 		if (DOMAIN != time.getTimeDomain())
-			throw T2Msg.exception(32152, time.getTimeDomain().getLabel(), DOMAIN.getLabel());
+			throw T2Msg.exception(K.T1073, time.getTimeDomain().getLabel(), DOMAIN.getLabel());
 	}
 	
 	/**
@@ -64,9 +65,9 @@ public class ThirdFriday extends Time2 {
 	 *  
 	 * @param date a non-null string
 	 * @param adjust a non-null adjustment mode
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public ThirdFriday(String date, Adjustment adjust) throws KeyedException {
+	public ThirdFriday(String date, Adjustment adjust) throws T2Exception {
 		super(DOMAIN, date, adjust);
 	}
 	
@@ -75,9 +76,9 @@ public class ThirdFriday extends Time2 {
 	 * 
 	 * @param year a non-negative number
 	 * @param month a number in [1-12]
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public ThirdFriday(long year, int month) throws KeyedException { 
+	public ThirdFriday(long year, int month) throws T2Exception { 
 		super(DOMAIN, year, month, 1, 0, 0, 0, 0, Adjustment.UP);
 	}
 

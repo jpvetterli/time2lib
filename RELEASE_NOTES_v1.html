@@ -10,9 +10,9 @@ xmp {background: white; border: 1px dashed; padding: 10px}
 
 <h1>T2 LIBRARY RELEASE NOTES</h1>
 
-<small>2011-11-30/jpv</small>
+<small>2012-03-21/jpv</small>
 
-<xmp>Copyright 2011 Hauser Olsson GmbH.
+<xmp>Copyright 2011, 2012 Hauser Olsson GmbH.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -36,6 +36,43 @@ redesigned. The medium number is incremented when modifications break
 backward compatibility. For all other modifications, only the minor 
 number is incremented.
 <p>
+<hr/>
+<!-- ************************************************************* -->
+<a name="v1_1_4">2012-03-21/jpv</a>
+<p>
+<h3>Version 1.1.4 &mdash; New exception type and refactoring of diagnostic message management</h3>
+<p>
+This is a maintenance release which behaves exactly like the previous version 
+and is plug-compatible for applications.
+<p>
+Methods of the Time2 library now throw a T2Exception instead of a KeyedException. 
+The new exception extends the former, so there is no compatibility issue. 
+Starting with this version, messages are prepared only when (and if) actually used. 
+Because preparation includes fetching the message from the resource bundle and 
+formatting the text using parameters, this change has a positive effective on
+performance.
+Within the sofware messages are now keyed symbolically.
+<p>
+The release consists of two jars:
+<ul>
+<li><em>t2-1.1.4.jar</em> (binaries)
+<li><em>t2-1.1.4.source.jar</em> (sources only)
+</ul>
+</p>
+Compared to version 1.1.3, the following files have been modified 
+(new file version number in parentheses):
+<ul>
+<li>ch/agent/core/KeyedMessage.java (1.0.1)
+<li>ch/agent/t2/T2Exception.java : new class
+<li>ch/agent/t2/T2Msg.java (1.0.1) :
+messages now accessed using a symbolic key instead of a literal number.
+<li>ch/agent/t2/T2Msg.properties (1.0.5): all messages have a new key.
+<li>ch/agent/t2/time/* : most classes modified to throw T2Exception and use new message key.
+<li>ch/agent/t2/time/engine/* : ditto
+<li>ch/agent/t2/timeseries/* : ditto
+<li>ch/agent/t2/timeutil/* : ditto
+</ul>
+
 <hr/>
 <!-- ************************************************************* -->
 <a name="v1_1_3">2011-11-30/jpv</a>

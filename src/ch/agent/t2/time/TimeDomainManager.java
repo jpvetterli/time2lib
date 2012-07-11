@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,13 +15,14 @@
  * 
  * Package: ch.agent.t2.time
  * Type: TimeDomainManager
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.time;
 
 import java.lang.reflect.Method;
 
 import ch.agent.t2.T2Msg;
+import ch.agent.t2.T2Msg.K;
 
 /**
  * The TimeDomainManager provides a single point of access to the 
@@ -40,7 +41,7 @@ import ch.agent.t2.T2Msg;
  * <em>TimeDomainFactory</em>.
  *
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  */
 public class TimeDomainManager {
 
@@ -66,7 +67,8 @@ public class TimeDomainManager {
 					Method getI = c.getMethod(INSTANCE_METHOD);
 					factory = (TimeDomainFactory) getI.invoke(null);
 				} catch (Exception e) {
-					throw new RuntimeException(new T2Msg(32000, PROP, className).toString(), e);
+					Exception cause = T2Msg.exception(e, K.T0004, PROP, className);
+					throw T2Msg.runtimeException(K.T0001, cause);
 				}
 			}
 		}

@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,19 @@
  * 
  * Package: ch.agent.t2.timeutil
  * Type: DayExpression
- * Version: 1.0.1
+ * Version: 1.0.2
  */
 package ch.agent.t2.timeutil;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
+import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.Adjustment;
 import ch.agent.t2.time.Day;
 import ch.agent.t2.time.Range;
+import ch.agent.t2.time.Resolution;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeIndex;
-import ch.agent.t2.time.Resolution;
 
 /**
  * A DayExpression allows to express times symbolically. The syntax of a day
@@ -65,7 +66,7 @@ import ch.agent.t2.time.Resolution;
  * {@link IllegalStateException}.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.1
+ * @version 1.0.2
  */
 public class DayExpression {
 
@@ -120,9 +121,9 @@ public class DayExpression {
 	 * 
 	 * @param expr a non-null day expression
 	 * @return a Day
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public static Day parseDay(String expr) throws KeyedException {
+	public static Day parseDay(String expr) throws T2Exception {
 		return new Day(parseDay(expr, Day.DOMAIN, Adjustment.NONE));
 	}
 	
@@ -134,9 +135,9 @@ public class DayExpression {
 	 * @param domain a non-null time domain
 	 * @param adjustment a non-null adjustment
 	 * @return a time index
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public static TimeIndex parseDay(String expr, TimeDomain domain, Adjustment adjustment) throws KeyedException {
+	public static TimeIndex parseDay(String expr, TimeDomain domain, Adjustment adjustment) throws T2Exception {
 		DayExpression dex = new DayExpression(adjustment);
 		dex.parseExpression(Day.DOMAIN, expr);
 		return dex.getDate(domain);
@@ -203,9 +204,9 @@ public class DayExpression {
 	 * @param domain a non-null domain
 	 * @param expression a non-null expression
 	 * 
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public void setExpression(TimeDomain domain, String expression) throws KeyedException {
+	public void setExpression(TimeDomain domain, String expression) throws T2Exception {
 		parseExpression(domain, expression);
 	}
 
@@ -215,9 +216,9 @@ public class DayExpression {
 	 * The offset is applied when the expression is resolved.
 	 * 
 	 * @param increment a positive or negative number
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public void incr(int increment) throws KeyedException {
+	public void incr(int increment) throws T2Exception {
 		if (type == Type.ERROR)
 			throw new IllegalStateException();
 		if (increment == 0)
@@ -269,9 +270,9 @@ public class DayExpression {
 	 * @param domain
 	 *            a non-null time domain
 	 * @return a time index
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public TimeIndex getDate(TimeDomain domain) throws KeyedException {
+	public TimeIndex getDate(TimeDomain domain) throws T2Exception {
 		switch(type) {
 		case LITERAL:
 			if (!domain.equals(time.getTimeDomain()))
@@ -304,7 +305,7 @@ public class DayExpression {
 		}
 		case END:
 		case START:
-			throw T2Msg.exception(32104, getExpression());
+			throw T2Msg.exception(K.T7026, getExpression());
 		case ERROR:
 			throw new IllegalStateException(type.name());
 		default:
@@ -319,9 +320,9 @@ public class DayExpression {
 	 * @param context
 	 *            a non-null range
 	 * @return a time index
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public TimeIndex getDate(Range context) throws KeyedException {
+	public TimeIndex getDate(Range context) throws T2Exception {
 		switch(type) {
 		case LITERAL:
 		case TODAY:
@@ -346,9 +347,9 @@ public class DayExpression {
 	
 	/**
 	 * Apply the offset to the time index and set the offset to zero.
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	private void applyOffset() throws KeyedException {
+	private void applyOffset() throws T2Exception {
 		if (time != null && offset != 0) {
 			time = time.add(offset);
 			offset = 0;
@@ -358,9 +359,9 @@ public class DayExpression {
 	/**
 	 * @param t a time index or null
 	 * @return a time index or null if t is null
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	private TimeIndex addOffset(TimeIndex t) throws KeyedException {
+	private TimeIndex addOffset(TimeIndex t) throws T2Exception {
 		if (t == null)
 			return null;
 		if (offset != 0)
@@ -372,13 +373,13 @@ public class DayExpression {
 	/**
 	 * @param domain a non-null domain
 	 * @param expression a non-null string
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	private void parseExpression(TimeDomain domain, String expression) throws KeyedException {
+	private void parseExpression(TimeDomain domain, String expression) throws T2Exception {
 		DayExpression previous = new DayExpression(this);
 		try {
 			tryParseExpression(domain, expression);
-		} catch (KeyedException e) {
+		} catch (T2Exception e) {
 			reset(previous);
 			throw e;
 		}
@@ -387,9 +388,9 @@ public class DayExpression {
 	/**
 	 * @param domain a non-null domain
 	 * @param expr a non-null string
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	private void tryParseExpression(TimeDomain domain, String expr) throws KeyedException {
+	private void tryParseExpression(TimeDomain domain, String expr) throws T2Exception {
 		String modifier = "";
 		time = null;
 		try {
@@ -401,7 +402,7 @@ public class DayExpression {
 				time = domain.time(expr, adjustment);
 			}
 			type = Type.LITERAL;
-		} catch (KeyedException e) {
+		} catch (T2Exception e) {
 			modifier = parseKeyword(expr, e);
 		}
 		if (modifier.length() > 0) {
@@ -413,9 +414,9 @@ public class DayExpression {
 					try {
 						time = domain.time(expr, adjustment);
 						offset = 0;
-					} catch (KeyedException e2) {
+					} catch (T2Exception e2) {
 						// throw an error about the wrong offset
-						throw T2Msg.exception(32102, modifier, expr);
+						throw T2Msg.exception(K.T7025, modifier, expr);
 					}
 				}
 			}
@@ -428,9 +429,9 @@ public class DayExpression {
 	 * @param expression a non-null string
 	 * @param originalException a keyed exception or null
 	 * @return the modifier following the keyword or an empty string
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	private String parseKeyword(String expression, KeyedException originalException) throws KeyedException {
+	private String parseKeyword(String expression, T2Exception originalException) throws T2Exception {
 		String modifier = "";
 		String expr = expression.toLowerCase();
 		if (expr.startsWith(TODAY)) {
@@ -512,9 +513,9 @@ public class DayExpression {
 	 * @param keepBegin
 	 *            if true modify this object else modify the argument
 	 * @return true if the range is valid
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	protected boolean enforceValidRange(TimeDomain domain, DayExpression begin, boolean keepBegin) throws KeyedException {
+	protected boolean enforceValidRange(TimeDomain domain, DayExpression begin, boolean keepBegin) throws T2Exception {
 		/*
 		 * handle END-END START-START TODAY-TODAY LITERAL-LITERAL TODAY-LITERAL LITERAL-TODAY
 		 * if ERROR or begin.ERROR: exception
@@ -571,7 +572,7 @@ public class DayExpression {
 	 * @param begin 
 	 * @param keepBegin
 	 */
-	private void eVRTodayLiteral(TimeDomain domain, DayExpression begin, boolean keepBegin) throws KeyedException {
+	private void eVRTodayLiteral(TimeDomain domain, DayExpression begin, boolean keepBegin) throws T2Exception {
 		TimeIndex t = begin.getDate(domain);
 		if (t.compareTo(time) > 0) {
 			if (keepBegin)
@@ -593,7 +594,7 @@ public class DayExpression {
 	 * @param begin
 	 * @param keepBegin
 	 */
-	private void eVRLiteralToday(TimeDomain domain, DayExpression begin, boolean keepBegin) throws KeyedException {
+	private void eVRLiteralToday(TimeDomain domain, DayExpression begin, boolean keepBegin) throws T2Exception {
 		TimeIndex t = getDate(domain);
 		if (begin.time.compareTo(t) > 0) {
 			if (keepBegin) {

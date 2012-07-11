@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,18 +15,19 @@
  * 
  * Package: ch.agent.t2.timeutil
  * Type: RangeHolder
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.timeutil;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
+import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.Adjustment;
 import ch.agent.t2.time.Day;
 import ch.agent.t2.time.Range;
+import ch.agent.t2.time.Resolution;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeIndex;
-import ch.agent.t2.time.Resolution;
 
 /**
  * A RangeHolder helps applications manipulate time ranges.
@@ -35,7 +36,7 @@ import ch.agent.t2.time.Resolution;
  * start of the range and downwards for the end.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  */
 public class RangeHolder {
 
@@ -148,9 +149,9 @@ public class RangeHolder {
 	 * the current bounds are retained.
 	 * 
 	 * @param domain a non-null domain
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public void reset(TimeDomain domain) throws KeyedException {
+	public void reset(TimeDomain domain) throws T2Exception {
 		if (domain == null)
 			throw new IllegalArgumentException("domain null");
 		String begin = getBeginText();
@@ -167,13 +168,13 @@ public class RangeHolder {
 	 * Refer to {@link DayExpression} for the valid syntax of dates.
 	 * 
 	 * @param date a day expression
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public void setBegin(String date) throws KeyedException {
+	public void setBegin(String date) throws T2Exception {
 		setBegin(date, true);
 	}
 	
-	private void setBegin(String date, boolean enforceValidRange) throws KeyedException {
+	private void setBegin(String date, boolean enforceValidRange) throws T2Exception {
 		DayExpression previousBegin = beginExpr == null ? null : new DayExpression(beginExpr);
 		if (date == null || date.length() == 0)
 			setEmpty();
@@ -192,9 +193,9 @@ public class RangeHolder {
 	 * Refer to {@link DayExpression} for the valid syntax of dates.
 	 * 
 	 * @param date a day expression
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public void setEnd(String date) throws KeyedException {
+	public void setEnd(String date) throws T2Exception {
 		DayExpression previousEnd = endExpr == null ? null : new DayExpression(endExpr);
 		if (date == null || date.length() == 0)
 			setEmpty();
@@ -214,7 +215,7 @@ public class RangeHolder {
 	 * @param increment
 	 *            a positive or negative number
 	 */
-	public void incrBegin(int increment) throws KeyedException {
+	public void incrBegin(int increment) throws T2Exception {
 		if (increment == 0)
 			return;
 		DayExpression previousBegin = null;
@@ -234,9 +235,9 @@ public class RangeHolder {
 	 * 
 	 * @param up if true increase, else decrease
 	 * @param large if true use a large amount, else a single unit
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public void incrBegin(boolean up, boolean large) throws KeyedException {
+	public void incrBegin(boolean up, boolean large) throws T2Exception {
 		int incr = 1;
 		if (large) {
 			if (beginExpr.isToday())
@@ -256,7 +257,7 @@ public class RangeHolder {
 	 * @param increment
 	 *            a positive or negative number
 	 */
-	public void incrEnd(int increment) throws KeyedException {
+	public void incrEnd(int increment) throws T2Exception {
 		if (increment == 0)
 			return;
 		DayExpression previousEnd = null;
@@ -276,9 +277,9 @@ public class RangeHolder {
 	 * 
 	 * @param up if true increase, else decrease
 	 * @param large if true use a large amount, else a single unit
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public void incrEnd(boolean up, boolean large) throws KeyedException {
+	public void incrEnd(boolean up, boolean large) throws T2Exception {
 		int incr = 1;
 		if (large) {
 			if (endExpr.isToday())
@@ -323,9 +324,9 @@ public class RangeHolder {
 	 * Get the range evaluated in the time domain of the range holder.
 	 * 
 	 * @return a range
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public Range getRange() throws KeyedException {
+	public Range getRange() throws T2Exception {
 		return getRange(domain);
 	}
 	
@@ -334,9 +335,9 @@ public class RangeHolder {
 	 * 
 	 * @param context a non-null time domain
 	 * @return a range
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public Range getRange(TimeDomain context) throws KeyedException {
+	public Range getRange(TimeDomain context) throws T2Exception {
 		if (beginExpr == null)
 			return new Range(context);
 		else
@@ -354,9 +355,9 @@ public class RangeHolder {
 	 * 
 	 * @param context non-null range
 	 * @return a range
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public Range getRange(Range context) throws KeyedException {
+	public Range getRange(Range context) throws T2Exception {
 		TimeDomain contextDomain = context.getTimeDomain();
 		if (beginExpr == null) {
 			return new Range(contextDomain);
@@ -404,9 +405,9 @@ public class RangeHolder {
 	 * 
 	 * @param keepBegin
 	 * @param previous
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	private void enforceValidRange(boolean keepBegin, DayExpression previous) throws KeyedException {
+	private void enforceValidRange(boolean keepBegin, DayExpression previous) throws T2Exception {
 		DayExpression previous2 = new DayExpression(keepBegin ? endExpr : beginExpr);
 		if (!endExpr.enforceValidRange(domain, beginExpr, keepBegin)) {
 			// repair
@@ -417,7 +418,7 @@ public class RangeHolder {
 				beginExpr.reset(previous2);
 				endExpr.reset(previous);
 			}
-			throw T2Msg.exception(32105);
+			throw T2Msg.exception(K.T7027);
 		}
 	}
 	

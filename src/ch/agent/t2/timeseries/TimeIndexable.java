@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  * 
  * Package: ch.agent.t2.timeseries
  * Type: TimeIndexable
- * Version: 1.1.0
+ * Version: 1.1.1
  */
 package ch.agent.t2.timeseries;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 import ch.agent.t2.time.Range;
 
 /**
@@ -40,7 +40,7 @@ import ch.agent.t2.time.Range;
  *  
  * 
  * @author Jean-Paul Vetterli
- * @version 1.1.0
+ * @version 1.1.1
  * @param <T> the value type
  */
 public interface TimeIndexable<T> extends TimeAddressable<T> {
@@ -64,9 +64,9 @@ public interface TimeIndexable<T> extends TimeAddressable<T> {
 	 * 
 	 * @param range the non-null wanted range
 	 * @return an array with a subrange of values
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	T[] getArray(Range range) throws KeyedException;
+	T[] getArray(Range range) throws T2Exception;
 	
 	/**
 	 * Fill holes in the time series with the given value and append a
@@ -80,9 +80,9 @@ public interface TimeIndexable<T> extends TimeAddressable<T> {
 	 * @param replacement the replacement value
 	 * @param tailLength the length of the tail to append
 	 * @return the number of values filled
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	int fill(T replacement, long tailLength) throws KeyedException;
+	int fill(T replacement, long tailLength) throws T2Exception;
 	
 	/**
 	 * Fill holes in the time series by repeating the last value before each
@@ -100,12 +100,12 @@ public interface TimeIndexable<T> extends TimeAddressable<T> {
 	 * 
 	 * @param filler a non-null filler
 	 * @return the number of values filled
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	int fill(Filler<T> filler) throws KeyedException;
+	int fill(Filler<T> filler) throws T2Exception;
 	
 	@Override
-	TimeIndexable<T> copy() throws KeyedException;
+	TimeIndexable<T> copy() throws T2Exception;
 
 	@Override
 	TimeIndexable<T> makeEmptyCopy();

@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.core
  * Type: KeyedMessage
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.core;
 
@@ -31,56 +31,69 @@ import java.util.MissingResourceException;
  * unique key. The messages themselves contain parameters following the
  * {@link MessageFormat} convention.
  * <p>
+ * Messages are only prepared when fetched with {@link #getMessage()}. Preparation 
+ * involves looking up messages in a resource bundle and formatting parameters.
+ * Avoiding this overhead is especially useful when messages are sent to a logging 
+ * facility without knowing for sure that they will actually be logged. 
+ * Thanks to this feature, it is not necessary to bracket the logging calls with
+ * tests of the current logging level. To force preparation of the message, for example
+ * because objects passed as parameter are about to change, use {@link #getMessage()},
+ * which makes a copy of the formatted string the first time it is called, and 
+ * returns the copy on subsequent calls.
+ * <p>
  * An application would extend this class as follows: <blockquote> 
  * <xmp>
  * public class FOOMsg extends KeyedMessage {
+ * 
+ *	public class M {
+ *	    public static final String A123 = "A123";
+ *	    public static final String X124 = "X124";
+ *	}
  *	private static final MessageBundle BUNDLE = 
  *	    new MessageBundle("FOO", ResourceBundle.getBundle("ch.agent.foo.FOOMsg"));
  *
- *	public static KeyedMessage exception(int code, Object... arg) {
+ *	public static KeyedMessage exception(String code, Object... arg) {
  *		return new KeyedMessage(new FOOMsg(code, arg));
  *	}
- *	public static KeyedMessage exception(Throwable cause, int code, Object... arg) {
+ *	public static KeyedMessage exception(Throwable cause, String code, Object... arg) {
  *		return new KeyedMessage(new FOOMsg(code, arg), cause);
  * 	}
- *	public FOOMsg(int tag, Object... args) {
- *		super(String.valueOf(tag), BUNDLE, args);
+ *	public FOOMsg(String code, Object... args) {
+ *		super(code, BUNDLE, args);
  *	}
  * }
  * </xmp> </blockquote> The property file <tt>ch/agent/foo/FOOMsg.properties</tt> would contains lines like:
  * <blockquote>
  * <xmp>
- * 123=The answer is {0}.
- * 124=What is the question?
+ * A123=The answer is {0}.
+ * X124=What is the question?
  * </xmp>
  * </blockquote>
  * Clients would throw exceptions and write messages so:
  * <blockquote>
  * <xmp>
- * System.error.println(new FOOMsg(124));
- * throw FOOMsg.exception(123, 42);
+ * System.error.println(new FOOMsg(M.X124));
+ * throw FOOMsg.exception(M.A123, 42);
  * </xmp>
  * </blockquote>
  * The user would see:
  * <blockquote>
  * <xmp>
- * FOO.124 - What is the question?
- * FOO.123 - The answer is 42.
+ * FOO.X124 - What is the question?
+ * FOO.A123 - The answer is 42.
  * </xmp>
  * </blockquote>
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  */
 public abstract class KeyedMessage {
 
-	private String category;
+	private MessageBundle bundle;
 	private String key;
 	private String message;
+	private Object[] args;
 
-	private KeyedMessage() {
-	}
-	
 	/**
 	 * Construct a keyed message. The description is fetched from the message
 	 * bundle using the key. When one or more arguments are specified, these are
@@ -97,17 +110,16 @@ public abstract class KeyedMessage {
 	 *            zero of more arguments
 	 */
 	public KeyedMessage(String key, MessageBundle bundle, Object... args) {
-		this();
+		this.bundle = bundle;
 		this.key = key;
-		this.category = bundle.getCategory();
-		findMessage(key, bundle, args);
+		this.args = args;
 	}
 	
-	private void findMessage(String key, MessageBundle bundle, Object... args) {
+	private String findMessage(MessageBundle bundle, String key, Object[] args) {
 		try {
-			message = format(bundle.getBundle().getString(String.valueOf(key)), args);
+			return format(bundle.getBundle().getString(String.valueOf(key)), args);
 		} catch (MissingResourceException e) {
-			message = key + "??";
+			return key + "??";
 		}
 	}
 
@@ -133,7 +145,7 @@ public abstract class KeyedMessage {
 	 * @return the category
 	 */
 	public String getCategory() {
-		return category;
+		return bundle.getCategory();
 	}
 
 	/**
@@ -151,11 +163,13 @@ public abstract class KeyedMessage {
 	 * @return the message text
 	 */
 	public String getMessage() {
+		if (message == null)
+			message = findMessage(bundle, key, args);
 		return message;
 	}
 
 	@Override
 	public String toString() {
-		return category + "." + key + " - " + message;
+		return String.format("%s.%s - %s", getCategory(), key, getMessage());
 	}
 }

@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,13 @@
  * 
  * Package: ch.agent.t2.time
  * Type: Day
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.time;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
+import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.engine.Time2;
 
 /**
@@ -44,7 +45,7 @@ import ch.agent.t2.time.engine.Time2;
  * </blockquote>
  *
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  */
 public class Day extends Time2 {
 
@@ -61,21 +62,21 @@ public class Day extends Time2 {
 	/**
 	 * Construct a <q>daily</q> time from another time object. 
 	 * @param time a non-null time in the domain <q>daily</q>
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public Day(TimeIndex time) throws KeyedException {
+	public Day(TimeIndex time) throws T2Exception {
 		super(DOMAIN, time.asLong());
 		if (DOMAIN != time.getTimeDomain())
-			throw T2Msg.exception(32152, time.getTimeDomain().getLabel(), DOMAIN.getLabel());
+			throw T2Msg.exception(K.T1073, time.getTimeDomain().getLabel(), DOMAIN.getLabel());
 	}
 	
 	/**
 	 * Construct a <q>daily</q> time from a string.
 	 *  
 	 * @param date a non-null string
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public Day(String date) throws KeyedException {
+	public Day(String date) throws T2Exception {
 		super(DOMAIN, date);
 	}
 	
@@ -85,9 +86,9 @@ public class Day extends Time2 {
 	 * @param year a non-negative number
 	 * @param month a number in [1-12]
 	 * @param day a number between 1 and the last day of the month
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public Day(long year, int month, int day) throws KeyedException { 
+	public Day(long year, int month, int day) throws T2Exception { 
 		super(DOMAIN, year, month, day, 0, 0, 0, 0, Adjustment.NONE);
 	}
 
@@ -95,9 +96,9 @@ public class Day extends Time2 {
 	 * Return true if the day falls on a weekend.
 	 * 
 	 * @return true if the day falls on a weekend
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public boolean isWeekEnd() throws KeyedException {
+	public boolean isWeekEnd() throws T2Exception {
 		switch (getDayOfWeek()) {
 		case Sun:
 		case Sat:

@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  * 
  * Package: ch.agent.t2.time
  * Type: BasePeriodPattern
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.time;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 
 /**
  * A BasePeriodPattern defines a repeating pattern of time points.
@@ -30,7 +30,7 @@ import ch.agent.core.KeyedException;
  * {@link Workday}.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  * @see TimePacker
  */
 public interface BasePeriodPattern {
@@ -48,9 +48,9 @@ public interface BasePeriodPattern {
 	 * 
 	 * @param time an unrestricted numerical time index
 	 * @return the numerical time index compressed
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	long makeIndex(long time) throws KeyedException;
+	long makeIndex(long time) throws T2Exception;
 	
 	/**
 	 * Put back all removed OFF time points in a compressed numerical time index.

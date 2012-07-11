@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,15 @@
  * 
  * Package: ch.agent.t2.time
  * Type: SimpleSubperiodPattern
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.time;
 
 import java.util.Arrays;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
+import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.engine.TimeTools;
 
 /**
@@ -35,7 +36,7 @@ import ch.agent.t2.time.engine.TimeTools;
  * another one: "at 10:15, 14:20, and 22:40 every working day".
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  * @see DayRankingSubPeriodPattern
  */
 public class SimpleSubPeriodPattern implements SubPeriodPattern {
@@ -55,9 +56,9 @@ public class SimpleSubPeriodPattern implements SubPeriodPattern {
 	 * @param basePeriod a non-null resolution
 	 * @param subPeriod a non-null resolution
 	 * @param ranks a non-null non-empty array of integers
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public SimpleSubPeriodPattern(Resolution basePeriod, Resolution subPeriod, int[] ranks) throws KeyedException {
+	public SimpleSubPeriodPattern(Resolution basePeriod, Resolution subPeriod, int[] ranks) throws T2Exception {
 		if (basePeriod == null)
 			throw new IllegalArgumentException("basePeriod null");
 		if (subPeriod == null)
@@ -73,9 +74,9 @@ public class SimpleSubPeriodPattern implements SubPeriodPattern {
 	/**
 	 * Validate the ranks array.
 	 * 
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	private void validateRanks() throws KeyedException {
+	private void validateRanks() throws T2Exception {
 		int minRank = Integer.MAX_VALUE;
 		int maxRank = Integer.MIN_VALUE;
 		switch (subPeriodUnit) {
@@ -92,14 +93,14 @@ public class SimpleSubPeriodPattern implements SubPeriodPattern {
 			maxRank = 86399;
 			break;
 		default:
-			throw T2Msg.exception(32130, subPeriodUnit.name());
+			throw T2Msg.exception(K.T1112, subPeriodUnit.name());
 		}
 		
 		for (int i = 0; i < ranks.length; i++) {
 			if (ranks[i] < minRank || ranks[i] > maxRank)
-				throw T2Msg.exception(32131, ranks[i], minRank, maxRank);
+				throw T2Msg.exception(K.T1113, ranks[i], minRank, maxRank);
 			if (i > 0 && ranks[i] <= ranks[i-1])
-				throw T2Msg.exception(32132);
+				throw T2Msg.exception(K.T1114);
 		}
 	}
 	
@@ -114,7 +115,7 @@ public class SimpleSubPeriodPattern implements SubPeriodPattern {
 	}
 
 	@Override
-	public long adjustForSubPeriod(long time, Adjustment adjust, TimeParts tp) throws KeyedException {
+	public long adjustForSubPeriod(long time, Adjustment adjust, TimeParts tp) throws T2Exception {
 		time *= getSize();
 		switch (basePeriodUnit) {
 		case YEAR:
@@ -123,7 +124,7 @@ public class SimpleSubPeriodPattern implements SubPeriodPattern {
 				time = increment(time, adjust, ranks, tp.getMonth());
 				break;
 			default:
-				throw T2Msg.exception(32133, basePeriodUnit.name(), subPeriodUnit.name());
+				throw T2Msg.exception(K.T1115, basePeriodUnit.name(), subPeriodUnit.name());
 			}
 			break;
 		case MONTH:
@@ -132,7 +133,7 @@ public class SimpleSubPeriodPattern implements SubPeriodPattern {
 				time = increment(time, adjust, ranks, tp.getDay());
 				break;
 			default:
-				throw T2Msg.exception(32133, basePeriodUnit.name(), subPeriodUnit.name());
+				throw T2Msg.exception(K.T1115, basePeriodUnit.name(), subPeriodUnit.name());
 			}
 			break;
 		case DAY:
@@ -141,11 +142,11 @@ public class SimpleSubPeriodPattern implements SubPeriodPattern {
 				time = increment(time, adjust, ranks, tp.getHour() * 3600 + tp.getMin() * 60 + tp.getSec());
 				break;
 			default:
-				throw T2Msg.exception(32133, basePeriodUnit.name(), subPeriodUnit.name());
+				throw T2Msg.exception(K.T1115, basePeriodUnit.name(), subPeriodUnit.name());
 			}
 			break;
 		default:
-			throw T2Msg.exception(32133, basePeriodUnit.name(), subPeriodUnit.name());
+			throw T2Msg.exception(K.T1115, basePeriodUnit.name(), subPeriodUnit.name());
 		}
 		
 		return time;
@@ -161,9 +162,9 @@ public class SimpleSubPeriodPattern implements SubPeriodPattern {
 	 * @param ranks an array of ranks
 	 * @param period a number
 	 * @return an adjusted time
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	private long increment(long time, Adjustment adjust, int[] ranks, int period) throws KeyedException {
+	private long increment(long time, Adjustment adjust, int[] ranks, int period) throws T2Exception {
 		int inc = 0;
 		int i = Arrays.binarySearch(ranks, period);
 		if (i >= 0)
@@ -181,7 +182,7 @@ public class SimpleSubPeriodPattern implements SubPeriodPattern {
 					inc = -1; // last sub period of previous base period
 				break;
 			case NONE:
-				throw T2Msg.exception(32135);
+				throw T2Msg.exception(K.T1117);
 			default:
 				throw new RuntimeException(adjust.name());
 			}
@@ -197,14 +198,14 @@ public class SimpleSubPeriodPattern implements SubPeriodPattern {
 	 * @param inc
 	 *            an increment
 	 * @return the incremented numeric time index
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	private long increment(long time, int inc) throws KeyedException {
+	private long increment(long time, int inc) throws T2Exception {
 		long result = time;
 		time += inc;
 		// overflow?
 		if (result < 0 && time > 0 || result > 0 && time < 0)
-			throw T2Msg.exception(32134);
+			throw T2Msg.exception(K.T1116);
 		return time;
 	}
 	

@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.t2.timeutil
  * Type: JavaDateUtil
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.timeutil;
 
@@ -25,8 +25,9 @@ import java.util.GregorianCalendar;
 import java.util.SimpleTimeZone;
 import java.util.TimeZone;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
+import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.Adjustment;
 import ch.agent.t2.time.Day;
 import ch.agent.t2.time.SystemTime;
@@ -37,7 +38,7 @@ import ch.agent.t2.time.TimeIndex;
  * JavaDateUtil converts between {@link TimeIndex} and Java {@link java.util.Date Date}.
  *
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  */
 public class JavaDateUtil {
 
@@ -57,9 +58,9 @@ public class JavaDateUtil {
 	 * 
 	 * @param t a non-null time index
 	 * @return a Java date
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public static Date toJavaDate(TimeIndex t) throws KeyedException {
+	public static Date toJavaDate(TimeIndex t) throws T2Exception {
 		long index;
 		switch (t.getTimeDomain().getResolution()) {
 		case YEAR:
@@ -72,7 +73,7 @@ public class JavaDateUtil {
 			index = dayOrLessToMillisecSinceEpoch(t);
 		}
 		if (index < gregorianCutover)
-			throw T2Msg.exception(32142, t.toString());
+			throw T2Msg.exception(K.T7023, t.toString());
 		return new Date(index);
 	}
 
@@ -83,9 +84,9 @@ public class JavaDateUtil {
 	 * @param date a non-null Java date
 	 * @param domain a non-null time domain
 	 * @return a time index
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public static TimeIndex fromJavaDate(Date date, TimeDomain domain) throws KeyedException {
+	public static TimeIndex fromJavaDate(Date date, TimeDomain domain) throws T2Exception {
 		return fromJavaDate(date, domain, Adjustment.NONE, true);
 	}
 	
@@ -101,9 +102,9 @@ public class JavaDateUtil {
 	 * @param adjustment a non-null adjustment
 	 * @param UTC if true, perform the conversion in the UTC time zone, else in the local time zone
 	 * @return a time index
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public static TimeIndex fromJavaDate(Date date, TimeDomain domain, Adjustment adjustment, boolean UTC) throws KeyedException {
+	public static TimeIndex fromJavaDate(Date date, TimeDomain domain, Adjustment adjustment, boolean UTC) throws T2Exception {
 		Calendar cal = null;
 		if (UTC)
 			cal = new GregorianCalendar(utcTimeZone);
@@ -117,13 +118,13 @@ public class JavaDateUtil {
 	}
 	
 	// convert "difficult" calendars to Day and increase resolution to milliseconds
-	private static long yearOrMonthToMillisecSinceEpoch (long year, int month) throws KeyedException {
+	private static long yearOrMonthToMillisecSinceEpoch (long year, int month) throws T2Exception {
 		TimeIndex m = Day.DOMAIN.time(year, month, 1, 0, 0, 0, 0, Adjustment.NONE);
 		long index = m.asLong() * 24L * 3600000L;
 		return index = index - epoch;
 	}
 	
-	private static long dayOrLessToMillisecSinceEpoch (TimeIndex t) throws KeyedException {
+	private static long dayOrLessToMillisecSinceEpoch (TimeIndex t) throws T2Exception {
 		long index = new SystemTime(t.toString()).asLong();
 		return index - epoch;
 	}

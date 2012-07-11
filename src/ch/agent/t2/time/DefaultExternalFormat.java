@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.t2.time
  * Type: DefaultExternalFormat
- * Version: 1.0.1
+ * Version: 1.0.2
  */
 package ch.agent.t2.time;
 
@@ -23,8 +23,9 @@ import java.util.Formatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
+import ch.agent.t2.T2Msg.K;
 
 /**
  * DefaultExternalFormat supports the ISO 8601:2004 international
@@ -92,7 +93,7 @@ import ch.agent.t2.T2Msg;
  * <p>
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.1
+ * @version 1.0.2
  */
 public class DefaultExternalFormat implements ExternalTimeFormat {
 
@@ -150,7 +151,7 @@ public class DefaultExternalFormat implements ExternalTimeFormat {
 	}
 	
 	@Override
-	public TimeParts scan(String datetime) throws KeyedException {
+	public TimeParts scan(String datetime) throws T2Exception {
 		if (datetime == null)
 			throw new IllegalArgumentException("date null");
 		Matcher matcher;
@@ -176,7 +177,7 @@ public class DefaultExternalFormat implements ExternalTimeFormat {
 		matcher.reset(datetime);
 		
 		if (!matcher.matches())
-			throw T2Msg.exception(matcher == matcher1 ? 32094 : 32095, datetime);
+			throw T2Msg.exception(matcher == matcher1 ? K.T1081 : K.T1082, datetime);
 		else {
 			if (matcher.groupCount() != 5)
 				throw new RuntimeException("bug: unexpected count " + matcher.groupCount());
@@ -206,7 +207,7 @@ public class DefaultExternalFormat implements ExternalTimeFormat {
 					case 3:
 						HMSU hmsd = scanTime(group, timeMatcher);
 						if (hmsd == null)
-							throw T2Msg.exception(matcher == matcher1 ? 32096 : 32097, group);
+							throw T2Msg.exception(matcher == matcher1 ? K.T1083 : K.T1084, group);
 						tp.setHour(hmsd.h);
 						tp.setMin(hmsd.m);
 						tp.setSec(hmsd.s);
@@ -215,7 +216,7 @@ public class DefaultExternalFormat implements ExternalTimeFormat {
 					case 4:
 						hmsd = scanTime(group.substring(1), timeMatcher);
 						if (hmsd == null)
-							throw T2Msg.exception(matcher == matcher1 ? 32098 : 32099, group);
+							throw T2Msg.exception(matcher == matcher1 ? K.T1085 : K.T1086, group);
 						TimeParts.TimeZoneOffset tzo = tp.new TimeZoneOffset(group.startsWith("-"));
 						tzo.setHour(hmsd.h);
 						tzo.setMin(hmsd.m);
@@ -239,9 +240,9 @@ public class DefaultExternalFormat implements ExternalTimeFormat {
 	 * @param time
 	 * @param matcher
 	 * @return an HMSU object
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	private HMSU scanTime(String time, Matcher matcher) throws KeyedException {
+	private HMSU scanTime(String time, Matcher matcher) throws T2Exception {
 		matcher.reset(time);
 		
 		if (!matcher.matches())

@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.t2.timeseries
  * Type: SparseTimeSeries
- * Version: 1.0.1
+ * Version: 1.0.2
  */
 package ch.agent.t2.timeseries;
 
@@ -24,7 +24,7 @@ import java.util.Iterator;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 import ch.agent.t2.time.Range;
 import ch.agent.t2.time.TimeDomain;
 
@@ -37,7 +37,7 @@ import ch.agent.t2.time.TimeDomain;
  * The implementation is not thread-safe.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.1
+ * @version 1.0.2
  * @param <T>
  */
 public class SparseTimeSeries<T> extends AbstractTimeSeries<T> implements TimeAddressable<T> {
@@ -127,7 +127,7 @@ public class SparseTimeSeries<T> extends AbstractTimeSeries<T> implements TimeAd
 	}
 
 	@Override
-	public TimeIndexable<T> asIndexable() throws KeyedException {
+	public TimeIndexable<T> asIndexable() throws T2Exception {
 		TimeIndexable<T> ts = TimeSeriesFactory.make(getTimeDomain(), type);
 		ts.put(this, null);
 		return ts;
@@ -141,7 +141,7 @@ public class SparseTimeSeries<T> extends AbstractTimeSeries<T> implements TimeAd
 	}
 		
 	@Override
-	public TimeAddressable<T> get(Range range) throws KeyedException {
+	public TimeAddressable<T> get(Range range) throws T2Exception {
 		getTimeDomain().requireEquality(range.getTimeDomain());
 		if (range.isEmpty())
 			return new SparseTimeSeries<T>(type, getTimeDomain(), getMissingValue());
@@ -150,7 +150,7 @@ public class SparseTimeSeries<T> extends AbstractTimeSeries<T> implements TimeAd
 	}
 
 	@Override
-	protected Observation<T> internalGetLast(long index) throws KeyedException {
+	protected Observation<T> internalGetLast(long index) throws T2Exception {
 		if (data.isEmpty() || data.firstKey() > index)
 			return null;
 		// headMap does not include the high point in the result
@@ -168,7 +168,7 @@ public class SparseTimeSeries<T> extends AbstractTimeSeries<T> implements TimeAd
 	}
 	
 	@Override
-	protected Observation<T> internalGetFirst(long index) throws KeyedException {
+	protected Observation<T> internalGetFirst(long index) throws T2Exception {
 		if (data.isEmpty() || data.lastKey() < index)
 			return null;
 		Long lowerBound = index;
@@ -200,7 +200,7 @@ public class SparseTimeSeries<T> extends AbstractTimeSeries<T> implements TimeAd
 	}
 
 	@Override
-	protected T internalGet(long index) throws KeyedException {
+	protected T internalGet(long index) throws T2Exception {
 		T result = data.get(index);
 		if (result == null)
 			return  getMissingValue();
@@ -234,7 +234,7 @@ public class SparseTimeSeries<T> extends AbstractTimeSeries<T> implements TimeAd
 	}
 	
 	@Override
-	protected void internalPut(long index, T value) throws KeyedException {
+	protected void internalPut(long index, T value) throws T2Exception {
 		if (index < 0)
 			throw new IllegalArgumentException("index < 0");
 		value = normalizeMissingValue(value);
@@ -245,12 +245,12 @@ public class SparseTimeSeries<T> extends AbstractTimeSeries<T> implements TimeAd
 	}
 
 	@Override
-	protected void internalRemove(long index) throws KeyedException {
+	protected void internalRemove(long index) throws T2Exception {
 		data.remove(index);
 	}
 
 	@Override
-	protected void internalSetBounds(long first, long last) throws KeyedException {
+	protected void internalSetBounds(long first, long last) throws T2Exception {
 		// reallocate to avoid submap problems when inserting out of range
 		data = new TreeMap<Long, T>(data.subMap(first, last + 1));
 	}

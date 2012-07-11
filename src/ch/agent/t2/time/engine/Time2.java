@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,14 +15,15 @@
  * 
  * Package: ch.agent.t2.time.engine
  * Type: Time2
- * Version: 1.0.2
+ * Version: 1.0.3
  */
 package ch.agent.t2.time.engine;
 
 import java.util.Formatter;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
+import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.Adjustment;
 import ch.agent.t2.time.Day;
 import ch.agent.t2.time.DayOfWeek;
@@ -76,11 +77,11 @@ import ch.agent.t2.time.Year;
  * of Time2 and override the {@link Comparable#compareTo(Object) compareTo} method.
  * <p>
  * @author Jean-Paul Vetterli
- * @version 1.0.2
+ * @version 1.0.3
  */
 public class Time2 implements TimeIndex {
 
-	private int hash; // a Time is immmutable, so hash needs to be computed only once
+	private int hash; // Time2 is immutable, so hash needs to be computed only once
 	
 	private TimeFactory domain;
 
@@ -128,7 +129,7 @@ public class Time2 implements TimeIndex {
 		try {
 			this.domain.valid(time, false);
 			setInternalTime(time);
-		} catch (KeyedException e) {
+		} catch (T2Exception e) {
 			throw new IllegalArgumentException("time", e);
 		}
 	}
@@ -148,10 +149,10 @@ public class Time2 implements TimeIndex {
 	 * @param sec a second in the range 0-59
 	 * @param usec the number of microseconds in the current second in the range 0-999999
 	 * @param adjust a non-null allowed adjustment mode
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
 	protected Time2(TimeDomain domain, long year, int month, int day, int hour, int min, int sec,
-			int usec, Adjustment adjust) throws KeyedException {
+			int usec, Adjustment adjust) throws T2Exception {
 		this(domain);
 		TimeParts tp = new TimeParts();
 		tp.setYear(year);
@@ -176,9 +177,9 @@ public class Time2 implements TimeIndex {
 	 * @param domain a non-null {@link TimeFactory}
 	 * @param time a string containing a representation of a date and time
 	 * @param adjustment a non-null allowed adjustment mode
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	protected Time2(TimeDomain domain, String time, Adjustment adjustment) throws KeyedException {
+	protected Time2(TimeDomain domain, String time, Adjustment adjustment) throws T2Exception {
 		this(domain);
 		set(time, adjustment);
 	}
@@ -194,34 +195,34 @@ public class Time2 implements TimeIndex {
 	 * 
 	 * @param domain a non-null {@link TimeFactory}
 	 * @param time a string containing a representation of a date and time
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	protected Time2(TimeDomain domain, String time) throws KeyedException {
+	protected Time2(TimeDomain domain, String time) throws T2Exception {
 		this(domain, time, Adjustment.NONE);
 	}
 	
-	private Time2(TimeIndex timeIndex, long increment) throws KeyedException {
+	private Time2(TimeIndex timeIndex, long increment) throws T2Exception {
 		this(timeIndex.getTimeDomain());
 		long t = timeIndex.asLong();
 		long incrT = t + increment;
 		// overflow?
 		if (t > 0 && incrT < 0 || t < 0 && incrT > 0)
-			throw T2Msg.exception(32220, timeIndex.toString(), increment);
+			throw T2Msg.exception(K.T1075, timeIndex.toString(), increment);
 		try {
 			domain.valid(incrT, false);
-		} catch (KeyedException e) {
-			throw T2Msg.exception(e, 32220, timeIndex.toString(), increment);
+		} catch (T2Exception e) {
+			throw T2Msg.exception(e, K.T1075, timeIndex.toString(), increment);
 		}
 		setInternalTime(incrT);
 	}
 	
 	@Override
-	public TimeIndex convert(TimeDomain domain) throws KeyedException {
+	public TimeIndex convert(TimeDomain domain) throws T2Exception {
 		return convert(domain, Adjustment.NONE);
 	}
 	
 	@Override
-	public TimeIndex convert(TimeDomain domain, Adjustment adjustment) throws KeyedException {
+	public TimeIndex convert(TimeDomain domain, Adjustment adjustment) throws T2Exception {
 		if (getTimeDomain().equals(domain))
 			return this;
 		resolve();
@@ -248,24 +249,24 @@ public class Time2 implements TimeIndex {
 	}
 	
 	@Override
-	public int asOffset() throws KeyedException {
+	public int asOffset() throws T2Exception {
 		long time = getInternalTime() - domain.getOrigin();
 		if (time < Integer.MIN_VALUE || time > Integer.MAX_VALUE)
-			throw T2Msg.exception(32170, domain.getResolution(), time);
+			throw T2Msg.exception(K.T1076, domain.getResolution(), time);
 		return (int) time;
 	}
 	
 	@Override
-	public TimeIndex add(long increment) throws KeyedException {
+	public TimeIndex add(long increment) throws T2Exception {
 		return new Time2(this, increment);
 	}
 	
 	@Override
-	public long sub(TimeIndex time) throws KeyedException {
+	public long sub(TimeIndex time) throws T2Exception {
 		if (getTimeDomain().equals(time.getTimeDomain())) {
 			return asLong() - time.asLong();
 		} else
-			throw T2Msg.exception(32181, time.toString(), toString(), 
+			throw T2Msg.exception(K.T1077, time.toString(), toString(), 
 					time.getTimeDomain().getLabel(), getTimeDomain().getLabel());
 	}
 	
@@ -323,19 +324,19 @@ public class Time2 implements TimeIndex {
 	}
 
 	@Override
-	public DayOfWeek getDayOfWeek() throws KeyedException {
+	public DayOfWeek getDayOfWeek() throws T2Exception {
 		return domain.getDayOfWeek(this);
 	}
 
 	@Override
-	public TimeIndex getDayByRank(Resolution basePeriod, DayOfWeek day, int rank) throws KeyedException {
+	public TimeIndex getDayByRank(Resolution basePeriod, DayOfWeek day, int rank) throws T2Exception {
 		switch(basePeriod) {
 		case MONTH:
 			return TimeTools.getDayOfMonthByRank(this, day, rank);
 		case YEAR:
 			return TimeTools.getDayOfYearByRank(this, day, rank);
 		default:
-			throw T2Msg.exception(32129, basePeriod.name());
+			throw T2Msg.exception(K.T1052, basePeriod.name());
 		}
 	}
 	
@@ -452,8 +453,9 @@ public class Time2 implements TimeIndex {
 	private TimeIndex convertOrThrowRTE(TimeDomain domain, TimeIndex time) {
 		try {
 			return time.convert(domain);
-		} catch (KeyedException e) {
-			throw new RuntimeException(new T2Msg(32009, time.toString(), domain).toString(), e); 
+		} catch (T2Exception e) {
+			Exception cause = T2Msg.exception(e, K.T0005, time.toString(), domain); 
+			throw T2Msg.runtimeException(K.T0001, cause); 
 		}
 	}
 	
@@ -463,9 +465,9 @@ public class Time2 implements TimeIndex {
 	 * 
 	 * @param tp a non-null time parts object
 	 * @param adjust a non-null allowed adjustment mode
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	private void set(TimeParts tp, Adjustment adjust) throws KeyedException {
+	private void set(TimeParts tp, Adjustment adjust) throws T2Exception {
 		setInternalTime(domain.pack(tp, adjust));
 	}
 
@@ -474,9 +476,9 @@ public class Time2 implements TimeIndex {
 	 * Silently ignore elements finer than the resolution.
 	 * @param date a non-null string
 	 * @param adjust a non-null allowed adjustment mode
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	private void set(String date, Adjustment adjust) throws KeyedException {
+	private void set(String date, Adjustment adjust) throws T2Exception {
 		TimeParts tp = domain.scan(date);
 		set(tp, adjust);
 	}

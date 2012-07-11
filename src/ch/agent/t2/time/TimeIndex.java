@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  * 
  * Package: ch.agent.t2.time
  * Type: TimeIndex
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.time;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 
 /**
  * A TimeIndex object represents a time, or more precisely, a point in time. 
@@ -36,7 +36,7 @@ import ch.agent.core.KeyedException;
  * The design assumes that TimeIndex is implemented as an immutable object.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  * @see TimeDomain
  */
 public interface TimeIndex extends Comparable<TimeIndex> {
@@ -60,18 +60,18 @@ public interface TimeIndex extends Comparable<TimeIndex> {
 	 * the offset does not fit into a 32 bit integer.
 	 * 
 	 * @return the time as an offset from the origin
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	int asOffset() throws KeyedException;
+	int asOffset() throws T2Exception;
 	
 	/**
 	 * Return the day of the week. An exception is thrown if the time domain 
 	 * resolution is YEAR or MONTH
 	 * 
 	 * @return the day of the week
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	DayOfWeek getDayOfWeek() throws KeyedException;
+	DayOfWeek getDayOfWeek() throws T2Exception;
 
 	/**
 	 * Return the TimeIndex for a day defined by name and rank within a reference period.
@@ -83,9 +83,9 @@ public interface TimeIndex extends Comparable<TimeIndex> {
 	 * @param day the day name
 	 * @param rank the day rank
 	 * @return a time index with DAY resolution
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	TimeIndex getDayByRank(Resolution referencePeriod, DayOfWeek day, int rank) throws KeyedException;
+	TimeIndex getDayByRank(Resolution referencePeriod, DayOfWeek day, int rank) throws T2Exception;
 	
 	/**
 	 * Return the microsecond component of the time.
@@ -147,9 +147,9 @@ public interface TimeIndex extends Comparable<TimeIndex> {
 	 * 
 	 * @param increment positive or negative number of units to add
 	 * @return a new TimeIndex object
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	TimeIndex add(long increment) throws KeyedException;
+	TimeIndex add(long increment) throws T2Exception;
 
 	/**
 	 * Return the number of time units since the time specified as argument.
@@ -162,9 +162,9 @@ public interface TimeIndex extends Comparable<TimeIndex> {
 	 * 
 	 * @param time a non-null time index to substract from this time index
 	 * @return the number of periods between this time index and the argument, positive is the argument is earlier
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	long sub(TimeIndex time) throws KeyedException;
+	long sub(TimeIndex time) throws T2Exception;
 
 	/**
 	 * Return a new time index by converting this one to the given time domain. No
@@ -172,9 +172,9 @@ public interface TimeIndex extends Comparable<TimeIndex> {
 	 * 
 	 * @param domain a non-null time domain
 	 * @return a time index in the given domain
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	TimeIndex convert(TimeDomain domain) throws KeyedException;
+	TimeIndex convert(TimeDomain domain) throws T2Exception;
 
 	/**
 	 * Return a new time index by converting this one to the given time domain, 
@@ -183,9 +183,9 @@ public interface TimeIndex extends Comparable<TimeIndex> {
 	 * @param domain a non-null time domain
 	 * @param adjustment a non-null allowed adjustment 
 	 * @return a time index in the given domain
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	TimeIndex convert(TimeDomain domain, Adjustment adjustment) throws KeyedException;
+	TimeIndex convert(TimeDomain domain, Adjustment adjustment) throws T2Exception;
 	
 	/**
 	 * Return a string representation of the time. The order of the time

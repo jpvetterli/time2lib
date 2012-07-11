@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  * 
  * Package: ch.agent.t2.time
  * Type: SubperiodPattern
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.time;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 
 /**
  * A SubperiodPattern defines a set of higher resolution time points within a base unit. 
@@ -31,7 +31,7 @@ import ch.agent.core.KeyedException;
  * implementing "the 3d Friday of the month" in {@link ThirdFriday}.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  * @see TimePacker
  */
 public interface SubPeriodPattern {
@@ -68,9 +68,9 @@ public interface SubPeriodPattern {
 	 * @param adjust an allowed adjustment mode
 	 * @param timeParts a time parts object with the complete time specification
 	 * @return the numeric time index adjusted for the sub period
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	long adjustForSubPeriod(long time, Adjustment adjust, TimeParts timeParts) throws KeyedException;
+	long adjustForSubPeriod(long time, Adjustment adjust, TimeParts timeParts) throws T2Exception;
 
 	/**
 	 * Update the relevant field of the time parts argument for the given sub period.

@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,12 +15,13 @@
  * 
  * Package: ch.agent.t2.time
  * Type: TimeParts
- * Version: 1.0.1
+ * Version: 1.0.2
  */
 package ch.agent.t2.time;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
+import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.engine.TimeTools;
 
 /**
@@ -35,7 +36,7 @@ import ch.agent.t2.time.engine.TimeTools;
  * to {@link DefaultExternalFormat} for details.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.1
+ * @version 1.0.2
  */
 public class TimeParts {
 	
@@ -90,11 +91,11 @@ public class TimeParts {
 		 * Set the hour offset.
 		 * 
 		 * @param hour a number in [0, 11]
-		 * @throws KeyedException
+		 * @throws T2Exception
 		 */
-		public void setHour(int hour) throws KeyedException {
+		public void setHour(int hour) throws T2Exception {
 			if (hour < 0 || hour > 11)
-				throw T2Msg.exception(32042, hour);
+				throw T2Msg.exception(K.T1018, hour);
 			this.hour = sign * hour;
 		}
 
@@ -111,11 +112,11 @@ public class TimeParts {
 		 * Set the minute offset.
 		 * 
 		 * @param min a number in [0, 59]
-		 * @throws KeyedException
+		 * @throws T2Exception
 		 */
-		public void setMin(int min) throws KeyedException {
+		public void setMin(int min) throws T2Exception {
 			if (min < 0 || min > 59)
-				throw T2Msg.exception(32052, min);
+				throw T2Msg.exception(K.T1021, min);
 			this.min = sign * min;
 		}
 
@@ -132,11 +133,11 @@ public class TimeParts {
 		 * Set the second offset.
 		 * 
 		 * @param sec a number in [0, 59]
-		 * @throws KeyedException
+		 * @throws T2Exception
 		 */
-		public void setSec(int sec) throws KeyedException {
+		public void setSec(int sec) throws T2Exception {
 			if (sec < 0 || sec > 59)
-				throw T2Msg.exception(32062, sec);
+				throw T2Msg.exception(K.T1023, sec);
 			this.sec = sign * sec;
 		}
 
@@ -153,11 +154,11 @@ public class TimeParts {
 		 * Set the usec offset.
 		 * 
 		 * @param usec a number in [0, 999999]
-		 * @throws KeyedException
+		 * @throws T2Exception
 		 */
-		public void setUsec(int usec) throws KeyedException {
+		public void setUsec(int usec) throws T2Exception {
 			if (usec < 0 || usec > 999999)
-				throw T2Msg.exception(32072, usec);
+				throw T2Msg.exception(K.T1027, usec);
 			this.usec = sign * usec;
 		}
 	}
@@ -330,18 +331,18 @@ public class TimeParts {
 	 * supported.
 	 * 
 	 * @return 1 if hours overflowed, -1 if they underflowed, else return 0
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	protected int checkTimeComponentsAndApplyTimeZoneOffset() throws KeyedException {
+	protected int checkTimeComponentsAndApplyTimeZoneOffset() throws T2Exception {
 		
 		if (hour < 0 || hour > 23)
-			throw T2Msg.exception(32040, hour);
+			throw T2Msg.exception(K.T1017, hour);
 		if (min < 0 || min > 59)
-			throw T2Msg.exception(32050, min);
+			throw T2Msg.exception(K.T1019, min);
 		if (sec < 0 || sec > 59)
-			throw T2Msg.exception(32060, sec);
+			throw T2Msg.exception(K.T1022, sec);
 		if (usec < 0 || usec > 999999)
-			throw T2Msg.exception(32070, usec);
+			throw T2Msg.exception(K.T1026, usec);
 		
 		int overflow = 0;
 		
@@ -424,23 +425,23 @@ public class TimeParts {
 	 * @param unit
 	 *            a non-null resolution
 	 * @return a numeric time index
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public long asRawIndex(Resolution unit) throws KeyedException {
+	public long asRawIndex(Resolution unit) throws T2Exception {
 		long time = 0;
 		if (year < 0)
-			throw T2Msg.exception(32010, year);
+			throw T2Msg.exception(K.T1014, year);
 		if (unit == Resolution.YEAR) {
 			time = year;
 		} else {
 			if (month < 1 || month > 12)
-				throw T2Msg.exception(32020, month);
+				throw T2Msg.exception(K.T1015, month);
 			if (unit == Resolution.MONTH) {
 				time = year * 12 + month - 1; // -1: month 1-based
 			} else {
 				int daysInThisMonth = TimeTools.daysInMonth(year, month);
 				if (day < 1 || day > daysInThisMonth)
-					throw T2Msg.exception(32030, day,	daysInThisMonth);
+					throw T2Msg.exception(K.T1016, day,	daysInThisMonth);
 				time = year * 365 + TimeTools.leapYears(year)
 						+ TimeTools.daysToMonth(year, month) + day - 1; // -1: day 1-based
 				if (unit != Resolution.DAY) {
@@ -458,7 +459,7 @@ public class TimeParts {
 								(month == 6 && day == 30)) {
 							sec = 59;
 						} else {
-							throw T2Msg.exception(32064);
+							throw T2Msg.exception(K.T1025);
 						}
 					}
 					time += checkTimeComponentsAndApplyTimeZoneOffset();

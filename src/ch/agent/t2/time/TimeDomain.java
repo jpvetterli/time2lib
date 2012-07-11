@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  * 
  * Package: ch.agent.t2.time
  * Type: TimeDomain
- * Version: 1.0.1
+ * Version: 1.0.2
  */
 package ch.agent.t2.time;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 
 /**
  * The TimeDomain is a fundamental property of a {@link TimeIndex}. Most
@@ -73,7 +73,7 @@ import ch.agent.core.KeyedException;
  * The design assumes that TimeDomain is implemented as an immutable object.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.1
+ * @version 1.0.2
  * @see TimeIndex
  * @see TimeDomainManager
  */
@@ -87,9 +87,9 @@ public interface TimeDomain {
 	 * Throw an exception if the domain is not equal to this domain.
 	 * 
 	 * @param domain a time domain
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	void requireEquality(TimeDomain domain) throws KeyedException;
+	void requireEquality(TimeDomain domain) throws T2Exception;
 	
 	/**
 	 * Return the resolution of the time domain.
@@ -183,9 +183,9 @@ public interface TimeDomain {
 	 * 
 	 * @param date a non-null date string
 	 * @return a TimeIndex in the domain
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	TimeIndex time(String date) throws KeyedException;
+	TimeIndex time(String date) throws T2Exception;
 	
 	/**
 	 * Return a new TimeIndex corresponding to the given date string. 
@@ -195,9 +195,9 @@ public interface TimeDomain {
 	 * @param date a non-null date string
 	 * @param adjust a non-null adjustment mode
 	 * @return a TimeIndex in the domain
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	TimeIndex time(String date, Adjustment adjust) throws KeyedException;
+	TimeIndex time(String date, Adjustment adjust) throws T2Exception;
 	
 	/**
 	 * Return a new TimeIndex corresponding to the list of parameters. 
@@ -213,9 +213,9 @@ public interface TimeDomain {
 	 * @param usec the microsecond
 	 * @param adjust a non-null adjustment mode
 	 * @return a TimeIndex in the domain
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
 	TimeIndex time(long year, int month, int day, int hour, int min, int sec,
-			int usec, Adjustment adjust) throws KeyedException;
+			int usec, Adjustment adjust) throws T2Exception;
 
 }

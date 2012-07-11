@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.t2.timeseries
  * Type: TimeSeriesFactory
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.timeseries;
 
@@ -23,10 +23,11 @@ import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Map;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
-import ch.agent.t2.time.TimeDomain;
+import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.Resolution;
+import ch.agent.t2.time.TimeDomain;
 
 /**
  * TimeSeriesFactory manages the objects representing <em>missing values</em>
@@ -49,7 +50,7 @@ import ch.agent.t2.time.Resolution;
  * time series with the wanted attributes.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  */
 public class TimeSeriesFactory {
 
@@ -144,11 +145,11 @@ public class TimeSeriesFactory {
 	 * 
 	 * @param type the value type
 	 * @param missingValue the object representing missing values
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public synchronized void define(Class<?> type, Object missingValue) throws KeyedException {
+	public synchronized void define(Class<?> type, Object missingValue) throws T2Exception {
 		if (map.containsKey(type))
-			throw T2Msg.exception(40010, type.getSimpleName());
+			throw T2Msg.exception(K.T5005, type.getSimpleName());
 		// store a special object to represent null
 		map.put(type, missingValue == null ? nullValue : missingValue);
 	}

@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  * 
  * Package: ch.agent.t2.timeutil
  * Type: TimeUtil
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.timeutil;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 import ch.agent.t2.time.Adjustment;
 import ch.agent.t2.time.SystemTime;
 import ch.agent.t2.time.TimeDomain;
@@ -29,7 +29,7 @@ import ch.agent.t2.time.TimeIndex;
  * TimeUtil provides a selection of stateless methods useful in various applications.
  *
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  */
 public class TimeUtil {
 
@@ -44,7 +44,7 @@ public class TimeUtil {
 		try {
 			TimeIndex t = new SystemTime();
 			return t.convert(domain, Adjustment.DOWN);
-		} catch (KeyedException e) {
+		} catch (T2Exception e) {
 			// should not occur because of the adjustment
 			throw new RuntimeException(e);
 		}

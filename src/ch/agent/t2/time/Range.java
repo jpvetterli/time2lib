@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,16 @@
  * 
  * Package: ch.agent.t2.time
  * Type: Range
- * Version: 1.0.1
+ * Version: 1.0.2
  */
 package ch.agent.t2.time;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
+import ch.agent.t2.T2Msg.K;
 
 /**
  * A Range is an immutable time interval in a {@link TimeDomain}. A range can be empty.
@@ -33,7 +34,7 @@ import ch.agent.t2.T2Msg;
  * A Range is an immutable object.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.1
+ * @version 1.0.2
  */
 public class Range implements Iterable<TimeIndex> {
 
@@ -66,7 +67,7 @@ public class Range implements Iterable<TimeIndex> {
 			TimeIndex result = next;
 			try {
 				next = next.add(1);
-			} catch (KeyedException e) {
+			} catch (T2Exception e) {
 				next = null;
 			}
 			return result;
@@ -116,7 +117,7 @@ public class Range implements Iterable<TimeIndex> {
 	 * @param domain a non-null domain
 	 * @param first the lower bound
 	 * @param last the upper bound
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
 	public Range(TimeDomain domain, long first, long last) {
 		this(domain);
@@ -131,12 +132,12 @@ public class Range implements Iterable<TimeIndex> {
 	 * 
 	 * @param first a non-null lower bound
 	 * @param last a non-null upper bound
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public Range(TimeIndex first, TimeIndex last) throws KeyedException {
+	public Range(TimeIndex first, TimeIndex last) throws T2Exception {
 		this(first.getTimeDomain());
 		if (!domain.equals(last.getTimeDomain())) {
-			throw T2Msg.exception(32179, first.toString(), last.toString(),
+			throw T2Msg.exception(K.T5009, first.toString(), last.toString(),
 					first.getTimeDomain().getLabel(), last.getTimeDomain().getLabel());
 		}
 		this.first = first.asLong();
@@ -157,9 +158,9 @@ public class Range implements Iterable<TimeIndex> {
 	 * @param firstDate a non-null lower bound
 	 * @param lastDate a non-null upper bound
 	 * @param adjust a non-null adjustment mode
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public Range(TimeDomain domain, String firstDate, String lastDate, Adjustment adjust) throws KeyedException {
+	public Range(TimeDomain domain, String firstDate, String lastDate, Adjustment adjust) throws T2Exception {
 		this(domain);
 		Adjustment firstAdjust = Adjustment.NONE;
 		Adjustment lastAdjust = Adjustment.NONE;
@@ -195,9 +196,9 @@ public class Range implements Iterable<TimeIndex> {
 	 * @param domain a non-null domain
 	 * @param adjust a non-null adjustment mode
 	 * @return a range
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public Range convert(TimeDomain domain, Adjustment adjust) throws KeyedException {
+	public Range convert(TimeDomain domain, Adjustment adjust) throws T2Exception {
 		if (this.domain.equals(domain))
 			return this;
 		Adjustment firstAdjust = Adjustment.NONE;
@@ -261,12 +262,12 @@ public class Range implements Iterable<TimeIndex> {
 	 * Get the size of the range as an integer and check for overflow.
 	 * 
 	 * @return the range size as an integer
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public int getSizeAsInt() throws KeyedException {
+	public int getSizeAsInt() throws T2Exception {
 		long size = getSize();
 		if (size > Integer.MAX_VALUE)
-			throw T2Msg.exception(32178, domain.time(first).toString(),	domain.time(last).toString());
+			throw T2Msg.exception(K.T5008, domain.time(first).toString(),	domain.time(last).toString());
 		return (int) size;
 	}
 
@@ -313,7 +314,7 @@ public class Range implements Iterable<TimeIndex> {
 	 * @param time a non-null time 
 	 * @return true if the time is in the range
 	 */
-	public boolean isInRange(TimeIndex time) throws KeyedException {
+	public boolean isInRange(TimeIndex time) throws T2Exception {
 		getTimeDomain().requireEquality(time.getTimeDomain());
 		return isInRange(time.asLong());
 	}
@@ -325,7 +326,7 @@ public class Range implements Iterable<TimeIndex> {
 	 * @param range a non-null range
 	 * @return true if the time is in the range
 	 */
-	public boolean isInRange(Range range) throws KeyedException {
+	public boolean isInRange(Range range) throws T2Exception {
 		getTimeDomain().requireEquality(range.getTimeDomain());
 		return isInRange(range.first) && isInRange(range.last);
 	}
@@ -355,9 +356,9 @@ public class Range implements Iterable<TimeIndex> {
 	 * 
 	 * @param range a non-null range
 	 * @return the union of both ranges
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public Range union(Range range) throws KeyedException {
+	public Range union(Range range) throws T2Exception {
 //		range = range.convert(domain); ... no magic please
 		getTimeDomain().requireEquality(range.getTimeDomain());
 		Range union = null;
@@ -379,9 +380,9 @@ public class Range implements Iterable<TimeIndex> {
 	 * 
 	 * @param range a non-null range
 	 * @return the intersection of both ranges
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	public Range intersection(Range range) throws KeyedException {
+	public Range intersection(Range range) throws T2Exception {
 //		range = range.convert(domain); ... no magic please
 		getTimeDomain().requireEquality(range.getTimeDomain());
 		Range inter = null;

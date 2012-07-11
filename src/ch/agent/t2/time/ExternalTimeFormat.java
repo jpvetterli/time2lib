@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  * 
  * Package: ch.agent.t2.time
  * Type: ExternalTimeFormat
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.time;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 
 /**
  * ExternalTimeFormat defines the interface for scanning time strings and for
@@ -27,7 +27,7 @@ import ch.agent.core.KeyedException;
  * {@link TimeDomainManager}.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  */
 public interface ExternalTimeFormat {
 
@@ -42,7 +42,7 @@ public interface ExternalTimeFormat {
 	 * @return a {@link TimeParts}
 	 * @throws Exception
 	 */
-	TimeParts scan(String time) throws KeyedException;
+	TimeParts scan(String time) throws T2Exception;
 	
 	/**
 	 * Generate a string representing the time in the time parts object.

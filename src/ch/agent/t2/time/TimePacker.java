@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,17 +15,17 @@
  * 
  * Package: ch.agent.t2.time
  * Type: TimePacker
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.time;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 
 /**
  * TimePacker defines the backend interface for the machinery implementing {@link TimeDomain} and {@link TimeIndex}. 
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  */
 public interface TimePacker {
 
@@ -56,7 +56,7 @@ public interface TimePacker {
 	 *            if true do not throw an exception when time is not valid
 	 * @return true if valid
 	 */
-	boolean valid(long time, boolean testOnly) throws KeyedException;
+	boolean valid(long time, boolean testOnly) throws T2Exception;
 
 	/**
 	 * Unpack the numeric representation of time into its component elements.
@@ -76,17 +76,17 @@ public interface TimePacker {
 	 * @param timeParts a time parts object
 	 * @param adjust a non-null adjustment mode
 	 * @return a numerical time index
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	long pack(TimeParts timeParts, Adjustment adjust) throws KeyedException;
+	long pack(TimeParts timeParts, Adjustment adjust) throws T2Exception;
 
 	/**
 	 * Return the day of week for the given time.
 	 * 
 	 * @param time a time index
 	 * @return the day of the week
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	DayOfWeek getDayOfWeek(TimeIndex time) throws KeyedException;
+	DayOfWeek getDayOfWeek(TimeIndex time) throws T2Exception;
 	
 }

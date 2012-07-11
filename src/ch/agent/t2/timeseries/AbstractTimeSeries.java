@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,15 +15,16 @@
  * 
  * Package: ch.agent.t2.timeseries
  * Type: AbstractTimeSeries
- * Version: 1.0.1
+ * Version: 1.0.2
  */
 package ch.agent.t2.timeseries;
 
 import java.util.Collection;
 import java.util.Iterator;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
+import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.Range;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeIndex;
@@ -33,7 +34,7 @@ import ch.agent.t2.time.TimeIndex;
  * AbstractTimeseries is the basis for {@link RegularTimeSeries} and {@link SparseTimeSeries}.
  *
  * @author Jean-Paul Vetterli
- * @version 1.0.1
+ * @version 1.0.2
  * @param <T>
  */
 public abstract class AbstractTimeSeries<T> implements TimeAddressable<T> {
@@ -68,24 +69,24 @@ public abstract class AbstractTimeSeries<T> implements TimeAddressable<T> {
 	}
 
 	@Override
-	public TimeAddressable<T> copy() throws KeyedException {
+	public TimeAddressable<T> copy() throws T2Exception {
 		TimeAddressable<T> ts = makeEmptyCopy();
 		ts.put(this, null);
 		return ts;
 	}
 	
 	@Override
-	public T get(long t) throws KeyedException {
+	public T get(long t) throws T2Exception {
 		return internalGet(t);
 	}
 	
 	@Override
-	public abstract TimeAddressable<T> get(long first, long last) throws KeyedException;
+	public abstract TimeAddressable<T> get(long first, long last) throws T2Exception;
 	
 	@Override
-	public T get(TimeIndex t) throws KeyedException {
+	public T get(TimeIndex t) throws T2Exception {
 		if (!domain.equals(t.getTimeDomain()))
-			throw T2Msg.exception(40114);
+			throw T2Msg.exception(K.T5011);
 		return get(t.asLong());
 	}
 
@@ -114,26 +115,26 @@ public abstract class AbstractTimeSeries<T> implements TimeAddressable<T> {
 	}
 	
 	@Override
-	public Observation<T> getLast(TimeIndex t) throws KeyedException {
+	public Observation<T> getLast(TimeIndex t) throws T2Exception {
 		if (t == null) {
 			long l = internalGetLastIndex();
 			return l >= 0 ? internalGetLast(l) : null;
 		} else {
 			if (!t.getTimeDomain().equals(getTimeDomain()))
-				throw T2Msg.exception(40116, t.toString(), t.getTimeDomain().getLabel(), 
+				throw T2Msg.exception(K.T5013, t.toString(), t.getTimeDomain().getLabel(), 
 						getTimeDomain().getLabel());
 			return internalGetLast(t.asLong());
 		}
 	}
 	
 	@Override
-	public Observation<T> getFirst(TimeIndex t) throws KeyedException {
+	public Observation<T> getFirst(TimeIndex t) throws T2Exception {
 		if (t == null) {
 			long f = internalGetFirstIndex();
 			return f >= 0 ? internalGetFirst(f) : null;
 		} else {
 			if (!t.getTimeDomain().equals(getTimeDomain()))
-				throw T2Msg.exception(40116, t.toString(), t.getTimeDomain().getLabel(), 
+				throw T2Msg.exception(K.T5013, t.toString(), t.getTimeDomain().getLabel(), 
 						getTimeDomain().getLabel());
 			return internalGetFirst(t.asLong());
 		}
@@ -145,13 +146,13 @@ public abstract class AbstractTimeSeries<T> implements TimeAddressable<T> {
 	}
 	
 	@Override
-	public void put(long index, T value) throws KeyedException {
+	public void put(long index, T value) throws T2Exception {
 		internalPut(index, value);
 
 	}
 	
 	@Override
-	public void put(long index, T[] values) throws KeyedException {
+	public void put(long index, T[] values) throws T2Exception {
 		if (values.length == 0)
 			return;
 		// add last value first so resizing occurs at most once 
@@ -162,13 +163,13 @@ public abstract class AbstractTimeSeries<T> implements TimeAddressable<T> {
 	}
 	
 	@Override
-	public void put(TimeAddressable<T> values, UpdateReviewer<T> reviewer) throws KeyedException {
+	public void put(TimeAddressable<T> values, UpdateReviewer<T> reviewer) throws T2Exception {
 		// check for domain compatibility, then for Integer overflow 
 		getRange().union(values.getRange()).getSizeAsInt();
 		
 		int rejectCount = accept(values, reviewer);
 		if (rejectCount > 0)
-			throw T2Msg.exception(40115, rejectCount, values.getSize());
+			throw T2Msg.exception(K.T5012, rejectCount, values.getSize());
 		
 		if (values.isIndexable()) {
 			put(values.getFirstIndex(), ((TimeIndexable<T>)values).getArray());
@@ -182,28 +183,28 @@ public abstract class AbstractTimeSeries<T> implements TimeAddressable<T> {
 	}
 	
 	@Override
-	public void put(TimeIndex t, T value) throws KeyedException {
+	public void put(TimeIndex t, T value) throws T2Exception {
 		if (!domain.equals(t.getTimeDomain()))
-			throw T2Msg.exception(40114);
+			throw T2Msg.exception(K.T5011);
 		internalPut(t.asLong(), value);
 	}
 
 	@Override
-	public void put(TimeIndex t, T[] values) throws KeyedException {
+	public void put(TimeIndex t, T[] values) throws T2Exception {
 		if (!domain.equals(t.getTimeDomain()))
-			throw T2Msg.exception(40114);
+			throw T2Msg.exception(K.T5011);
 		put(t.asLong(), values);
 	}
 
 	@Override
-	public void remove(TimeIndex t) throws KeyedException {
+	public void remove(TimeIndex t) throws T2Exception {
 		if (!domain.equals(t.getTimeDomain()))
-			throw T2Msg.exception(40114);
+			throw T2Msg.exception(K.T5011);
 		internalRemove(t.asLong());
 	}
 
 	@Override
-	public boolean setRange(Range range) throws KeyedException {
+	public boolean setRange(Range range) throws T2Exception {
 		Range current = getRange();
 		if (current.isEmpty())
 			return false;
@@ -260,14 +261,14 @@ public abstract class AbstractTimeSeries<T> implements TimeAddressable<T> {
 	 * @param value
 	 *            the value to normalize
 	 * @return the value, normalized
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	protected T normalizeMissingValue(T value) throws KeyedException {
+	protected T normalizeMissingValue(T value) throws T2Exception {
 		if (value == null) {
 			if (missingValue == null)
 				return value;
 			else
-				throw T2Msg.exception(40117);
+				throw T2Msg.exception(K.T5014);
 		} else {
 			if (value.equals(missingValue))
 				return missingValue;
@@ -283,9 +284,9 @@ public abstract class AbstractTimeSeries<T> implements TimeAddressable<T> {
 	 * @param updates a non-null time series of updates
 	 * @param reviewer a non-null reviewer
 	 * @return the number of updates rejected
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	protected int accept(TimeAddressable<T> updates, UpdateReviewer<T> reviewer) throws KeyedException {
+	protected int accept(TimeAddressable<T> updates, UpdateReviewer<T> reviewer) throws T2Exception {
 		int rejected = 0;
 		if (reviewer != null) {
 			for (Observation<T> update : updates) {
@@ -293,7 +294,7 @@ public abstract class AbstractTimeSeries<T> implements TimeAddressable<T> {
 					if (!reviewer.accept(this, update.getIndex(), update.getValue()))
 						rejected++;
 				} catch (Exception e) {
-					throw T2Msg.exception(e, 40130, update);
+					throw T2Msg.exception(e, K.T5031, update);
 				}
 			}
 		}
@@ -322,9 +323,9 @@ public abstract class AbstractTimeSeries<T> implements TimeAddressable<T> {
 	 * 
 	 * @param index a number
 	 * @return an observation or null
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	protected abstract Observation<T> internalGetFirst(long index) throws KeyedException;
+	protected abstract Observation<T> internalGetFirst(long index) throws T2Exception;
 	
 	/**
 	 * Return the observation at or before the given numerical time index. Return
@@ -334,9 +335,9 @@ public abstract class AbstractTimeSeries<T> implements TimeAddressable<T> {
 	 * 
 	 * @param time a numerical time index
 	 * @return an observation or null
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	protected abstract Observation<T> internalGetLast(long time) throws KeyedException;
+	protected abstract Observation<T> internalGetLast(long time) throws T2Exception;
 
 	/**
 	 * Remove all values from the time series.
@@ -348,9 +349,9 @@ public abstract class AbstractTimeSeries<T> implements TimeAddressable<T> {
 	 * 
 	 * @param time a numerical time index
 	 * @return a value
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	protected abstract T internalGet(long time) throws KeyedException;
+	protected abstract T internalGet(long time) throws T2Exception;
 	
 	/**
 	 * Return the used size of the data structure where values are stored. 
@@ -366,17 +367,17 @@ public abstract class AbstractTimeSeries<T> implements TimeAddressable<T> {
 	 * 
 	 * @param time a numerical time index
 	 * @param value a value
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	protected abstract void internalPut(long time, T value) throws KeyedException;
+	protected abstract void internalPut(long time, T value) throws T2Exception;
 	
 	/**
 	 * Remove the value at the given numerical time index.
 	 * 
 	 * @param time a numerical time index
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	protected abstract void internalRemove(long time) throws KeyedException;
+	protected abstract void internalRemove(long time) throws T2Exception;
 	
 	/**
 	 * Shrink the range to the one given by the two numerical time indexes. The
@@ -388,9 +389,9 @@ public abstract class AbstractTimeSeries<T> implements TimeAddressable<T> {
 	 *            a numerical time index giving the lower bound of the new range
 	 * @param last
 	 *            a numerical time index giving the upper bound of the new range
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	protected abstract void internalSetBounds(long first, long last) throws KeyedException;
+	protected abstract void internalSetBounds(long first, long last) throws T2Exception;
 
 	/**
 	 * Return all values as a {@link Collection}.

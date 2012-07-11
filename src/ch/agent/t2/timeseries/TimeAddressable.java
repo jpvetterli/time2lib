@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011 Hauser Olsson GmbH
+ *   Copyright 2011, 2012 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,11 +15,11 @@
  * 
  * Package: ch.agent.t2.timeseries
  * Type: TimeAddressable
- * Version: 1.0.1
+ * Version: 1.0.2
  */
 package ch.agent.t2.timeseries;
 
-import ch.agent.core.KeyedException;
+import ch.agent.t2.T2Exception;
 import ch.agent.t2.time.Range;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeIndex;
@@ -31,7 +31,7 @@ import ch.agent.t2.time.TimeIndex;
  * axis.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.1
+ * @version 1.0.2
  * @param <T>
  *            the value type
  */
@@ -65,9 +65,9 @@ public interface TimeAddressable<T> extends Iterable<Observation<T>> {
 	 * 
 	 * @param index a number
 	 * @return a value
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	T get(long index) throws KeyedException;
+	T get(long index) throws T2Exception;
 	
 	/**
 	 * Return the value identified by the given time index. Return the missing value object 
@@ -76,9 +76,9 @@ public interface TimeAddressable<T> extends Iterable<Observation<T>> {
 	 * 
 	 * @param time a non-null time index 
 	 * @return a value
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	T get(TimeIndex time) throws KeyedException;
+	T get(TimeIndex time) throws T2Exception;
 	
 	/**
 	 * Return the observation at or before the given time. When the argument
@@ -89,9 +89,9 @@ public interface TimeAddressable<T> extends Iterable<Observation<T>> {
 	 * 
 	 * @param time a time index
 	 * @return an observation or null
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	Observation<T> getLast(TimeIndex time) throws KeyedException;
+	Observation<T> getLast(TimeIndex time) throws T2Exception;
 	
 	/**
 	 * Return the observation at or after the given time. When the argument
@@ -102,9 +102,9 @@ public interface TimeAddressable<T> extends Iterable<Observation<T>> {
 	 * 
 	 * @param time a time index
 	 * @return an observation or null
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	Observation<T> getFirst(TimeIndex time) throws KeyedException;
+	Observation<T> getFirst(TimeIndex time) throws T2Exception;
 	
 	/**
 	 * Return a new time series corresponding to the range between two numerical time indexes.
@@ -114,9 +114,9 @@ public interface TimeAddressable<T> extends Iterable<Observation<T>> {
 	 * @param first a numerical time index giving the lower bound of the wanted range
 	 * @param last a numerical time index giving the upper bound of the wanted range
 	 * @return a time series
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	TimeAddressable<T> get(long first, long last) throws KeyedException;
+	TimeAddressable<T> get(long first, long last) throws T2Exception;
 	
 	/**
 	 * Return a time series constructed from the given range of this series.
@@ -125,9 +125,9 @@ public interface TimeAddressable<T> extends Iterable<Observation<T>> {
 	 *  
 	 * @param range a non-null range
 	 * @return a time series
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	TimeAddressable<T> get(Range range) throws KeyedException;
+	TimeAddressable<T> get(Range range) throws T2Exception;
 	
 	/**
 	 * Put a value identified by a time index into the time series. The value
@@ -138,9 +138,9 @@ public interface TimeAddressable<T> extends Iterable<Observation<T>> {
 	 *            a non-null time index
 	 * @param value
 	 *            a value
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	void put(TimeIndex time, T value) throws KeyedException;
+	void put(TimeIndex time, T value) throws T2Exception;
 
 	/**
 	 * Put an array of values identified with time index of its first element
@@ -151,9 +151,9 @@ public interface TimeAddressable<T> extends Iterable<Observation<T>> {
 	 *            a non-null time index
 	 * @param values
 	 *            a non-null array of values
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	void put(TimeIndex time, T[] values) throws KeyedException;
+	void put(TimeIndex time, T[] values) throws T2Exception;
 	
 	/**
 	 * Put a value identified by a numerical time index into the time series.
@@ -164,9 +164,9 @@ public interface TimeAddressable<T> extends Iterable<Observation<T>> {
 	 *            a numerical time index
 	 * @param value
 	 *            a value
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	void put(long time, T value) throws KeyedException;
+	void put(long time, T value) throws T2Exception;
 
 	/**
 	 * Put an array of values identified with the numerical time index of its
@@ -178,9 +178,9 @@ public interface TimeAddressable<T> extends Iterable<Observation<T>> {
 	 *            a numerical time index
 	 * @param values
 	 *            a non-null array of values
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	void put(long time, T[] values) throws KeyedException;
+	void put(long time, T[] values) throws T2Exception;
 	
 	/**
 	 * Conditionally put all values from another time series into this time series.
@@ -193,18 +193,18 @@ public interface TimeAddressable<T> extends Iterable<Observation<T>> {
 	 * 
 	 * @param values a non-null time series
 	 * @param reviewer a reviewer
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	void put(TimeAddressable<T> values, UpdateReviewer<T> reviewer) throws KeyedException;
+	void put(TimeAddressable<T> values, UpdateReviewer<T> reviewer) throws T2Exception;
 	
 	/**
 	 * Remove the value identified by the time index. 
 	 * 
 	 * @param time a non-null time index
 	 * 
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	void remove(TimeIndex time) throws KeyedException;
+	void remove(TimeIndex time) throws T2Exception;
 	
 	/**
 	 * Return the number of values. Missing values are included. Note that in a sparse time
@@ -256,9 +256,9 @@ public interface TimeAddressable<T> extends Iterable<Observation<T>> {
 	 * 
 	 * @param range the new range will be the intersection of the current range with this one
 	 * @return true if the range was modified
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	boolean setRange(Range range) throws KeyedException;
+	boolean setRange(Range range) throws T2Exception;
 	
 	/**
 	 * Return the time domain of the time series.
@@ -275,17 +275,17 @@ public interface TimeAddressable<T> extends Iterable<Observation<T>> {
 	 * if the range is too large to be represented with a 32 bit integer.
 	 * 
 	 * @return an indexable time series
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	TimeIndexable<T> asIndexable() throws KeyedException;
+	TimeIndexable<T> asIndexable() throws T2Exception;
 	
 	/**
 	 * Return a copy of the time series.
 	 * 
 	 * @return a copy of the time series
-	 * @throws KeyedException
+	 * @throws T2Exception
 	 */
-	TimeAddressable<T> copy() throws KeyedException;
+	TimeAddressable<T> copy() throws T2Exception;
 	
 	/**
 	 * Make a copy of the time series but without the values.
