@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.t2.time.engine
  * Type: TimeTools
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.time.engine;
 
@@ -25,16 +25,16 @@ import ch.agent.core.KeyedException;
 import ch.agent.t2.T2Msg;
 import ch.agent.t2.time.Day;
 import ch.agent.t2.time.DayOfWeek;
+import ch.agent.t2.time.Resolution;
 import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.time.TimeParts;
-import ch.agent.t2.time.Resolution;
 
 /**
  * TimeTools provides a selection of methods useful in time computations. 
  * These methods do not need any state.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  */
 public class TimeTools {
 	
@@ -205,58 +205,19 @@ public class TimeTools {
 	}
 
 	/**
-	 * Return the numeric representation of the time specified.
+	 * Return the numeric representation of the time specified. 
+	 * <p>
+	 * The method has been deprecrated in version 1.0.1 of the class. 
+	 * Use {@link TimeParts#asRawIndex(Resolution)} instead.
 	 * 
 	 * @param unit a non-null resolution
 	 * @param tp a non-null time parts object
 	 * @return a numeric time index
 	 * @throws KeyedException
 	 */
+	@Deprecated
 	public static long makeRawIndex(Resolution unit, TimeParts tp) throws KeyedException {
-		long time = 0;
-		if (tp.getYear() < 0)
-			throw T2Msg.exception(32010, tp.getYear());
-		if (unit == Resolution.YEAR) {
-			time = tp.getYear();
-		} else {
-			if (tp.getMonth() < 1 || tp.getMonth() > 12)
-				throw T2Msg.exception(32020, tp.getMonth());
-			if (unit == Resolution.MONTH) {
-				time = tp.getYear() * 12 + tp.getMonth() - 1; // -1: zero-based months
-			} else {
-				int daysInThisMonth = TimeTools.daysInMonth(tp.getYear(), tp.getMonth());
-				if (tp.getDay() < 1 || tp.getDay() > daysInThisMonth)
-					throw T2Msg.exception(32030, tp.getDay(),	daysInThisMonth);
-				time = tp.getYear() * 365 + TimeTools.leapYears(tp.getYear())
-						+ TimeTools.daysToMonth(tp.getYear(), tp.getMonth()) + tp.getDay() - 1; // -1: zero
-				if (unit != Resolution.DAY) {
-					if (tp.getHour() < 0 || tp.getHour() > 23)
-						throw T2Msg.exception(32040, tp.getHour());
-					time = time * 24 + tp.getHour();
-					if (unit != Resolution.HOUR) {
-						if (tp.getMin() < 0 || tp.getMin() > 59)
-							throw T2Msg.exception(32050, tp.getMin());
-						time = time * 60 + tp.getMin();
-						if (unit != Resolution.MIN) {
-							if (tp.getSec() < 0 || tp.getSec() > 59)
-								throw T2Msg.exception(32060, tp.getSec());
-							time = time * 60 + tp.getSec();
-							if (unit != Resolution.SEC) {
-								if (tp.getUsec() < 0 || tp.getUsec() > 999999)
-									throw T2Msg.exception(32070, tp.getUsec());
-								if (unit == Resolution.MSEC)
-									time = time * 1000L + tp.getUsec() / 1000;
-								else if (unit == Resolution.USEC)
-									time = time * 1000000L + tp.getUsec();
-								else
-									throw new RuntimeException("bug: " + unit.name());
-							}
-						}
-					}
-				}
-			}
-		}
-		return time;
+		return tp.asRawIndex(unit);
 	}
 	
 	/**

@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.t2.time.engine
  * Type: TimeFactory
- * Version: 1.0.1
+ * Version: 1.0.2
  */
 package ch.agent.t2.time.engine;
 
@@ -47,7 +47,7 @@ import ch.agent.t2.time.Resolution;
  * <p>
  *
  * @author Jean-Paul Vetterli
- * @version 1.0.1
+ * @version 1.0.2
  * @see Resolution
  * @see BasePeriodPattern
  * @see SubPeriodPattern
@@ -348,8 +348,8 @@ public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
 	@Override
 	public long pack(TimeParts tp, Adjustment adjust) throws KeyedException {
 		try {
-			// input values validated in makeRawIndex
-			long time = TimeTools.makeRawIndex(this.baseUnit, tp);
+			// input values validated in asRawIndex
+			long time = tp.asRawIndex(this.baseUnit);
 			if (subPeriodPattern == null)
 				time = compress(time, adjust);
 			else {
@@ -443,7 +443,7 @@ public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
 	public DayOfWeek getDayOfWeek(TimeIndex time) throws KeyedException {
 		if (subPeriodPattern != null) {
 			if (compareResolutionTo(Resolution.DAY) <= 0) {
-				long numTime = TimeTools.makeRawIndex(Resolution.DAY, ((Time2) time).getTimeParts());
+				long numTime = ((Time2) time).getTimeParts().asRawIndex(Resolution.DAY);
 				return TimeTools.getDayOfWeek(Resolution.DAY, numTime);
 			} else
 				throw T2Msg.exception(32140, getResolution());

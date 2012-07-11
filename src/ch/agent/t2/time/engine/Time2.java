@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.t2.time.engine
  * Type: Time2
- * Version: 1.0.1
+ * Version: 1.0.2
  */
 package ch.agent.t2.time.engine;
 
@@ -76,7 +76,7 @@ import ch.agent.t2.time.Year;
  * of Time2 and override the {@link Comparable#compareTo(Object) compareTo} method.
  * <p>
  * @author Jean-Paul Vetterli
- * @version 1.0.1
+ * @version 1.0.2
  */
 public class Time2 implements TimeIndex {
 
@@ -354,7 +354,8 @@ public class Time2 implements TimeIndex {
 		if (full) {
 			StringBuilder sb = new StringBuilder();
 			Formatter fmt = new Formatter(sb);
-			fmt.format("%04d-%02d-%02d %02d:%02d:%02d.%06d", tp.getYear(), tp.getMonth(),
+			String plus = tp.getYear() > 9999 ? "+" : "";
+			fmt.format("%s%04d-%02d-%02d %02d:%02d:%02d.%06d", plus, tp.getYear(), tp.getMonth(),
 					tp.getDay(), tp.getHour(), tp.getMin(), tp.getSec(), tp.getUsec());
 			return sb.toString();
 		} else
