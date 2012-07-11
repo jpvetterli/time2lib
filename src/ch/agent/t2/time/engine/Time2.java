@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.t2.time.engine
  * Type: Time2
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.time.engine;
 
@@ -24,13 +24,19 @@ import java.util.Formatter;
 import ch.agent.core.KeyedException;
 import ch.agent.t2.T2Msg;
 import ch.agent.t2.time.Adjustment;
+import ch.agent.t2.time.Day;
 import ch.agent.t2.time.DayOfWeek;
 import ch.agent.t2.time.DefaultExternalFormat;
 import ch.agent.t2.time.ExternalTimeFormat;
+import ch.agent.t2.time.Resolution;
+import ch.agent.t2.time.ThirdFriday;
 import ch.agent.t2.time.TimeDomain;
+import ch.agent.t2.time.TimeDomainDefinition;
+import ch.agent.t2.time.TimeDomainManager;
 import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.time.TimeParts;
-import ch.agent.t2.time.Resolution;
+import ch.agent.t2.time.Workday;
+import ch.agent.t2.time.Year;
 
 
 /**
@@ -48,9 +54,29 @@ import ch.agent.t2.time.Resolution;
  * </blockquote>
  * <p>
  * It corresponds to the numerical time index 0L.
- * 
+ * <p>
+ * <b>Warning note about time comparisons</b>
+ * <p>
+ * This class implements {@link Comparable} with simple
+ * semantics. Basically, it considers "earlier" as "smaller".
+ * When time domain differs, times are converted before performing the
+ * comparison. The conversion is done in the following fashion:
+ * <ul>
+ * <li>If resolutions differ, the time with the lowest resolution is
+ * converted to the one with the highest resolution. For example comparing a
+ * {@link Day} to a {@link Year} will compare the day specified to the 
+ * implicit default day of the year specified (which is January 1).
+ * <li>If resolutions do not differ, the times are converted to the unrestricted
+ * time domain for their resolution. For example the
+ * comparison of a {@link Workday} to a {@link ThirdFriday} will convert
+ * both to a {@link Day} before comparing.
+ * </ul>
+ * These semantics are not meaningful for all possible time domains. 
+ * Applications using "exotic" time domains should consider writing a subclass
+ * of Time2 and override the {@link Comparable#compareTo(Object) compareTo} method.
+ * <p>
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  */
 public class Time2 implements TimeIndex {
 
@@ -196,11 +222,19 @@ public class Time2 implements TimeIndex {
 	
 	@Override
 	public TimeIndex convert(TimeDomain domain, Adjustment adjustment) throws KeyedException {
-		/*
-		 * This domain conversion method is a quick-shot. Not sure it works in
-		 * all cases, or that it provides the best conversion.
-		 */
-		return new Time2(domain, toString(), adjustment);
+		if (getTimeDomain().equals(domain))
+			return this;
+		resolve();
+		switch(getTimeDomain().getResolution()) {
+		case YEAR:
+			tp.setMonth(1);
+		case MONTH:
+			tp.setDay(1);
+			break;
+		default:
+		}
+		return new Time2(domain, tp.getYear(), tp.getMonth(), tp.getDay(), tp.getHour(),
+				tp.getMin(), tp.getSec(), tp.getUsec(), adjustment);
 	}
 
 	@Override
@@ -366,29 +400,60 @@ public class Time2 implements TimeIndex {
 		return hash;
 	}
 
-	/**
-	 * Compare this time to the argument interpreting "earlier" as "smaller".
-	 * Throw an <b>unchecked</b> exception if the time domains differ. 
-	 * 
-	 * @param time a non-null time index
-	 * @return a negative (positive) number if this time is earlier (later) than the argument
-	 */
 	@Override
-	public int compareTo(TimeIndex time) {
-		if (time == null)
+	public int compareTo(TimeIndex otherTime) {
+		if (otherTime == null)
 			throw new IllegalArgumentException("t null");
-		if (time.getTimeDomain().equals(getTimeDomain())) {
+		if (otherTime.getTimeDomain().equals(getTimeDomain())) {
 			long l1 = asLong();
-			long l2 = time.asLong();
+			long l2 = otherTime.asLong();
 			if (l1 < l2)
 				return -1;
 			else if (l1 > l2)
 				return 1;
 			else
 				return 0;
+		} else {
+			int compareResols = getTimeDomain().getResolution().compareTo(otherTime.getTimeDomain().getResolution());
+			if (compareResols == 0) {
+				// convert  both to unrestricted domain
+				TimeDomainDefinition def = new TimeDomainDefinition(null, getTimeDomain().getResolution(), 0L);
+				TimeDomain unrestrictedDomain = TimeDomainManager.getFactory().get(def, true);
+				TimeIndex converted = convertOrThrowRTE(unrestrictedDomain, this);
+				TimeIndex otherConverted = convertOrThrowRTE(unrestrictedDomain, otherTime);
+				return converted.compareTo(otherConverted);
+			} else if (compareResols < 0) {
+				// convert  both to highest resolution
+				TimeDomainDefinition def = new TimeDomainDefinition(null, otherTime.getTimeDomain().getResolution(), 0L);
+				TimeDomain unrestrictedDomain = TimeDomainManager.getFactory().get(def, true);
+				TimeIndex converted = convertOrThrowRTE(unrestrictedDomain, this);
+				return converted.compareTo(otherTime);
+			} else {
+				// convert  both to highest resolution
+				TimeDomainDefinition def = new TimeDomainDefinition(null, getTimeDomain().getResolution(), 0L);
+				TimeDomain unrestrictedDomain = TimeDomainManager.getFactory().get(def, true);
+				TimeIndex otherConverted = convertOrThrowRTE(unrestrictedDomain, otherTime);
+				return compareTo(otherConverted);
+			}
 		}
-		throw new RuntimeException(new T2Msg(32008, getTimeDomain().getLabel(), 
-				time.getTimeDomain().getLabel()).toString());		
+	}
+	
+	/**
+	 * Convert the time to the given time domain and turn any checked exception
+	 * to an unchecked one.
+	 * 
+	 * @param domain
+	 *            non-null time domain
+	 * @param time
+	 *            non-null time index
+	 * @return the time converted to the time domain
+	 */
+	private TimeIndex convertOrThrowRTE(TimeDomain domain, TimeIndex time) {
+		try {
+			return time.convert(domain);
+		} catch (KeyedException e) {
+			throw new RuntimeException(new T2Msg(32009, time.toString(), domain).toString(), e); 
+		}
 	}
 	
 	/**

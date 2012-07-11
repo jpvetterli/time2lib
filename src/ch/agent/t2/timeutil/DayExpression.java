@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.t2.timeutil
  * Type: DayExpression
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.timeutil;
 
@@ -61,13 +61,11 @@ import ch.agent.t2.time.Resolution;
  * with complete daily dates.
  * <p>
  * A new day expression has no default value. Trying to resolve a new day
- * expression which was never set is a bug and		case ERROR:
-			throw new IllegalStateException(type.name());
- throws an
+ * expression which was never set is a bug and throws an
  * {@link IllegalStateException}.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  */
 public class DayExpression {
 
@@ -263,7 +261,10 @@ public class DayExpression {
 	
 	/**
 	 * Resolve the expression in the given time domain and return the result as
-	 * a time index.
+	 * a time index. If the expression is already resolved into a time index,
+	 * but in a time domain different from the one requested, return the
+	 * converted time index, but do not convert in place, so that the expression
+	 * remains unchanged.
 	 * 
 	 * @param domain
 	 *            a non-null time domain
@@ -274,8 +275,9 @@ public class DayExpression {
 		switch(type) {
 		case LITERAL:
 			if (!domain.equals(time.getTimeDomain()))
-				time = time.convert(domain, adjustment);
-			return time;
+				return time.convert(domain, adjustment);
+			else
+				return time;
 		case TODAY: {
  			/*
 			 * Warning: this is too smart by half. The idea is that "today-20"

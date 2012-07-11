@@ -10,7 +10,7 @@ xmp {background: white; border: 1px dashed; padding: 10px}
 
 <h1>T2 LIBRARY RELEASE NOTES</h1>
 
-<small>2011-08-22/jpv</small>
+<small>2011-09-21/jpv</small>
 
 <xmp>Copyright 2011 Hauser Olsson GmbH.
 
@@ -104,7 +104,7 @@ The release consists of two jars:
 Compared to version 1.0.0, the following files have been modified 
 (new file version number in parentheses):
 <ul>
-<li>ch/agent/t2/T2Msg.java (1.0.1)
+<li>ch/agent/t2/T2Msg.properties (1.0.1)
 <ul>
 <li>header with copyright added
 <li>40116 modified
@@ -157,5 +157,74 @@ Compared to version 1.0.0, the following files have been modified
 
 </ul>
 <hr/>
+
+<!-- ************************************************************* -->
+<a name="v1_1_1">2011-09-21/jpv</a>
+<p>
+<h3>Version 1.1.1 &mdash; Times from different domains now comparable</h3>
+
+The new version provides a functional improvement in the comparison of times.
+It also includes various bug fixes and documentation improvements.
+
+<p>
+The release consists of two jars:
+<ul>
+<li><em>t2-1.1.1.jar</em> (binaries)
+<li><em>t2-1.1.1.source.jar</em> (sources only)
+</ul>
+</p>
+Compared to version 1.1.0, the following files have been modified 
+(new file version number in parentheses):
+<ul>
+<li>ch/agent/t2/T2Msg.properties (1.0.2)
+<ul>
+<li>32008 removed
+<li>32009 added
+</ul>
+
+<li>ch/agent/t2/time/TimeDomain.java (1.0.1)
+<ul>
+<li>maxTime(boolean) added
+<li>minTime(boolean) added
+<li>maxTime(): comment modified
+<li>minTime(): comment modified
+</ul>
+
+<li>ch/agent/t2/time/TimeDomainDefinition.java (1.0.1)
+<ul>
+<li>comments modified
+</ul>
+
+<li>ch/agent/t2/time/engine/Time2.java (1.0.1)
+<ul>
+<li>class comment: new warning note about time comparisons
+<li> convert(TimeDomain, Adjustment): bug fix. 
+When converting from YEAR or MONTH to higher resolution domains,
+the month and day are now set to 1.
+<li>compareTo(TimeIndex otherTime): better implementation. It is now
+possible to compare times from different domains.
+</ul>
+
+<li>ch/agent/t2/time/engine/TimeFactory.java (1.0.1)
+<ul>
+<li>TimeDomain.maxTime(boolean) implementation added
+<li>TimeDomain.minTime(boolean) implementation added
+</ul>
+
+<li>ch/agent/t2/timeseries/RegularTimeSeries.java (1.1.1)
+<ul>
+<li>fill(T, long): bug fix. 
+In a special case, the method was breaking the rule that
+missing values are all represented by the same object or null.
+</ul>
+
+<li>ch/agent/t2/time/timeutil/DayExpression.java (1.0.1)
+<ul>
+<li>class comment: typo.
+<li>getDate(TimeDomain): bug fix and comment update.
+The method was producing an unintended side effect.  
+</ul>
+
+</ul>
 
 </html>

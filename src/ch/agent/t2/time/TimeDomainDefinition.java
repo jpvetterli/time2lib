@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.t2.time
  * Type: TimeDomainDefinition
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.time;
 
@@ -25,19 +25,7 @@ package ch.agent.t2.time;
  * It does not provide useful behavior.
  *
  * @author Jean-Paul Vetterli
- * @version 1.0.0
- */
-/**
- * TimeDomainDefinition is a ...
- *
- * @author Jean-Paul Vetterli
- * @version 1.0.0
- */
-/**
- * TimeDomainDefinition is a ...
- *
- * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  */
 public class TimeDomainDefinition {
 	
@@ -49,8 +37,9 @@ public class TimeDomainDefinition {
 	
 	/**
 	 * Construct a definition with the given label and properties.
+	 * If the label is null, one will be generated.
 	 *  
-	 * @param label a string 
+	 * @param label a string or null
 	 * @param baseUnit a resolution
 	 * @param origin a number 
 	 * @param basePattern base period pattern
@@ -68,10 +57,10 @@ public class TimeDomainDefinition {
 	/**
 	 * Construct a definition with the given label and properties.
 	 *  
-	 * @param label
-	 * @param baseUnit
-	 * @param origin
-	 * @param basePattern
+	 * @param label a string or null
+	 * @param baseUnit a resolution
+	 * @param origin a number 
+	 * @param basePattern base period pattern
 	 */
 	public TimeDomainDefinition(String label, Resolution baseUnit, long origin, 
 			BasePeriodPattern basePattern) {
@@ -81,9 +70,9 @@ public class TimeDomainDefinition {
 	/**
 	 * Construct a definition with the given label and properties.
 	 *  
-	 * @param label
-	 * @param baseUnit
-	 * @param origin
+	 * @param label a string or null
+	 * @param baseUnit a resolution
+	 * @param origin a number 
 	 */
 	public TimeDomainDefinition(String label, Resolution baseUnit, long origin) {
 		this(label, baseUnit, origin, null, null);

@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.t2.timeseries
  * Type: RegularTimeSeries
- * Version: 1.1.0
+ * Version: 1.1.1
  */
 package ch.agent.t2.timeseries;
 
@@ -37,7 +37,7 @@ import ch.agent.t2.time.TimeDomain;
  * The implementation is not thread-safe.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.1.0
+ * @version 1.1.1
  * @param <T> the value type
  */
 public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeIndexable<T> {
@@ -364,6 +364,8 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 		
 		if (replacement.equals(mv) && tailLength > 0) 
 			throw T2Msg.exception(40124);
+		else
+			replacement = mv;
 			
 		int count = 0;
 		T[] val = getArray();

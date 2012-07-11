@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.t2.time
  * Type: TimeDomain
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.time;
 
@@ -73,7 +73,7 @@ import ch.agent.core.KeyedException;
  * The design assumes that TimeDomain is implemented as an immutable object.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  * @see TimeIndex
  * @see TimeDomainManager
  */
@@ -143,18 +143,38 @@ public interface TimeDomain {
 	TimeIndex timeFromOffset(long offset);
 
 	/**
-	 * Return a new TimeIndex giving the minimum time in this domain. 
+	 * Return a new TimeIndex giving the minimum time in this domain. The
+	 * result is equivalent to that of <code>minTime(false)</code>.
 	 * 
 	 * @return a TimeIndex in the domain
 	 */
 	TimeIndex minTime();
 	
 	/**
-	 * Return a new TimeIndex giving the maximum time in this domain. 
+	 * Return a new TimeIndex giving the maximum time in this domain. The
+	 * result is equivalent to that of <code>maxTime(false)</code>.
 	 * 
 	 * @return a TimeIndex in the domain
 	 */
 	TimeIndex maxTime();
+	
+	/**
+	 * Return a new TimeIndex giving the minimum time in this domain.
+	 * 
+	 * @param offsetCompatible if true, return a TimeIndex representable as an offset
+	 * @return a TimeIndex in the domain
+	 * @see TimeIndex#asOffset()
+	 */
+	TimeIndex minTime(boolean offsetCompatible);
+	
+	/**
+	 * Return a new TimeIndex giving the maximum time in this domain.
+	 * 
+	 * @param offsetCompatible if true, return a TimeIndex representable as an offset
+	 * @return a TimeIndex in the domain
+	 * @see TimeIndex#asOffset()
+	 */
+	TimeIndex maxTime(boolean offsetCompatible);
 	
 	/**
 	 * Return a new TimeIndex corresponding to the given date string. 

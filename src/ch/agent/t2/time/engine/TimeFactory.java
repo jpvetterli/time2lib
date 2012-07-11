@@ -15,7 +15,7 @@
  * 
  * Package: ch.agent.t2.time.engine
  * Type: TimeFactory
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 package ch.agent.t2.time.engine;
 
@@ -47,7 +47,7 @@ import ch.agent.t2.time.Resolution;
  * <p>
  *
  * @author Jean-Paul Vetterli
- * @version 1.0.0
+ * @version 1.0.1
  * @see Resolution
  * @see BasePeriodPattern
  * @see SubPeriodPattern
@@ -71,7 +71,7 @@ public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
 	
 	private int serialNumber = -1; // -1 for non-built-ins, should be accessible only from classes in package
 	
-	private TimeIndex minTime, maxTime;
+	private TimeIndex minTime, maxTime, minOffsetCompatibleTime, maxOffsetCompatibleTime;
 	private long minNumericTime, maxNumericTime;
 	
 	/**
@@ -262,11 +262,35 @@ public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
 
 	@Override
 	public TimeIndex maxTime() {
-		if (maxTime == null)
-			maxTime = new Time2(this, maxNumericTime);
-		return maxTime;
+		return maxTime(false);
 	}
 	
+	@Override
+	public TimeIndex minTime(boolean offsetCompatible) {
+		if (offsetCompatible) {
+			if (minOffsetCompatibleTime == null)
+				minOffsetCompatibleTime = new Time2(this, Integer.MIN_VALUE + getOrigin());
+			return minOffsetCompatibleTime;
+		} else {
+			if (minTime == null)
+				minTime = new Time2(this, minNumericTime);
+			return minTime;
+		}
+	}
+
+	@Override
+	public TimeIndex maxTime(boolean offsetCompatible) {
+		if (offsetCompatible) {
+			if (maxOffsetCompatibleTime == null)
+				maxOffsetCompatibleTime = new Time2(this, Integer.MAX_VALUE + getOrigin());
+			return maxOffsetCompatibleTime;
+		} else {
+			if (maxTime == null)
+				maxTime = new Time2(this, maxNumericTime);
+			return maxTime;
+		}
+	}
+
 	@Override
 	public TimeIndex time(long index) {
 		return new Time2(this, index);
