@@ -1,0 +1,4 @@
+hr {border-width: 0; border-top-width: 1;}
+body {background: lightgray; font-family: monospace;}
+pre {background: white; border: 1px dashed; padding: 10px; overflow: auto}
+
