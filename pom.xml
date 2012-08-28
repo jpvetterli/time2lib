@@ -20,7 +20,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>ch.agent</groupId>
   <artifactId>t2</artifactId>
-  <version>1.1.4</version>
+  <version>1.1.5</version>
   <packaging>jar</packaging>
   <name>Time2 Library</name>
   <url>http://agent.ch/timeseries/t2/</url>
@@ -32,7 +32,29 @@
     </license>
   </licenses>
 
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.test.skip>true</maven.test.skip>
+  </properties>
+
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+        <includes>
+          <include>**/*.properties</include>
+        </includes>
+      </resource>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>false</filtering>
+        <excludes>
+          <exclude>**/*.properties</exclude>
+        </excludes>
+      </resource>
+    </resources>
+
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -57,7 +79,20 @@
         </configuration>
       </plugin>
 
-     <plugin>
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.2</version>
+         <executions>
+           <execution>
+            <id>attach-sources</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>2.8.1</version>
         <configuration>
@@ -65,32 +100,19 @@
           <show>protected</show>
           <nohelp>true</nohelp>
         </configuration>
+        <!--executions>
+          <execution>
+            <id>attach-javadocs</id>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions-->
       </plugin>
 
     </plugins>
 
-    <resources>
-      <resource>
-        <filtering>false</filtering>
-        <directory>.</directory>
-	<includes>
-          <include>LICENCE.txt</include>
-          <include>README.md</include>
-          <include>README.css</include>
-          <include>RELEASE_NOTES_v1.html</include>
-        </includes>
-      </resource>
-      <resource>
-        <directory>src/main/resources</directory>
-        <filtering>true</filtering>
-      </resource>
-    </resources>
   </build>
-
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.test.skip>true</maven.test.skip>
-  </properties>
 
   <dependencies>
     <dependency>

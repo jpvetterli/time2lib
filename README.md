@@ -1,8 +1,5 @@
-<link rel="stylesheet" type="text/css" href="README.css"/>
-The Time2 Library
-===========================
-
-2012-08-25/jpv
+time2lib : The Time2 Library
+============================
 
 	Copyright 2011-2012 Hauser Olsson GmbH.
 	
@@ -20,28 +17,61 @@ The Time2 Library
 
 ***
 
-Thanks for your interest in the Time2 Library. This Java library provides 
+The Time2 Library is a Java library providing 
 generic time series with configurable time domains.
 
-Building the library
--
+Distribution
+------------
 
-The easiest way is to use maven (<http://maven.apache.org>). The process is easy, 
-as maven takes care of locating and downloading dependencies:
+Starting with version 1.1.5, the distribution consists of a binary JAR with 
+compiled classes and of a source JAR:
+
+	t2-<version>.jar
+	t2-<version>-sources.jar
+
+In the file names `<version>` stands of course for the actual version,
+`1.1.5` for example. For earlier versions, the suffix of the source JAR 
+is `.source` instead of `-sources`.   
+
+Dependencies
+------------
+
+The software is built with maven; dependencies are defined in the <q>POM</q>
+file, included in the binary JAR:
+
+	/META-INF/maven/ch.agent/t2/pom.xml
+
+Building the software
+---------------------
+
+The recommended way is to use [git](http://git-scm.com) for accessing the
+source and [maven](<http://maven.apache.org/>) for building. The procedure 
+is easy, as maven takes care of locating and downloading dependencies:
 
 	$ git clone https://github.com/jpvetterli/time2lib.git
 	$ cd time2lib
-	$ mvn package
-	$ ls target/*.jar
-	t2-1.1.4.jar
+	$ mvn install
 
-The current version number of the library will vary.
+This builds and installs the distribution JARs in your local maven
+repository. They can also be found in the `target` directory.
+
+Generating the documentation
+----------------------------
+
+If you are using maven, you can generate the javadocs with:
+
+	$ mvn javadoc:jar
+
+The documentation is packed into a JAR located in the `target` directory
+and can be browsed by pointing at the file:
+
+	target/apidocs/index.html
 
 Using the library
--
+-----------------
 
-This is a simple example of an application using the Time2 Library. 
-The following is the text of _Olympics.java_:
+Here is a simple example of an application using the Time2 Library. 
+It's called `Olympics.java`:
 
 	import ch.agent.t2.time.*;
 	import ch.agent.t2.timeseries.*;
@@ -78,16 +108,16 @@ The following is the text of _Olympics.java_:
 	    }
 	}
 
-Create file _Olympics.java_ in some directory and put a copy of _t2-1.1.4.jar_
-in the same directory.
+Create file `Olympics.java` in some directory and put a copy of 
+`t2-1.0.0.jar` (or a later version) in the same directory.
 
 Compile:
 
-	$ javac -cp t2-1.1.4.jar Olympics.java
+	$ javac -cp t2-1.0.0.jar Olympics.java
 
 Execute:
 
-	$ java -cp .:t2-1.1.4.jar Olympics
+	$ java -cp .:t2-1.0.0.jar Olympics
 	1896=Athens
 	1900=Paris
 	1904=Saint-Louis
@@ -101,12 +131,18 @@ Execute:
 	1936=Berlin
 
 Browsing the source code
--
+------------------------
 
-The source is available on GitHub at <http://github.com/jpvetterli/time2lib.git>.
+The source is available on GitHub at 
+<http://github.com/jpvetterli/time2lib.git>.
 
 Finding more information
--
+------------------------
 
-More information on the Time2 Library is available at <http://agent.ch/timeseries/t2>.
+More information on the Time2 Library is available at 
+<http://agent.ch/timeseries/t2/>.
+
+<small>Updated: 2012-08-28/jpv</small>
+
+<link rel="stylesheet" type="text/css" href="README.css"/>
 

@@ -1,0 +1,148 @@
+<h1>time2lib : The Time2 Library</h1>
+
+<pre><code>Copyright 2011-2012 Hauser Olsson GmbH.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+</code></pre>
+
+<hr />
+
+<p>The Time2 Library is a Java library providing 
+generic time series with configurable time domains.</p>
+
+<h2>Distribution</h2>
+
+<p>Starting with version 1.1.5, the distribution consists of a binary JAR with 
+compiled classes and of a source JAR:</p>
+
+<pre><code>t2-&lt;version&gt;.jar
+t2-&lt;version&gt;-sources.jar
+</code></pre>
+
+<p>In the file names <code>&lt;version&gt;</code> stands of course for the actual version,
+<code>1.1.5</code> for example. For earlier versions, the suffix of the source JAR 
+is <code>.source</code> instead of <code>-sources</code>.   </p>
+
+<h2>Dependencies</h2>
+
+<p>The software is built with maven; dependencies are defined in the <q>POM</q>
+file, included in the binary JAR:</p>
+
+<pre><code>/META-INF/maven/ch.agent/t2/pom.xml
+</code></pre>
+
+<h2>Building the software</h2>
+
+<p>The recommended way is to use <a href="http://git-scm.com">git</a> for accessing the
+source and <a href="http://maven.apache.org/">maven</a> for building. The procedure 
+is easy, as maven takes care of locating and downloading dependencies:</p>
+
+<pre><code>$ git clone https://github.com/jpvetterli/time2lib.git
+$ cd time2lib
+$ mvn install
+</code></pre>
+
+<p>This builds and installs the distribution JARs in your local maven
+repository. They can also be found in the <code>target</code> directory.</p>
+
+<h2>Generating the documentation</h2>
+
+<p>If you are using maven, you can generate the javadocs with:</p>
+
+<pre><code>$ mvn javadoc:jar
+</code></pre>
+
+<p>The documentation is packed into a JAR located in the <code>target</code> directory
+and can be browsed by pointing at the file:</p>
+
+<pre><code>target/apidocs/index.html
+</code></pre>
+
+<h2>Using the library</h2>
+
+<p>Here is a simple example of an application using the Time2 Library. 
+It's called <code>Olympics.java</code>:</p>
+
+<pre><code>import ch.agent.t2.time.*;
+import ch.agent.t2.timeseries.*;
+
+/**
+ * Olympics is a small demo for the Time2 library.
+ * @author Jean-Paul Vetterli
+ */
+public class Olympics {
+
+    public static void main(String[] args) {
+        try {
+            /* define time domain "once every fourth year" */
+            TimeDomainDefinition year4def = new TimeDomainDefinition("year4", 
+                Resolution.YEAR, 0L, new Cycle(true, false, false, false));
+            TimeDomain year4 = TimeDomainManager.getFactory().get(year4def, true);
+
+            /* define "missing value" for String (else, the default is null) */
+            String missingValue = "(missing)";
+            TimeSeriesFactory.getInstance().define(String.class, missingValue);
+
+            TimeAddressable&lt;String&gt; olympics = TimeSeriesFactory.make(year4, String.class);
+            olympics.put(year4.time("1896"), new String[] 
+               {"Athens", "Paris", "Saint-Louis", "London", "Stockholm"});
+            olympics.put(year4.time("1920"), new String[] 
+                {"Antwerp", "Paris", "Amsterdam", "Los Angeles", "Berlin"});
+
+            for (Observation&lt;String&gt; oly : olympics) {
+                System.out.println(oly.toString());
+            }
+        } catch (Exception e) {
+            System.err.println("Oops...\n" + e.getMessage());
+    }
+    }
+}
+</code></pre>
+
+<p>Create file <code>Olympics.java</code> in some directory and put a copy of 
+<code>t2-1.0.0.jar</code> (or a later version) in the same directory.</p>
+
+<p>Compile:</p>
+
+<pre><code>$ javac -cp t2-1.0.0.jar Olympics.java
+</code></pre>
+
+<p>Execute:</p>
+
+<pre><code>$ java -cp .:t2-1.0.0.jar Olympics
+1896=Athens
+1900=Paris
+1904=Saint-Louis
+1908=London
+1912=Stockholm
+1916=(missing)
+1920=Antwerp
+1924=Paris
+1928=Amsterdam
+1932=Los Angeles
+1936=Berlin
+</code></pre>
+
+<h2>Browsing the source code</h2>
+
+<p>The source is available on GitHub at 
+<a href="http://github.com/jpvetterli/time2lib.git">http://github.com/jpvetterli/time2lib.git</a>.</p>
+
+<h2>Finding more information</h2>
+
+<p>More information on the Time2 Library is available at 
+<a href="http://agent.ch/timeseries/t2/">http://agent.ch/timeseries/t2/</a>.</p>
+
+<p><small>Updated: 2012-08-28/jpv</small></p>
+
+<p><link rel="stylesheet" type="text/css" href="README.css"/></p>
