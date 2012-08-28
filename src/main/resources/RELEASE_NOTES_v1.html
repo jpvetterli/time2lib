@@ -1,18 +1,6 @@
-<html>
-<style type="text/css">
-<!--/* <![CDATA[ */
-hr {border-width: 0; border-top-width: 1;}
-body {background: #d8eef7; color: black; font-family: monospace; font-size: medium;}
-xmp {background: white; border: 1px dashed; padding: 10px}
-/* ]]> */--></style>
-<title>T2 LIBRARY RELEASE NOTES</title>
-<body>
-
 <h1>T2 LIBRARY RELEASE NOTES</h1>
 
-<small>2012-03-21/jpv</small>
-
-<xmp>Copyright 2011, 2012 Hauser Olsson GmbH.
+<pre><code>Copyright 2011, 2012 Hauser Olsson GmbH.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,338 +13,390 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-</xmp>
-<hr/>
-<!-- ************************************************************* -->
+</code></pre>
+
+<hr />
+
 <h2>ABOUT VERSION NUMBERS</h2>
-Version numbers are in 3 parts: a major, a medium, and a minor number.
+
+<p>Version numbers are in 3 parts: a major, a medium, and a minor number.
 The major number is incremented very rarely, when the software is
 modified in such a way that clients using it need to be recoded or even 
 redesigned. The medium number is incremented when modifications break 
 backward compatibility. For all other modifications, only the minor 
-number is incremented.
-<p>
-<hr/>
-<!-- ************************************************************* -->
-<a name="v1_1_4">2012-03-21/jpv</a>
-<p>
-<h3>Version 1.1.4 &mdash; New exception type and refactoring of diagnostic message management</h3>
-<p>
-This is a maintenance release which behaves exactly like the previous version 
-and is plug-compatible for applications.
-<p>
-Methods of the Time2 library now throw a T2Exception instead of a KeyedException. 
+number is incremented.</p>
+
+<hr />
+
+<p><a name="v1_1_5">2012-08-28/jpv</a></p>
+
+<h2>Version 1.1.5 &mdash; Project migrated to Maven</h2>
+
+<p>This is a maintenance release which behaves exactly like the previous 
+version and is plug-compatible for applications. The organization of source 
+files has been modified to agree with the standard recommended by 
+<a href="http://maven.apache.org">Apache Maven</a>.</p>
+
+<p>The release consists of two JARs:</p>
+
+<ul>
+<li><code>t2-1.1.5.jar</code> (binaries)</li>
+<li><code>t2-1.1.5-sources.jar</code> (sources only)</li>
+</ul>
+
+<p>It was necessary to increment version numbers because the JAR checksums
+are different, due to small differences related to builders. Another
+change is in the name of the source JAR. The suffix has been modified and
+is now <code>-sources.jar</code>. Previously it was <code>.source.jar</code>.</p>
+
+<p>There is also a new version of the <strong>Time2 Library Demos</strong>:</p>
+
+<ul>
+<li><code>t2-demo-1.0.1.jar</code> (binaries)</li>
+<li><code>t2-demo-1.0.1-sources.jar</code> (sources only)</li>
+</ul>
+
+<hr />
+
+<p><a name="v1_1_4">2012-03-21/jpv</a></p>
+
+<h2>Version 1.1.4 &mdash; New exception type and refactoring of diagnostic message management</h2>
+
+<p>This is a maintenance release which behaves exactly like the previous version 
+and is plug-compatible for applications.</p>
+
+<p>Methods of the Time2 library now throw a T2Exception instead of a KeyedException. 
 The new exception extends the former, so there is no compatibility issue. 
 Starting with this version, messages are prepared only when (and if) actually used. 
 Because preparation includes fetching the message from the resource bundle and 
 formatting the text using parameters, this change has a positive effective on
 performance.
-Within the sofware messages are now keyed symbolically.
-<p>
-The release consists of two jars:
+Within the sofware messages are now keyed symbolically.</p>
+
+<p>The release consists of two jars:</p>
+
 <ul>
-<li><em>t2-1.1.4.jar</em> (binaries)
-<li><em>t2-1.1.4.source.jar</em> (sources only)
-</ul>
-</p>
-Compared to version 1.1.3, the following files have been modified 
-(new file version number in parentheses):
-<ul>
-<li>ch/agent/core/KeyedMessage.java (1.0.1)
-<li>ch/agent/t2/T2Exception.java : new class
-<li>ch/agent/t2/T2Msg.java (1.0.1) :
-messages now accessed using a symbolic key instead of a literal number.
-<li>ch/agent/t2/T2Msg.properties (1.0.5): all messages have a new key.
-<li>ch/agent/t2/time/* : most classes modified to throw T2Exception and use new message key.
-<li>ch/agent/t2/time/engine/* : ditto
-<li>ch/agent/t2/timeseries/* : ditto
-<li>ch/agent/t2/timeutil/* : ditto
+<li><code>t2-1.1.4.jar</code> (binaries)</li>
+<li><code>t2-1.1.4.source.jar</code> (sources only)</li>
 </ul>
 
-<hr/>
-<!-- ************************************************************* -->
-<a name="v1_1_3">2011-11-30/jpv</a>
-<p>
-<h3>Version 1.1.3 &mdash; Utility class for scanning dates and times in unusual formats</h3>
-<p>
-A class has been added to the utility package to 
-provide support for scanning dates and times in unusual formats. 
-<p>
-The release consists of two jars:
+<p>Compared to version 1.1.3, the following files have been modified 
+(new file version number in parentheses):</p>
+
 <ul>
-<li><em>t2-1.1.3.jar</em> (binaries)
-<li><em>t2-1.1.3.source.jar</em> (sources only)
-</ul>
-</p>
-Compared to version 1.1.2, the following files have been modified 
-(new file version number in parentheses):
-<ul>
-<li>ch/agent/t2/T2Msg.properties (1.0.4)
-<ul>
-<li>32144 32145 32146 32147 added
+<li>ch/agent/core/KeyedMessage.java (1.0.1)</li>
+<li>ch/agent/t2/T2Exception.java : new class</li>
+<li>ch/agent/t2/T2Msg.java (1.0.1) : 
+messages now accessed using a symbolic key instead of a literal number.</li>
+<li>ch/agent/t2/T2Msg.properties (1.0.5): all messages have a new key.</li>
+<li>ch/agent/t2/time/* : most classes modified to throw T2Exception and use new message key.</li>
+<li>ch/agent/t2/time/engine/* : ditto</li>
+<li>ch/agent/t2/timeseries/* : ditto</li>
+<li>ch/agent/t2/timeutil/* : ditto</li>
 </ul>
 
-<li>ch/agent/t2/timeutil/DateTimeScanner.java (1.0.0)
+<hr />
+
+<p><a name="v1_1_3">2011-11-30/jpv</a></p>
+
+<h2>Version 1.1.3 &mdash; Utility class for scanning dates and times in unusual formats</h2>
+
+<p>A class has been added to the utility package to 
+provide support for scanning dates and times in unusual formats. </p>
+
+<p>The release consists of two jars:</p>
+
 <ul>
-<li>New utility class.
+<li><code>t2-1.1.3.jar</code> (binaries)</li>
+<li><code>t2-1.1.3.source.jar</code> (sources only)</li>
 </ul>
 
+<p>Compared to version 1.1.2, the following files have been modified 
+(new file version number in parentheses):</p>
+
+<ul>
+<li><p>ch/agent/t2/T2Msg.properties (1.0.4)</p>
+
+<ul>
+<li>32144 32145 32146 32147 added</li>
+</ul></li>
+<li><p>ch/agent/t2/timeutil/DateTimeScanner.java (1.0.0)</p>
+
+<ul>
+<li>New utility class.</li>
+</ul></li>
 </ul>
 
-<hr/>
-<!-- ************************************************************* -->
-<a name="v1_1_2">2011-10-10/jpv</a>
-<p>
-<h3>Version 1.1.2 &mdash; Support for ISO 8601:2004 calendar dates and times</h3>
+<hr />
 
-<p>
-Starting today, release notes are sorted with the most recent release first.
-<p>
-The new version supports the representation for calendar dates and times 
+<p><a name="v1_1_2">2011-10-10/jpv</a></p>
+
+<h2>Version 1.1.2 &mdash; Support for ISO 8601:2004 calendar dates and times</h2>
+
+<p>Starting today, release notes are sorted with the most recent release first.</p>
+
+<p>The new version supports the representation for calendar dates and times 
 defined in the ISO 8601:2004 international standard. Dates and times can be 
 input using the basic or extended format. Leap seconds are tolerated. 
 Time zone offsets are supported. A complete description is available from
-the class documentation of DefaultExternalFormat.
-<p>
-The release consists of two jars:
+the class documentation of DefaultExternalFormat.</p>
+
+<p>The release consists of two jars:</p>
+
 <ul>
-<li><em>t2-1.1.2.jar</em> (binaries)
-<li><em>t2-1.1.2.source.jar</em> (sources only)
-</ul>
-</p>
-Compared to version 1.1.1, the following files have been modified 
-(new file version number in parentheses):
-<ul>
-<li>ch/agent/t2/T2Msg.properties (1.0.3)
-<ul>
-<li>32100 32110 32120 removed
-<li>32042 32052 32062 32064 32072 32094 32095 32096 32097 32098 32099 added
-<li>32020 32030 32040 32050 32060 32070 32100 modified
+<li><code>t2-1.1.2.jar</code> (binaries)</li>
+<li><code>t2-1.1.2.source.jar</code> (sources only)</li>
 </ul>
 
-<li>ch/agent/t2/time/DefaultExternalFormat.java (1.0.1)
+<p>Compared to version 1.1.1, the following files have been modified 
+(new file version number in parentheses):</p>
+
 <ul>
-<li>scan(String) modified. Now adheres to ISO 8601:2004.
-<li>format(Resolution, TimeParts) modified. Inserts a plus sign in front of the year in some cases (ISO 8601).
-<li>documentation improved
+<li><p>ch/agent/t2/T2Msg.properties (1.0.3)</p>
+
+<ul>
+<li>32100 32110 32120 removed</li>
+<li>32042 32052 32062 32064 32072 32094 32095 32096 
+32097 32098 32099 added</li>
+<li>32020 32030 32040 32050 32060 32070 32100 modified</li>
+</ul></li>
+<li><p>ch/agent/t2/time/DefaultExternalFormat.java (1.0.1)</p>
+
+<ul>
+<li>scan(String) modified. Now adheres to ISO 8601:2004.</li>
+<li>format(Resolution, TimeParts) modified. Inserts a plus sign in front 
+of the year in some cases (ISO 8601).</li>
+<li>documentation improved</li>
+</ul></li>
+<li><p>ch/agent/t2/time/TimeParts.java (1.0.1)</p>
+
+<ul>
+<li>inner class TimeZoneOffset added </li>
+<li>asRawIndex(Resolution) added. The method supports ISO 8601 and 
+replaces the static method TimeTools.makeRawIndex().</li>
+<li>checkTimeComponentsAndApplyTimeZoneOffset() added</li>
+<li>setTimeZoneOffset(TimeZoneOffset) added</li>
+<li>documentation improved</li>
+</ul></li>
+<li><p>ch/agent/t2/time/engine/Time2.java (1.0.2)</p>
+
+<ul>
+<li>toString(boolean) modified. Inserts a plus sign in front of 
+the year in some cases (ISO 8601).</li>
+</ul></li>
+<li><p>ch/agent/t2/time/engine/TimeFactory.java (1.0.2)</p>
+
+<ul>
+<li>getDayOfWeek(TimeIndex) modified</li>
+<li>pack(TimeParts, Adjustment) modified</li>
+</ul></li>
+<li><p>ch/agent/t2/time/engine/TimeTools.java (1.0.1)</p>
+
+<ul>
+<li>makeRawIndex(Resolution, TimeParts) modified and <b>deprecated</b>. 
+It is now an adapter for TimeParts.asRawIndex().
+New code should use TimeParts.asRawIndex directly.</li>
+</ul></li>
 </ul>
 
-<li>ch/agent/t2/time/TimeParts.java (1.0.1)
+<hr />
+
+<p><a name="v1_1_1">2011-09-21/jpv</a></p>
+
+<h2>Version 1.1.1 &mdash; Times from different domains now comparable</h2>
+
+<p>The new version provides a functional improvement in the comparison of times.
+It also includes various bug fixes and documentation improvements.</p>
+
+<p>The release consists of two jars:</p>
+
 <ul>
-<li>inner class TimeZoneOffset added 
-<li>asRawIndex(Resolution) added. The method supports ISO 8601 and replaces the static method TimeTools.makeRawIndex().
-<li>checkTimeComponentsAndApplyTimeZoneOffset() added
-<li>setTimeZoneOffset(TimeZoneOffset) added
-<li>documentation improved
+<li><code>t2-1.1.1.jar</code> (binaries)</li>
+<li><code>t2-1.1.1.source.jar</code> (sources only)</li>
 </ul>
 
-<li>ch/agent/t2/time/engine/Time2.java (1.0.2)
-<ul>
-<li>toString(boolean) modified. Inserts a plus sign in front of the year in some cases (ISO 8601).
-</ul>
+<p>Compared to version 1.1.0, the following files have been modified 
+(new file version number in parentheses):</p>
 
-<li>ch/agent/t2/time/engine/TimeFactory.java (1.0.2)
 <ul>
-<li>getDayOfWeek(TimeIndex) modified
-<li>pack(TimeParts, Adjustment) modified
-</ul>
+<li><p>ch/agent/t2/T2Msg.properties (1.0.2)</p>
 
-<li>ch/agent/t2/time/engine/TimeTools.java (1.0.1)
 <ul>
-<li>makeRawIndex(Resolution, TimeParts) modified and <b>deprecated</b>. It is now an adapter for TimeParts.asRawIndex().
-New code should use TimeParts.asRawIndex directly.
-</ul>
+<li>32008 removed</li>
+<li>32009 added</li>
+</ul></li>
+<li><p>ch/agent/t2/time/TimeDomain.java (1.0.1)</p>
 
-</ul>
-
-<hr/>
-<!-- ************************************************************* -->
-<a name="v1_1_1">2011-09-21/jpv</a>
-<p>
-<h3>Version 1.1.1 &mdash; Times from different domains now comparable</h3>
-
-The new version provides a functional improvement in the comparison of times.
-It also includes various bug fixes and documentation improvements.
-
-<p>
-The release consists of two jars:
 <ul>
-<li><em>t2-1.1.1.jar</em> (binaries)
-<li><em>t2-1.1.1.source.jar</em> (sources only)
-</ul>
-</p>
-Compared to version 1.1.0, the following files have been modified 
-(new file version number in parentheses):
-<ul>
-<li>ch/agent/t2/T2Msg.properties (1.0.2)
-<ul>
-<li>32008 removed
-<li>32009 added
-</ul>
+<li>maxTime(boolean) added</li>
+<li>minTime(boolean) added</li>
+<li>maxTime(): comment modified</li>
+<li>minTime(): comment modified</li>
+</ul></li>
+<li><p>ch/agent/t2/time/TimeDomainDefinition.java (1.0.1)</p>
 
-<li>ch/agent/t2/time/TimeDomain.java (1.0.1)
 <ul>
-<li>maxTime(boolean) added
-<li>minTime(boolean) added
-<li>maxTime(): comment modified
-<li>minTime(): comment modified
-</ul>
+<li>comments modified</li>
+</ul></li>
+<li><p>ch/agent/t2/time/engine/Time2.java (1.0.1)</p>
 
-<li>ch/agent/t2/time/TimeDomainDefinition.java (1.0.1)
 <ul>
-<li>comments modified
-</ul>
-
-<li>ch/agent/t2/time/engine/Time2.java (1.0.1)
-<ul>
-<li>class comment: new warning note about time comparisons
-<li> convert(TimeDomain, Adjustment): bug fix. 
+<li>class comment: new warning note about time comparisons</li>
+<li>convert(TimeDomain, Adjustment): bug fix. 
 When converting from YEAR or MONTH to higher resolution domains,
-the month and day are now set to 1.
+the month and day are now set to 1.</li>
 <li>compareTo(TimeIndex otherTime): better implementation. It is now
-possible to compare times from different domains.
-</ul>
+possible to compare times from different domains.</li>
+</ul></li>
+<li><p>ch/agent/t2/time/engine/TimeFactory.java (1.0.1)</p>
 
-<li>ch/agent/t2/time/engine/TimeFactory.java (1.0.1)
 <ul>
-<li>TimeDomain.maxTime(boolean) implementation added
-<li>TimeDomain.minTime(boolean) implementation added
-</ul>
+<li>TimeDomain.maxTime(boolean) implementation added</li>
+<li>TimeDomain.minTime(boolean) implementation added</li>
+</ul></li>
+<li><p>ch/agent/t2/timeseries/RegularTimeSeries.java (1.1.1)</p>
 
-<li>ch/agent/t2/timeseries/RegularTimeSeries.java (1.1.1)
 <ul>
 <li>fill(T, long): bug fix. 
 In a special case, the method was breaking the rule that
-missing values are all represented by the same object or null.
-</ul>
+missing values are all represented by the same object or null.</li>
+</ul></li>
+<li><p>ch/agent/t2/time/timeutil/DayExpression.java (1.0.1)</p>
 
-<li>ch/agent/t2/time/timeutil/DayExpression.java (1.0.1)
 <ul>
-<li>class comment: typo.
+<li>class comment: typo.</li>
 <li>getDate(TimeDomain): bug fix and comment update.
-The method was producing an unintended side effect.  
+The method was producing an unintended side effect.  </li>
+</ul></li>
 </ul>
 
-</ul>
+<hr />
 
-<hr/>
-<!-- ************************************************************* -->
-<a name="v1_1_0">2011-08-22/jpv</a>
-<p>
-<h3>Version 1.1.0 &mdash; Null elements forbidden unless they represent a missing value</h3>
-There is now a consistently enforced rule that elements of time series cannot be 
+<p><a name="v1_1_0">2011-08-22/jpv</a></p>
+
+<h2>Version 1.1.0 &mdash; Null elements forbidden unless they represent a missing value</h2>
+
+<p>There is now a consistently enforced rule that elements of time series cannot be 
 null unless null has been defined to represent missing values. The rule is not new,
-but its implementation has been cleaned up.
-<p>
-The new version of the library includes
+but its implementation has been cleaned up.</p>
+
+<p>The new version of the library includes
 modifications in TimeIndexable and RegularTimeSeries which are not backward compatible.
-These changes are highlighted below.
-<p>
-Various pieces of javadoc comment have been updated.
-<p>
-The release consists of two jars:
+These changes are highlighted below.</p>
+
+<p>Various pieces of javadoc comment have been updated.</p>
+
+<p>The release consists of two jars:</p>
+
 <ul>
-<li><em>t2-1.1.0.jar</em> (binaries)
-<li><em>t2-1.1.0.source.jar</em> (sources only)
-</ul>
-</p>
-Compared to version 1.0.0, the following files have been modified 
-(new file version number in parentheses):
-<ul>
-<li>ch/agent/t2/T2Msg.properties (1.0.1)
-<ul>
-<li>header with copyright added
-<li>40116 modified
-<li>40117, 40118, 40121, 40124 added
+<li><code>t2-1.1.0.jar</code> (binaries)</li>
+<li><code>t2-1.1.0.source.jar</code> (sources only)</li>
 </ul>
 
-<li>ch/agent/t2/time/{Adjustment, Resolution}.java (1.0.1)
+<p>Compared to version 1.0.0, the following files have been modified 
+(new file version number in parentheses):</p>
+
 <ul>
-<li>add @version in javadoc
-</ul>
+<li><p>ch/agent/t2/T2Msg.properties (1.0.1)</p>
 
-<li>ch/agent/t2/time/Range.java (1.0.1)
 <ul>
-<li>remove @version from javadoc of a nested class
-</ul>
+<li>header with copyright added</li>
+<li>40116 modified</li>
+<li>40117, 40118, 40121, 40124 added</li>
+</ul></li>
+<li><p>ch/agent/t2/time/{Adjustment, Resolution}.java (1.0.1)</p>
 
-<li>ch/agent/t2/timeseries/AbstractTimeSeries.java (1.0.1)
 <ul>
-<li>normalizeMissingValue() modified
-</ul>
+<li>add @version in javadoc</li>
+</ul></li>
+<li><p>ch/agent/t2/time/Range.java (1.0.1)</p>
 
-<li>ch/agent/t2/timeseries/Filler.java (1.0.1)
 <ul>
-<li>fillHole() now throws an Exception
-</ul>
+<li>remove @version from javadoc of a nested class</li>
+</ul></li>
+<li><p>ch/agent/t2/timeseries/AbstractTimeSeries.java (1.0.1)</p>
 
-<li>ch/agent/t2/timeseries/RegularTimeSeries.java (1.1.0)
 <ul>
-<li>fill(long) now defined in interface TimeIndexable
-<li>fill(T, long) <b>now throws a KeyedException</b> (breaks backward compatibility) 
-<li>fill(Filler) <b>now throws a KeyedException</b> (breaks backward compatibility) 
-</ul>
+<li>normalizeMissingValue() modified</li>
+</ul></li>
+<li><p>ch/agent/t2/timeseries/Filler.java (1.0.1)</p>
 
-<li>ch/agent/t2/timeseries/SparseTimeSeries (1.0.1)
 <ul>
-<li>remove @version from javadoc of a nested class
-</ul>
+<li>fillHole() now throws an Exception</li>
+</ul></li>
+<li><p>ch/agent/t2/timeseries/RegularTimeSeries.java (1.1.0)</p>
 
-<li>ch/agent/t2/timeseries/TimeAddressable.java (1.0.1)
 <ul>
-<li>all put() methods: javadoc modified
-</ul>
+<li>fill(long) now defined in interface TimeIndexable</li>
+<li>fill(T, long) <b>now throws a KeyedException</b> (breaks backward compatibility) </li>
+<li>fill(Filler) <b>now throws a KeyedException</b> (breaks backward compatibility) </li>
+</ul></li>
+<li><p>ch/agent/t2/timeseries/SparseTimeSeries (1.0.1)</p>
 
-<li>ch/agent/t2/timeseries/TimeIndexable.java (1.1.0)
 <ul>
-<li>fill(long) added
-<li>fill(T, long) <b>now throws a KeyedException</b> (breaks backward compatibility) 
-<li>fill(Filler) <b>now throws a KeyedException</b> (breaks backward compatibility) 
+<li>remove @version from javadoc of a nested class</li>
+</ul></li>
+<li><p>ch/agent/t2/timeseries/TimeAddressable.java (1.0.1)</p>
+
+<ul>
+<li>all put() methods: javadoc modified</li>
+</ul></li>
+<li><p>ch/agent/t2/timeseries/TimeIndexable.java (1.1.0)</p>
+
+<ul>
+<li>fill(long) added</li>
+<li>fill(T, long) <b>now throws a KeyedException</b> (breaks backward compatibility) </li>
+<li>fill(Filler) <b>now throws a KeyedException</b> (breaks backward compatibility) </li>
+</ul></li>
 </ul>
 
-</ul>
+<hr />
 
-<hr/>
-<!-- ************************************************************* -->
-<a name="v1_0_0">2011-08-17/jpv</a>
-<p>
-The same version (1.0.0) of the Time2 Library is released again.
+<p><a name="v1_0_0">2011-08-17/jpv</a></p>
+
+<p>The same version (1.0.0) of the Time2 Library is released again.
 The library version number is now encoded into the names
 of jars, a README file and RELEASE NOTES have been added to the library,
 and line terminators in a few files have been standardized.
-The release consists of two jars:
+The release consists of two jars:</p>
+
 <ul>
-<li><em>t2-1.0.0.jar</em> (binaries)
-<li><em>t2-1.0.0.source.jar</em> (sources only)
-</ul>
-</p>
-Compared to the 2011-07-15 release,
-<ul>
-<li>2 files have been added to the libraries:
-<ul>
-<li><em>README_1st.html</em>
-<li><em>RELEASE_NOTES_v1.html</em>
-</ul>
-<li>and in 4 files, line terminators have been cleaned up (CRLFs replaced with LFs):
-<ul>
-<li>ch/agent/core/KeyedException.java
-<li>ch/agent/core/MessageBundle.java
-<li>ch/agent/core/KeyedMessage.java
-<li>ch/agent/t2/T2Msg.java
-</ul>
+<li><code>t2-1.0.0.jar</code> (binaries)</li>
+<li><code>t2-1.0.0.source.jar</code> (sources only)</li>
 </ul>
 
-<hr/>
-<!-- ************************************************************* -->
-<a name="first_release">2011-07-15/jpv</a>
-<p>
-The Time2 Library is released as a beta version on SourceForge 
-(<a href="http://time2.sourceforge.net">http://time2.sourceforge.net</a>). 
-The release consists of two jars:
-<ul>
-<li><em>t2.jar</em> (binaries)
-<li><em>t2source.jar</em> (sources only)
-</ul>
-</p>
+<p>Compared to the 2011-07-15 release,</p>
 
-</html>
+<ul>
+<li><p>2 files have been added to the libraries:</p>
+
+<ul>
+<li><code>README_1st.html</code></li>
+<li><code>RELEASE_NOTES_v1.html</code></li>
+</ul></li>
+<li><p>and in 4 files, line terminators have been cleaned up (CRLFs replaced with LFs):</p>
+
+<ul>
+<li>ch/agent/core/KeyedException.java</li>
+<li>ch/agent/core/MessageBundle.java</li>
+<li>ch/agent/core/KeyedMessage.java</li>
+<li>ch/agent/t2/T2Msg.java</li>
+</ul></li>
+</ul>
+
+<hr />
+
+<p><a name="first_release">2011-07-15/jpv</a></p>
+
+<p>The Time2 Library is released as a beta version on SourceForge
+<a href="http://time2.sourceforge.net">http://time2.sourceforge.net</a>. 
+The release consists of two jars:</p>
+
+<ul>
+<li><code>t2.jar</code> (binaries)</li>
+<li><code>t2source.jar</code> (sources only)</li>
+</ul>
+
+<p><small>Updated: 2012-08-28/jpv</small></p>
+
+<p><link rel="stylesheet" type="text/css" href="README.css"/></p>
