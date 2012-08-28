@@ -89,6 +89,7 @@ messages now accessed using a symbolic key instead of a literal number.
 - ch/agent/t2/time/engine/* : ditto
 - ch/agent/t2/timeseries/* : ditto
 - ch/agent/t2/timeutil/* : ditto
+
 *************************************************************
 
 <a name="v1_1_3">2011-11-30/jpv</a>
