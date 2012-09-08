@@ -36,16 +36,17 @@ import ch.agent.t2.time.TimeIndex;
  * DateTimeScanner supports the interpretation of strings as {@link TimeIndex} objects.
  * <p>
  * Here is an example of use:
- * <xmp> String pattern = 
+ * <blockquote><pre><code> String pattern = 
  *     "\\S+ (\\S+) (\\d+) (\\d\\d):(\\d\\d):(\\d\\d) \\S+ (\\d\\d\\d\\d)";
  * int[] groups = {6, 1, 2, 3, 4, 5};
  * String[] months = 
  *     {"Jan", "Feb", "Mar", "Apr", "May", "Jun", 
  *      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
  * DateTimeScanner scanner = new DateTimeScanner(pattern, groups);
- * TimeIndex time = scanner.scan(DateTime.DOMAIN, "Wed Nov 30 12:29:23 CET 2010"):
+ * scanner.setMonths(months);
+ * TimeIndex time = scanner.scan(DateTime.DOMAIN, "Wed Nov 30 12:29:23 UTC 2010");
  * assertEquals("2010-11-30 12:29:23", time.toString());
- * </xmp>
+ * </code></pre></blockquote>
  *
  * @author Jean-Paul Vetterli
  * @version 1.0.1

@@ -26,7 +26,7 @@ import ch.agent.t2.time.engine.Time2;
 
 /**
  * A Month is a {@link Time2} with month resolution.
- * The domain label is <em>monthly</em>.
+ * The domain label is <b>monthly</b>.
  *
  * @author Jean-Paul Vetterli
  * @version 1.0.1

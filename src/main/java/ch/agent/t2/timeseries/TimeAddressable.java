@@ -19,6 +19,8 @@
  */
 package ch.agent.t2.timeseries;
 
+import java.util.Iterator;
+
 import ch.agent.t2.T2Exception;
 import ch.agent.t2.time.Range;
 import ch.agent.t2.time.TimeDomain;
@@ -36,6 +38,15 @@ import ch.agent.t2.time.TimeIndex;
  *            the value type
  */
 public interface TimeAddressable<T> extends Iterable<Observation<T>> {
+	
+	/**
+	 * Returns an iterator over the {@link Observation}s in the time series
+	 * ordered by increasing time index. This iterator does not return any
+	 * missing value.
+	 * 
+	 * @return an iterator over the time series
+	 */
+	Iterator<Observation<T>> iterator();
 	
 	/**
 	 * Return true if the time series implements {@link TimeIndexable}.
@@ -226,7 +237,7 @@ public interface TimeAddressable<T> extends Iterable<Observation<T>> {
 	 * Modifying the range returned by this method does not have any effect
 	 * on the range of the time series.
 	 * 
-	 * @return the range
+	 * @return a copy of the range of the time series
 	 */
 	Range getRange();
 

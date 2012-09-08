@@ -41,11 +41,12 @@ import ch.agent.t2.T2Exception;
  * origin and the method {@link TimeDomain#timeFromOffset(long)} does the
  * reverse.
  * <p>
- * Another property of a time domain is its label. When an application uses a
- * time domain factory, for example through {@link TimeDomainManager}, the label should uniquely 
- * identify the time domain, making it safe to get a domain <q>by name</q>.
+ * Another important property of a time domain is its <b>label</b>. 
+ * When an application uses a time domain factory, obtained using 
+ * {@link TimeDomainManager#getFactory()}, the label should uniquely identify the time 
+ * domain, making it safe to get a domain <q>by name</q>.
  * <p>
- * A TimeDomain is also a factory, with a choice of methods for creating
+ * A TimeDomain is also a time index factory, with a choice of methods for creating
  * {@link TimeIndex} objects.
  * <p>
  * The <em>Time2</em> package implements dates and time in the spirit of the
@@ -120,7 +121,7 @@ public interface TimeDomain {
 
 	/**
 	 * Return the label of the time domain, uniquely identifying the domain when
-	 * using a factory like {@link TimeDomainManager}.
+	 * using a {@link TimeDomainFactory}.
 	 * 
 	 * @return the label of the time domain
 	 */

@@ -321,10 +321,11 @@ public class Range implements Iterable<TimeIndex> {
 	
 	/**
 	 * Return true if another range is within range.
-	 * The domains must be equal.
+	 * This is the case if both ends of the other range
+	 * are within this range. The domains must be equal.
 	 * 
 	 * @param range a non-null range
-	 * @return true if the time is in the range
+	 * @return true if the other range is in the range
 	 */
 	public boolean isInRange(Range range) throws T2Exception {
 		getTimeDomain().requireEquality(range.getTimeDomain());

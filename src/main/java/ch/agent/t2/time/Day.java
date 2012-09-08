@@ -26,7 +26,7 @@ import ch.agent.t2.time.engine.Time2;
 
 /**
  * A Day is a {@link Time2} with day resolution.
- * The domain label is <em>daily</em>.
+ * The domain label is <b>daily</b>.
  * <p>
  * Here are four equivalent ways of constructing <q>daily</q> times:
  * <blockquote>

@@ -339,8 +339,10 @@ public class DefaultExternalFormat implements ExternalTimeFormat {
 					tp.getMonth(), tp.getDay(), tp.getHour(), tp.getMin(), tp.getSec(), tp.getUsec());
 			break;
 		default:
+			fmt.close();
 			throw new RuntimeException("bug: " + unit.name());
 		}
+		fmt.close();
 		return sb.toString();
 	}
 	

@@ -28,8 +28,8 @@ import ch.agent.t2.time.engine.Time2;
  * A SystemTime is a {@link Time2} time with millisecond resolution and the
  * origin at 1970-01-01. It corresponds to the time used internally by
  * {@link java.util.Date}. For times before 1970-01-01,
- * {@link TimeIndex#asOffset()} will return negative values. The domain ID is
- * <em>systemtime</em>.
+ * {@link TimeIndex#asOffset()} will return negative values. The domain label is
+ * <b>systemtime</b>.
  * 
  * @author Jean-Paul Vetterli
  * @version 1.0.1

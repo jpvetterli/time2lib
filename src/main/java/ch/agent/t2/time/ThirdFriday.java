@@ -26,7 +26,7 @@ import ch.agent.t2.time.engine.Time2;
 
 /**
  * A ThirdFriday is a {@link Time2} with month base resolution and one day each month falling
- * on the 3d Friday. The domain label is <em>friday3</em>.
+ * on the 3d Friday. The domain label is <b>friday3</b>.
  *
  * @author Jean-Paul Vetterli
  * @version 1.0.1

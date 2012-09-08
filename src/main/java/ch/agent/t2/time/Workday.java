@@ -26,7 +26,7 @@ import ch.agent.t2.time.engine.Time2;
 
 /**
  * A Workday is a {@link Time2} with day resolution and a cycle of 2 days OFF
- * days and 5 days ON. The domain label is <em>workweek</em>. The days OFF are
+ * days and 5 days ON. The domain label is <b>workweek</b>. The days OFF are
  * Saturday and Sunday.
  * 
  * @author Jean-Paul Vetterli

@@ -27,7 +27,7 @@ import ch.agent.t2.time.engine.Time2;
 /**
  * A DateTime is a {@link Time2} with second resolution and the origin at
  * 2000-01-01. For times before the origin, {@link TimeIndex#asOffset()} will return
- * negative values. The domain label is <em>datetime</em>.
+ * negative values. The domain label is <b>datetime</b>.
  * <p>
  * This time corresponds to Unix time, except for the "epoch", 2000-01-01
  * instead of 1970-01-01.

@@ -358,6 +358,7 @@ public class Time2 implements TimeIndex {
 			String plus = tp.getYear() > 9999 ? "+" : "";
 			fmt.format("%s%04d-%02d-%02d %02d:%02d:%02d.%06d", plus, tp.getYear(), tp.getMonth(),
 					tp.getDay(), tp.getHour(), tp.getMin(), tp.getSec(), tp.getUsec());
+			fmt.close();
 			return sb.toString();
 		} else
 			return domain.format(domain.getResolution(), tp);
@@ -378,6 +379,7 @@ public class Time2 implements TimeIndex {
 		StringBuilder sb = new StringBuilder();
 		Formatter fmt = new Formatter(sb);
 		fmt.format(format, tp.getYear(), tp.getMonth(), tp.getDay(), tp.getHour(), tp.getMin(), tp.getSec(), tp.getUsec());
+		fmt.close();
 		return sb.toString();
 	}
 

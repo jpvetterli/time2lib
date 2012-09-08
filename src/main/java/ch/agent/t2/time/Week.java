@@ -26,7 +26,7 @@ import ch.agent.t2.time.engine.Time2;
 
 /**
  * A Week is a {@link Time2} with day resolution and a cycle of 6 days OFF and 1 day
- * ON. The domain label is <em>weekly</em>. The ON day is Thursday. This means
+ * ON. The ON day is Thursday. This means
  * that when creating a Week using a date other than a Thursday, the
  * {@link Adjustment} is important. An UP adjustment will
  * advance to the next Thursday and a DOWN adjustment will backtrack to the
@@ -36,8 +36,8 @@ import ch.agent.t2.time.engine.Time2;
  * href="http://en.wikipedia.org/wiki/ISO_8601#Week_dates">Wikipedia article</a>
  * on ISO 8601, the international date standard: <blockquote>
  * <em>The week number can be described by counting the Thursdays: 
- * week 12 contains the 12th Thursday of the year.</em> </blockquote> The domain
- * label is <em>weekly</em>.
+ * week 12 contains the 12th Thursday of the year.</em> </blockquote> 
+ * The domain label is <b>weekly</b>.
  * 
  * @author Jean-Paul Vetterli
  * @version 1.0.1

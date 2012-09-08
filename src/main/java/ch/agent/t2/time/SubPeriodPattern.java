@@ -14,7 +14,7 @@
  * limitations under the License.
  * 
  * Package: ch.agent.t2.time
- * Type: SubperiodPattern
+ * Type: SubPeriodPattern
  * Version: 1.0.1
  */
 package ch.agent.t2.time;

@@ -29,6 +29,32 @@ number is incremented.
 
 *************************************************************
 
+<a name="v1_1_6">2012-09-07/jpv</a>
+
+Version 1.1.6 &mdash; Software deployed to the central maven repository
+-----------------------------------------------------------------------
+
+This is a maintenance release which behaves exactly like the previous 
+version and is plug-compatible for applications. The POM file has been
+modified to agree with 
+[requirements](https://docs.sonatype.org/display/Repository/Central+Sync+Requirements)
+for deployment to the central maven repository. 
+Various typos in the documentation have been fixed.
+
+The release consists of three JARs:
+
+- `t2-1.1.6.jar` (binaries)
+- `t2-1.1.6-javadoc.jar`
+- `t2-1.1.6-sources.jar`
+
+There is also a new version of the __Time2 Library Demos__:
+
+- `t2-demo-1.0.2.jar` (binaries)
+- `t2-demo-1.0.2-javadoc.jar`
+- `t2-demo-1.0.2-sources.jar`
+
+*************************************************************
+
 <a name="v1_1_5">2012-08-28/jpv</a>
 
 Version 1.1.5 &mdash; Project migrated to Maven

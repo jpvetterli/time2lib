@@ -13,8 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * 
- * Package: ch.agent.core
- * Type: T2Exception.
+ * Package: ch.agent.t2
+ * Type: T2Exception
  * Version: 1.0.0
  */
 package ch.agent.t2;

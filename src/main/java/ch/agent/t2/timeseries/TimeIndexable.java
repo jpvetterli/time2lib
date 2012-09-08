@@ -19,6 +19,8 @@
  */
 package ch.agent.t2.timeseries;
 
+import java.util.Iterator;
+
 import ch.agent.t2.T2Exception;
 import ch.agent.t2.time.Range;
 
@@ -45,6 +47,16 @@ import ch.agent.t2.time.Range;
  */
 public interface TimeIndexable<T> extends TimeAddressable<T> {
 
+	/**
+	 * Returns an iterator over the {@link Observation}s in the time series
+	 * ordered by increasing time index. In contrast to
+	 * {@link TimeAddressable#iterator()}, this iterator returns all missing
+	 * values
+	 * 
+	 * @return an iterator over the time series
+	 */
+	Iterator<Observation<T>> iterator();
+	
 	/**
 	 * Return the maximum allowed length of a single run of missing values.
 	 * 
