@@ -23,23 +23,29 @@ generic time series with configurable time domains.
 Distribution
 ------------
 
-Starting with version 1.1.5, the distribution consists of a binary JAR with 
-compiled classes and of a source JAR:
+Starting with version 1.1.6, the distribution consists of a binary JAR with 
+compiled classes, of a javadoc JAR and of a source JAR. For version x.y.z:
 
-	t2-<version>.jar
-	t2-<version>-sources.jar
+	t2-x.y.z.jar
+	t2-x.y.z-javadoc.jar
+	t2-x.y.z-sources.jar
 
-In the file names `<version>` stands of course for the actual version,
-`1.1.5` for example. For earlier versions, the suffix of the source JAR 
-is `.source` instead of `-sources`.   
+For versions earlier than 1.1.6, there is no javadoc JAR. For versions earlier 
+than 1.1.5, the suffix of the source JAR is `.source` instead of `-sources`. 
 
-Dependencies
-------------
+For Maven users
+---------------
 
-The software is built with maven; dependencies are defined in the <q>POM</q>
-file, included in the binary JAR:
+Starting with version 1.1.6, the software is available from the central maven 
+repository. To use version x.y.z, insert the following dependency into your 
+`pom.xml` file:
 
-	/META-INF/maven/ch.agent/t2/pom.xml
+    <dependency>
+      <groupId>ch.agent</groupId>
+      <artifactId>t2</artifactId>
+      <version>x.y.z</version>
+      <scope>compile</scope>
+    </dependency>
 
 Building the software
 ---------------------
@@ -55,20 +61,9 @@ is easy, as maven takes care of locating and downloading dependencies:
 This builds and installs the distribution JARs in your local maven
 repository. They can also be found in the `target` directory.
 
-Generating the documentation
-----------------------------
 
-If you are using maven, you can generate the javadocs with:
-
-	$ mvn javadoc:jar
-
-The documentation is packed into a JAR located in the `target` directory
-and can be browsed by pointing at the file:
-
-	target/apidocs/index.html
-
-Using the library
------------------
+A simple example using the library
+----------------------------------
 
 Here is a simple example of an application using the Time2 Library. 
 It's called `Olympics.java`:
@@ -104,7 +99,7 @@ It's called `Olympics.java`:
 	            }
 	        } catch (Exception e) {
 	            System.err.println("Oops...\n" + e.getMessage());
-        }
+	        }
 	    }
 	}
 
@@ -142,7 +137,7 @@ Finding more information
 More information on the Time2 Library is available at 
 <http://agent.ch/timeseries/t2/>.
 
-<small>Updated: 2012-08-28/jpv</small>
+<small>Updated: 2012-09-07/jpv</small>
 
 <link rel="stylesheet" type="text/css" href="README.css"/>
 
