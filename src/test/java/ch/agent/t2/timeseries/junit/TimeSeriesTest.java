@@ -20,6 +20,10 @@ import ch.agent.t2.timeseries.UpdateReviewer;
 
 public class TimeSeriesTest extends TestCase {
 
+	private static void dump(Object expr) {
+		// System.out.println(expr);
+	}
+
 	private static final double EPSILON = 1e-10d;
 
 	TimeDomain dom;
@@ -39,9 +43,9 @@ public class TimeSeriesTest extends TestCase {
 	}
 	
 	private void print(String comment, TimeAddressable<Double> ts) throws Exception {
-		System.out.println(comment);
+		dump(comment);
 		for (Observation<Double> obs : ts) {
-			System.out.println(obs.getTime().getDayOfWeek() + " " + obs.toString());
+			dump(obs.getTime().getDayOfWeek() + " " + obs.toString());
 		}
 	}
 	
@@ -62,9 +66,9 @@ public class TimeSeriesTest extends TestCase {
 		try {
 			long first = ti.getRange().getFirstIndex();
 			assertEquals(456, ti.get(first + 1).intValue());
-			System.out.println("test1");
+			dump("test1");
 			for (Observation<Integer> o : ti)
-				System.out.println(o.toString());
+				dump(o.toString());
 		} catch (Exception e) {
 			assertEquals(null, e);
 		}
@@ -76,9 +80,9 @@ public class TimeSeriesTest extends TestCase {
 			tint.put(new Day("2000-01-15"), 41);
 			tint.put(new Day("2000-01-20"), 42);
 			assertEquals(6, tint.getRange().getSize());
-			System.out.println("test1b");
+			dump("test1b");
 			for (Observation<Integer> o : tint)
-				System.out.println(o.toString());
+				dump(o.toString());
 		} catch (Exception e) {
 			assertEquals(null, e);
 		}
@@ -216,9 +220,9 @@ public class TimeSeriesTest extends TestCase {
 			ts.put(t1, d1);
 			Range range = new Range(calendar, "2008-02-26", "2008-03-03", Adjustment.NONE);
 			ts.setRange(range);
-			System.out.println("test11");
+			dump("test11");
 			for (Observation<Double> obs : ts)
-				System.out.println(obs.getTime().toString() + " " + obs.getValue());
+				dump(obs.getTime().toString() + " " + obs.getValue());
 			assertEquals("2008-02-28", ts.getRange().getFirst().toString());
 			assertEquals("2008-03-01", ts.getRange().getLast().toString());
 		} catch (Exception e) {
@@ -235,10 +239,10 @@ public class TimeSeriesTest extends TestCase {
 			ts.put(t1, d1);
 			Range range = new Range(calendar, "2008-02-26", "2008-03-04", Adjustment.NONE);
 			ts.setRange(range);
-			System.out.println("test12");
+			dump("test12");
 			TimeAddressable<Double> ts2 = ts.copy();
 			for (Observation<Double> obs : ts2)
-				System.out.println(obs.getTime().toString() + " " + obs.getValue());
+				dump(obs.getTime().toString() + " " + obs.getValue());
 			assertEquals("2008-02-28", ts2.getRange().getFirst().toString());
 			assertEquals("2008-03-04", ts2.getRange().getLast().toString());
 
@@ -464,11 +468,11 @@ public class TimeSeriesTest extends TestCase {
 			Observation<Double> obs = i.next();
 			assertEquals("2006-06-26", obs.getTime().toString());
 			assertEquals(4d, obs.getValue());
-			System.out.println("test15 (notice 2006-06-28 skipped)");
+			dump("test15 (notice 2006-06-28 skipped)");
 			assertEquals(Double.NaN, ta.get(new Workday("2006-06-28")));	
 
 			for(Observation<Double> o : ta)
-				System.out.println(o.toString());
+				dump(o.toString());
 				
 		} catch (Exception e) {
 			fail("unexpected exception");
@@ -798,7 +802,7 @@ public class TimeSeriesTest extends TestCase {
 			if (series.isMissing(oldValue) || epsilon_same(oldValue, newValue))
 				return true;
 			else {
-				System.err.println(String.format("reject %s %10.3g %10.3g", series.getTimeDomain().time(index), oldValue, newValue));
+				dump(String.format("reject %s %10.3g %10.3g", series.getTimeDomain().time(index), oldValue, newValue));
 				count++;
 				return false;
 			}

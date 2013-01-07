@@ -12,6 +12,10 @@ import ch.agent.t2.timeseries.TimeSeriesFactory;
 
 public class TimeSeriesFactoryTest extends TestCase {
 
+	private static void dump(Object expr) {
+		// System.out.println(expr);
+	}
+
 	public TimeSeriesFactoryTest() {
 		super();
 	}
@@ -53,11 +57,11 @@ public class TimeSeriesFactoryTest extends TestCase {
 			tint.put(new Day("2000-01-20"), 42);
 			assertEquals(6, tint.getRange().getSize());
 			assertEquals(new Integer(100), tint.get(new Day("2000-01-16")));
-			System.out.println("test2");
+			dump("test2");
 			for (Observation<Integer> o : tint)
-				System.out.println(o.toString());
+				dump(o.toString());
 		} catch (Exception e) {
-			e.printStackTrace();
+//			e.printStackTrace();
 			fail("unexpected exception");
 		}
 	}

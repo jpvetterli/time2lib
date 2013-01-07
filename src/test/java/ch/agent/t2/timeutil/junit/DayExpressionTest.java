@@ -14,6 +14,10 @@ import ch.agent.t2.timeutil.DayExpression;
 
 
 public class DayExpressionTest extends TestCase {
+
+	private static void dump(Object expr) {
+		// System.out.println(expr);
+	}
 	
 	@Override
 	protected void setUp() throws Exception {
@@ -25,7 +29,7 @@ public class DayExpressionTest extends TestCase {
 			DayExpression expr = new DayExpression(Adjustment.UP);
 			expr.setExpression(Day.DOMAIN, "today+1+4-2");
 			TimeIndex day = expr.getDate(Day.DOMAIN);
-			System.out.println(day.toString());
+			dump(day.toString());
 		} catch (Exception e) {
 			fail(e.toString());
 		}
@@ -48,7 +52,7 @@ public class DayExpressionTest extends TestCase {
 			DayExpression expr = new DayExpression(Adjustment.UP);
 			expr.setExpression(Workday.DOMAIN, "end-5");
 			TimeIndex day = expr.getDate(range);
-			System.out.println(day.toString());
+			dump(day.toString());
 			assertEquals("2009-11-13", day.toString());
 		} catch (Exception e) {
 			fail(e.getMessage());
@@ -62,7 +66,7 @@ public class DayExpressionTest extends TestCase {
 			DayExpression expr = new DayExpression(Adjustment.UP);
 			expr.setExpression(Workday.DOMAIN, "start+1");
 			TimeIndex day = expr.getDate(range);
-			System.out.println(day.toString());
+			dump(day.toString());
 			assertEquals("2009-11-23", day.toString());
 		} catch (Exception e) {
 			fail(e.toString());
@@ -85,7 +89,7 @@ public class DayExpressionTest extends TestCase {
 			DayExpression expr = new DayExpression(Adjustment.UP);
 			expr.setExpression(Month.DOMAIN, "start+1");
 			TimeIndex day = expr.getDate(range);
-			System.out.println(day.toString());
+			dump(day.toString());
 			assertEquals("2009-12", day.toString());
 		} catch (Exception e) {
 			fail(e.toString());
@@ -99,7 +103,7 @@ public class DayExpressionTest extends TestCase {
 			DayExpression expr = new DayExpression(Adjustment.UP);
 			expr.setExpression(Month.DOMAIN, "start-1");
 			TimeIndex day = expr.getDate(range);
-			System.out.println(day.toString());
+			dump(day.toString());
 			assertEquals("2999-12", day.toString());
 		} catch (Exception e) {
 			fail(e.toString());
@@ -113,7 +117,7 @@ public class DayExpressionTest extends TestCase {
 			DayExpression expr = new DayExpression(Adjustment.UP);
 			expr.setExpression(Year.DOMAIN, "start");
 			TimeIndex day = expr.getDate(range);
-			System.out.println(day.toString());
+			dump(day.toString());
 			assertEquals("2009", day.toString());
 		} catch (Exception e) {
 			fail(e.toString());

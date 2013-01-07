@@ -11,6 +11,10 @@ import ch.agent.t2.timeutil.TimeUtil;
 
 public class TimeUtilTest extends TestCase {
 
+	private static void dump(Object expr) {
+		// System.out.println(expr);
+	}
+
 	TimeUtil util;
 	
 	public TimeUtilTest(String name) {
@@ -23,7 +27,7 @@ public class TimeUtilTest extends TestCase {
 		Date d = new Date();
 		String timeString = time.toString();
 		String dateString = new CalendarUtil().format(d);
-		System.out.println(timeString + " " + dateString);
+		dump(timeString + " " + dateString);
 		assertEquals(true, dateString.startsWith(timeString));
 	}
 	
@@ -32,7 +36,7 @@ public class TimeUtilTest extends TestCase {
 		Date d = new Date();
 		String timeString = time.toString();
 		String dateString = new CalendarUtil().format(d);
-		System.out.println(timeString + " " + dateString);
+		dump(timeString + " " + dateString);
 		assertEquals(true, dateString.startsWith(timeString));
 	}
 }

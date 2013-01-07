@@ -12,6 +12,10 @@ import ch.agent.t2.timeseries.TimeSeriesFactory;
 
 public class AsIndexableTest extends TestCase {
 
+	private static void dump(Object expr) {
+		// System.out.println(expr);
+	}
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -28,12 +32,12 @@ public class AsIndexableTest extends TestCase {
 			ts.put(t1, d1);
 			ts.put(t2, d2);
 			for (Observation<Double> obs : ts)
-				System.out.println(obs.getTime().toString() + " " + obs.getValue());
+				dump(obs.getTime().toString() + " " + obs.getValue());
 			
 			TimeIndexable<Double> tsi = ts.asIndexable();
 			Double[] values = tsi.getArray();
 			for (Double d : values)
-				System.out.println(d);
+				dump(d);
 			
 		} catch (KeyedException e) {
 			assertEquals(null, e);

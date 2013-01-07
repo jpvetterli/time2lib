@@ -27,6 +27,10 @@ import ch.agent.t2.timeutil.JavaDateUtil;
 
 public class JavaDateUtilTest extends TestCase {
 
+	private static void dump(Object expr) {
+		// System.out.println(expr);
+	}
+
 	private GregorianCalendar gcal;
 	private DateFormat fullDateFormat;
 	
@@ -55,7 +59,7 @@ public class JavaDateUtilTest extends TestCase {
 			TimeIndex time = JavaDateUtil.fromJavaDate(date, usec());
 			String timeString = time.toString();
 			String dateString = new CalendarUtil().format(date);
-			System.out.println(timeString + " " + dateString);
+			dump(timeString + " " + dateString);
 			assertEquals(true, timeString.startsWith(dateString));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -69,7 +73,7 @@ public class JavaDateUtilTest extends TestCase {
 			TimeIndex time = JavaDateUtil.fromJavaDate(date, usec(), Adjustment.NONE, false);
 			String timeString = time.toString();
 			String dateString = new CalendarUtil().format(date, "yyyy-MM-dd HH:mm:ss", false);
-			System.out.println(timeString + " " + dateString);
+			dump(timeString + " " + dateString);
 			assertEquals(true, timeString.startsWith(dateString));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -83,7 +87,7 @@ public class JavaDateUtilTest extends TestCase {
 			TimeIndex time = JavaDateUtil.fromJavaDate(d, usec());
 			String timeString = time.toString();
 			assertEquals(true, timeString.startsWith(new CalendarUtil().format(d)));
-			System.out.println(timeString);
+			dump(timeString);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception");
@@ -94,7 +98,7 @@ public class JavaDateUtilTest extends TestCase {
 		try {
 			TimeIndex t = new Day("1964-01-01");
 			Date date = JavaDateUtil.toJavaDate(t);
-			System.out.println("testJavaDate4: " + t + " " + t.asLong() + " " + JavaDateUtil.toJavaDate(t) + " " + 
+			dump("testJavaDate4: " + t + " " + t.asLong() + " " + JavaDateUtil.toJavaDate(t) + " " + 
 				new CalendarUtil().format(date));
 			assertEquals(true, new CalendarUtil().format(date).startsWith(t.toString()));
 		} catch (Exception e) {
@@ -167,7 +171,7 @@ public class JavaDateUtilTest extends TestCase {
 	public void testAsDate4a() {
 		try {
 			TimeIndex time = new Month("1986-09");
-			System.out.println(time.toString());
+			dump(time.toString());
 			Date date = JavaDateUtil.toJavaDate(time);
 			assertEquals("1986-09-01 00:00:00.000", fullDateFormat.format(date));
 		} catch (Exception e) {
@@ -264,14 +268,14 @@ public class JavaDateUtilTest extends TestCase {
 			String date1 = "Jan 1, 2000, 12:15:00 EST";
 			Date jdate1 = new Date(date1);
 			TimeIndex t1 = JavaDateUtil.fromJavaDate(jdate1, DateTime.DOMAIN);
-			System.out.println(date1 + " ---> " + jdate1 + " ---> " + t1);
+			dump(date1 + " ---> " + jdate1 + " ---> " + t1);
 			assertEquals("Sat Jan 01 18:15:00 CET 2000", jdate1.toString());
 			assertEquals("2000-01-01 17:15:00", t1.toString());
 			
 			String date2 = "Jul 1, 2000, 12:15:00 EST";
 			Date jdate2 = new Date(date2);
 			TimeIndex t2 = JavaDateUtil.fromJavaDate(jdate2, DateTime.DOMAIN);
-			System.out.println(date2 + " ---> " + jdate2 + " ---> " + t2);
+			dump(date2 + " ---> " + jdate2 + " ---> " + t2);
 			assertEquals("Sat Jul 01 19:15:00 CEST 2000", jdate2.toString());
 			assertEquals("2000-07-01 17:15:00", t2.toString());
 

@@ -8,6 +8,10 @@ import ch.agent.t2.time.TimeIndex;
 
 public class TimeLargeTest extends TestCase {
 
+	private static void dump(Object expr) {
+		// System.out.println(expr);
+	}
+	
 	private static class Singleton {
 		private static Random random;
 		static {
@@ -50,13 +54,13 @@ public class TimeLargeTest extends TestCase {
 				errors++;
 				outCount++;
 				if (outCount < 11)
-					System.out.println(date + " " + tString);
+					dump(date + " " + tString);
 				else if (outCount == 11)
-					System.out.println("stop printing errors (but continue testing)");
+					dump("stop printing errors (but continue testing)");
 			}
 		}
 		millis -= System.currentTimeMillis();
-		System.out.println(String.format("random sample of size %d processed in %dms", sample, -millis));
+		dump(String.format("random sample of size %d processed in %dms", sample, -millis));
 		assertEquals(0, errors);
 	}
 

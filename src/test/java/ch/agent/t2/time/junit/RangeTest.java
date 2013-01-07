@@ -17,6 +17,10 @@ import ch.agent.t2.time.Year;
 
 public class RangeTest extends TestCase {
 
+	private static void dump(Object expr) {
+		// System.out.println(expr);
+	}
+
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -33,7 +37,7 @@ public class RangeTest extends TestCase {
 				if (++i > size) {
 					fail("loop continues after range exhausted: " + i);
 				}
-				System.out.println(t);
+				dump(t);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -159,8 +163,7 @@ public class RangeTest extends TestCase {
 				}
 			}
 			millis -= System.currentTimeMillis();
-			System.out.println(String.format(
-					"%d iteration(s) with %d dates processed in %dms (domain %s)", 
+			dump(String.format("%d iteration(s) with %d dates processed in %dms (domain %s)", 
 					sample1, sample2, -millis, domain.getLabel()));
 			return -millis;
 		} catch (KeyedException e) {
@@ -177,7 +180,7 @@ public class RangeTest extends TestCase {
 		total += testIteration1Helper(SystemTime.DOMAIN, s1, s2);
 		total += testIteration1Helper(Workday.DOMAIN, s1, s2);
 		total += testIteration1Helper(ThirdFriday.DOMAIN, s1, s2);
-		System.out.println(String.format("total: %dms", total)); 
+		dump(String.format("total: %dms", total)); 
 	}
 
 //	public void test9() {

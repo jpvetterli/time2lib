@@ -24,6 +24,10 @@ import ch.agent.t2.time.engine.Time2;
 
 public class TimeTest extends TestCase {
 
+	private static void dump(Object expr) {
+		// System.out.println(expr);
+	}
+
 	private class TestTime extends Time2 {
 
 		public TestTime(TimeDomain domain, long time) {
@@ -65,13 +69,13 @@ public class TimeTest extends TestCase {
 		try {
 			TimeIndex t = new Day("1999-10-11");
 			for (TimeDomain d : TimeDomainManager.getFactory().getBuiltIns()) {
-				System.out.println(d.getLabel());
+				dump(d.getLabel());
 			}
 			TimeDomain d = TimeDomainManager.getFactory().get("daily");
 			assertSame(d, t.getTimeDomain());
 			assertTrue(TimeDomainManager.getFactory().isBuiltIn(Day.DOMAIN));
 			for (TimeDomain domain : TimeDomainManager.getFactory().getTimeDomains()) {
-				System.out.println(domain.toString() + " " + 
+				dump(domain.toString() + " " + 
 						TimeDomainManager.getFactory().isBuiltIn(domain));
 			}
 		} catch (Exception e) {
@@ -926,7 +930,7 @@ public class TimeTest extends TestCase {
 	public void testTime1() {
 		TimeIndex time = usec().time(86400000000L);
 		assertEquals(86400000000L, time.asLong());
-		System.out.println(time.toString());
+		dump(time.toString());
 	}
 
 	public void testTime2() {
@@ -936,7 +940,7 @@ public class TimeTest extends TestCase {
 
 	public void testTime2a() {
 		TimeIndex time = usec().time(Long.MAX_VALUE);
-		System.out.println(time.toString());
+		dump(time.toString());
 		assertEquals("+292277-01-09 04:00:54.775807", time.toString());
 	}
 	
@@ -1452,7 +1456,7 @@ public class TimeTest extends TestCase {
 			TimeIndex t1 = usec().time(0);
 			TimeIndex t2 = usec().time(Long.MAX_VALUE);
 			assertEquals(Long.MAX_VALUE, t2.sub(t1));
-			System.out.println(Long.MIN_VALUE + " " + (-Long.MAX_VALUE)  + " " + t1.sub(t2));
+			dump(Long.MIN_VALUE + " " + (-Long.MAX_VALUE)  + " " + t1.sub(t2));
 			assertEquals(-Long.MAX_VALUE, t1.sub(t2));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1465,7 +1469,7 @@ public class TimeTest extends TestCase {
 			TimeIndex t1 = sec().time("2000-01-01");
 			TimeIndex t2 = t1.add(Integer.MAX_VALUE);
 			assertEquals(Integer.MAX_VALUE, t2.sub(t1));
-			System.out.println(Integer.MIN_VALUE + " " + (-Integer.MAX_VALUE)  + " " + t1.sub(t2));
+			dump(Integer.MIN_VALUE + " " + (-Integer.MAX_VALUE)  + " " + t1.sub(t2));
 			assertEquals(-Integer.MAX_VALUE, t1.sub(t2));
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1477,7 +1481,7 @@ public class TimeTest extends TestCase {
 		try {
 			TimeIndex t1 = new Month(2009, 1);
 			Day d = new Day(t1.getDayByRank(Resolution.MONTH, DayOfWeek.Fri, 3));
-			System.out.println(d.toString(true) + " " + d.getDayOfWeek());
+			dump(d.toString(true) + " " + d.getDayOfWeek());
 			assertEquals(DayOfWeek.Fri, d.getDayOfWeek());
 			TimeIndex t2 = d.add(-21);
 			assertEquals(t2.getMonth(), 12);
@@ -1522,7 +1526,7 @@ public class TimeTest extends TestCase {
 			TimeIndex t1 = new Month(year, month);
 			TimeIndex d = t1.getDayByRank(Resolution.MONTH, dow, rank);
 			if (d != null) {
-				System.out.println(d.toString() + " " + d.getDayOfWeek());
+				dump(d.toString() + " " + d.getDayOfWeek());
 				assertEquals(dow, d.getDayOfWeek());
 				TimeIndex t2 = d.add(-rank * 7);
 				assertEquals(t2.getMonth(), month > 1 ? month - 1 : 12);
@@ -1546,7 +1550,7 @@ public class TimeTest extends TestCase {
 			Day d = new Day(date);
 			TimeIndex t1 = new Month(d.getYear(), d.getMonth());
 			TimeIndex result = t1.getDayByRank(Resolution.MONTH, d.getDayOfWeek(), rank);
-			System.out.println(d.toString() + " " + d.getDayOfWeek());
+			dump(d.toString() + " " + d.getDayOfWeek());
 			assertEquals(date, result.toString());
 			assertEquals(day, result.getDayOfWeek().name());
 		} catch (Exception e) {
@@ -1570,7 +1574,7 @@ public class TimeTest extends TestCase {
 		try {
 			Day d = new Day(date);
 			TimeIndex result = d.getDayByRank(Resolution.YEAR, d.getDayOfWeek(), rank);
-			System.out.println(d.toString() + " " + d.getDayOfWeek());
+			dump(d.toString() + " " + d.getDayOfWeek());
 			assertEquals(date, result.toString());
 			assertEquals(day, result.getDayOfWeek().name());
 		} catch (Exception e) {
@@ -1630,7 +1634,7 @@ public class TimeTest extends TestCase {
 		try {
 			TimeIndex t = new Week("2005-06-01", Adjustment.UP);
 			assertEquals("2005-06-02", t.toString());
-			System.out.println(t.getDayOfWeek() + " " + t);
+			dump(t.getDayOfWeek() + " " + t);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception");
@@ -1641,7 +1645,7 @@ public class TimeTest extends TestCase {
 		try {
 			TimeIndex t = new Week("2005-06-01", Adjustment.DOWN);
 			assertEquals("2005-05-26", t.toString());
-			System.out.println(t.getDayOfWeek() + " " + t);
+			dump(t.getDayOfWeek() + " " + t);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception");
