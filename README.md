@@ -36,8 +36,9 @@ than 1.1.5, the suffix of the source JAR is `.source` instead of `-sources`.
 For Maven users
 ---------------
 
-Starting with version 1.1.6, the software is available from the central maven 
-repository. To use version x.y.z, insert the following dependency into your 
+Starting with version 1.1.6, the software is available from the 
+<a href="http://repo.maven.apache.org/maven2/ch/agent/t2/">Maven central 
+repository</a>. To use version x.y.z, insert the following dependency into your 
 `pom.xml` file:
 
     <dependency>
@@ -137,7 +138,7 @@ Finding more information
 More information on the Time2 Library is available at 
 <http://agent.ch/timeseries/t2/>.
 
-<small>Updated: 2012-09-07/jpv</small>
+<small>Updated: 2012-12-20/jpv</small>
 
 <link rel="stylesheet" type="text/css" href="README.css"/>
 
