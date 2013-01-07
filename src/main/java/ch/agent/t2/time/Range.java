@@ -84,7 +84,7 @@ public class Range implements Iterable<TimeIndex> {
 	private long first;
 	private long last;
 	/**
-	 * Construct for an empty range.
+	 * Construct an empty range.
 	 * <p>
 	 * @param domain a non null domain
 	 */
