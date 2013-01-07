@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011, 2012 Hauser Olsson GmbH
+ *   Copyright 2011-2013 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * 
- * Package: ch.agent.t2.time
- * Type: SimpleSubPeriodPattern
- * Version: 1.0.1
  */
 package ch.agent.t2.time;
 
@@ -36,7 +33,6 @@ import ch.agent.t2.time.engine.TimeTools;
  * another one: "at 10:15, 14:20, and 22:40 every working day".
  * 
  * @author Jean-Paul Vetterli
- * @version 1.0.1
  * @see DayRankingSubPeriodPattern
  */
 public class SimpleSubPeriodPattern implements SubPeriodPattern {

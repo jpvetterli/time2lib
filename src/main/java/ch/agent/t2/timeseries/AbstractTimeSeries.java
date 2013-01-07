@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011, 2012 Hauser Olsson GmbH
+ *   Copyright 2011-2013 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * 
- * Package: ch.agent.t2.timeseries
- * Type: AbstractTimeSeries
- * Version: 1.0.2
  */
 package ch.agent.t2.timeseries;
 
@@ -34,7 +31,6 @@ import ch.agent.t2.time.TimeIndex;
  * AbstractTimeseries is the basis for {@link RegularTimeSeries} and {@link SparseTimeSeries}.
  *
  * @author Jean-Paul Vetterli
- * @version 1.0.2
  * @param <T>
  */
 public abstract class AbstractTimeSeries<T> implements TimeAddressable<T> {

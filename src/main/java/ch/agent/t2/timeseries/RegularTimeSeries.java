@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011, 2012 Hauser Olsson GmbH
+ *   Copyright 2011-2013 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * 
- * Package: ch.agent.t2.timeseries
- * Type: RegularTimeSeries
- * Version: 1.1.2
  */
 package ch.agent.t2.timeseries;
 
@@ -38,7 +35,6 @@ import ch.agent.t2.time.TimeDomain;
  * The implementation is not thread-safe.
  * 
  * @author Jean-Paul Vetterli
- * @version 1.1.2
  * @param <T> the value type
  */
 public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeIndexable<T> {

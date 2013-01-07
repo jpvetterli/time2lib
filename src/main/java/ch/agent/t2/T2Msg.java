@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011, 2012 Hauser Olsson GmbH
+ *   Copyright 2011-2013 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,9 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  * 
- * Package: ch.agent.t2
- * Type: T2Msg
- * Version: 1.0.1
  */
 package ch.agent.t2;
 
@@ -28,7 +25,6 @@ import ch.agent.core.MessageBundle;
  * T2Msg provides keyed messages to all ch.agent.t2.* packages.
  *
  * @author Jean-Paul Vetterli
- * @version 1.0.1
  */
 public class T2Msg extends KeyedMessage {
 

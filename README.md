@@ -1,7 +1,7 @@
 time2lib : The Time2 Library
 ============================
 
-	Copyright 2011-2012 Hauser Olsson GmbH.
+	Copyright 2011-2013 Hauser Olsson GmbH.
 	
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
@@ -138,7 +138,7 @@ Finding more information
 More information on the Time2 Library is available at 
 <http://agent.ch/timeseries/t2/>.
 
-<small>Updated: 2012-12-20/jpv</small>
+<small>Updated: 2013-01-07/jpv</small>
 
 <link rel="stylesheet" type="text/css" href="README.css"/>
 
