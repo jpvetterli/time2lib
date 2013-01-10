@@ -1,6 +1,6 @@
 <!--
 
-   Copyright 2012 Hauser Olsson GmbH
+   Copyright 2012-2013 Hauser Olsson GmbH
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 
   <groupId>ch.agent</groupId>
   <artifactId>t2</artifactId>
-  <version>1.1.6</version>
+  <version>1.1.7</version>
   <packaging>jar</packaging>
   <name>Time2 Library</name>
   <description>The Time2 library provides generic time series with configurable time domains.</description>
@@ -90,7 +90,6 @@
           <excludes>
             <exclude>**/time/junit/TimeLargeTest.java</exclude>
             <exclude>**/time/junit/TimeDomainManagerTest.java</exclude>
-            <exclude>**/time/junit/TimeDomainTest.java</exclude>
             <exclude>**/timeseries/junit/TimeSeriesFactoryTest.java</exclude>
           </excludes>
         </configuration>
