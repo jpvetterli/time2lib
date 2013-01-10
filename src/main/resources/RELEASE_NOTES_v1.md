@@ -29,6 +29,21 @@ number is incremented.
 
 *************************************************************
 
+<a name="v1_1_7">2013-01-07/jpv</a>
+
+Version 1.1.7 &mdash; Documentation and test cleanup
+----------------------------------------------------
+
+This is a maintenance release which behaves exactly like the previous 
+version and is plug-compatible for applications. Various errors in the javadoc
+comments have been fixed. Unit tests have been slightly modified to avoid 
+writing on standard output. The administrative information included in files is
+now limited to a copyright notice. Version tags have been removed from all 
+files, because their maintenance cost greatly exceeds their value. Complete 
+file history is available from the SCM (git).
+
+*************************************************************
+
 <a name="v1_1_6">2012-09-07/jpv</a>
 
 Version 1.1.6 &mdash; Software deployed to the central maven repository
