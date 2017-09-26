@@ -69,40 +69,39 @@ A simple example using the library
 Here is a simple example of an application using the Time2 Library. 
 It's called `Olympics.java`:
 
-	import ch.agent.t2.time.*;
-	import ch.agent.t2.timeseries.*;
+import ch.agent.t2.time.TimeDomain;
+import ch.agent.t2.timeseries.Observation;
+import ch.agent.t2.timeseries.TimeAddressable;
+import ch.agent.t2.timeseries.TimeSeriesFactory;
 
-	/**
-	 * Olympics is a small demo for the Time2 library.
-	 * @author Jean-Paul Vetterli
-	 */
-	public class Olympics {
-	
-	    public static void main(String[] args) {
-	        try {
-	            /* define time domain "once every fourth year" */
-	            TimeDomainDefinition year4def = new TimeDomainDefinition("year4", 
-	                Resolution.YEAR, 0L, new Cycle(true, false, false, false));
-	            TimeDomain year4 = TimeDomainManager.getFactory().get(year4def, true);
-	            
-	            /* define "missing value" for String (else, the default is null) */
-	            String missingValue = "(missing)";
-	            TimeSeriesFactory.getInstance().define(String.class, missingValue);
-	
-	            TimeAddressable<String> olympics = TimeSeriesFactory.make(year4, String.class);
-	            olympics.put(year4.time("1896"), new String[] 
- 	               {"Athens", "Paris", "Saint-Louis", "London", "Stockholm"});
-	            olympics.put(year4.time("1920"), new String[] 
-	                {"Antwerp", "Paris", "Amsterdam", "Los Angeles", "Berlin"});
-	            
-	            for (Observation<String> oly : olympics) {
-	                System.out.println(oly.toString());
-	            }
-	        } catch (Exception e) {
-	            System.err.println("Oops...\n" + e.getMessage());
-	        }
-	    }
-	}
+/**
+ * Olympics is a (very) little demo for the Time2 library.
+ *
+ * @author Jean-Paul Vetterli
+ */
+public class Olympics {
+
+  public static void main(String[] args) {
+    try {
+      TimeDomain year4 = new EveryFourYears();
+      
+      // define "missing value" for String (else, the default is null)
+      String missingValue = "(missing)";
+      TimeSeriesFactory.getInstance().define(String.class, missingValue);
+
+      TimeAddressable<String> olympics = TimeSeriesFactory.make(year4, String.class);
+      olympics.put(year4.time("1896"), new String[] {"Athens", "Paris", "Saint-Louis", "London", "Stockholm"});
+      olympics.put(year4.time("1920"), new String[] {"Antwerp", "Paris", "Amsterdam", "Los Angeles", "Berlin"});
+      
+      for (Observation<String> oly : olympics) {
+        System.out.println(oly.toString());
+      }
+      
+    } catch (Exception e) {
+      System.err.println("Oops...\n" + e.getMessage());
+    }
+  }
+}
 
 Create file `Olympics.java` in some directory and put a copy of 
 `t2-1.0.0.jar` (or a later version) in the same directory.

@@ -67,39 +67,38 @@ repository. They can also be found in the <code>target</code> directory.</p>
 <p>Here is a simple example of an application using the Time2 Library. 
 It's called <code>Olympics.java</code>:</p>
 
-<pre><code>import ch.agent.t2.time.*;
-import ch.agent.t2.timeseries.*;
+<pre><code>import ch.agent.t2.time.TimeDomain;
+import ch.agent.t2.timeseries.Observation;
+import ch.agent.t2.timeseries.TimeAddressable;
+import ch.agent.t2.timeseries.TimeSeriesFactory;
 
 /**
- * Olympics is a small demo for the Time2 library.
+ * Olympics is a (very) little demo for the Time2 library.
+ *
  * @author Jean-Paul Vetterli
  */
 public class Olympics {
 
-    public static void main(String[] args) {
-        try {
-            /* define time domain "once every fourth year" */
-            TimeDomainDefinition year4def = new TimeDomainDefinition("year4", 
-                Resolution.YEAR, 0L, new Cycle(true, false, false, false));
-            TimeDomain year4 = TimeDomainManager.getFactory().get(year4def, true);
+  public static void main(String[] args) {
+    try {
+      TimeDomain year4 = new EveryFourYears();
+      
+      // define "missing value" for String (else, the default is null)
+      String missingValue = "(missing)";
+      TimeSeriesFactory.getInstance().define(String.class, missingValue);
 
-            /* define "missing value" for String (else, the default is null) */
-            String missingValue = "(missing)";
-            TimeSeriesFactory.getInstance().define(String.class, missingValue);
-
-            TimeAddressable&lt;String&gt; olympics = TimeSeriesFactory.make(year4, String.class);
-            olympics.put(year4.time("1896"), new String[] 
-               {"Athens", "Paris", "Saint-Louis", "London", "Stockholm"});
-            olympics.put(year4.time("1920"), new String[] 
-                {"Antwerp", "Paris", "Amsterdam", "Los Angeles", "Berlin"});
-
-            for (Observation&lt;String&gt; oly : olympics) {
-                System.out.println(oly.toString());
-            }
-        } catch (Exception e) {
-            System.err.println("Oops...\n" + e.getMessage());
-        }
+      TimeAddressable<String> olympics = TimeSeriesFactory.make(year4, String.class);
+      olympics.put(year4.time("1896"), new String[] {"Athens", "Paris", "Saint-Louis", "London", "Stockholm"});
+      olympics.put(year4.time("1920"), new String[] {"Antwerp", "Paris", "Amsterdam", "Los Angeles", "Berlin"});
+      
+      for (Observation<String> oly : olympics) {
+        System.out.println(oly.toString());
+      }
+      
+    } catch (Exception e) {
+      System.err.println("Oops...\n" + e.getMessage());
     }
+  }
 }
 </code></pre>
 
