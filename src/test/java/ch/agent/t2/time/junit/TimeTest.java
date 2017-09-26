@@ -2,7 +2,6 @@ package ch.agent.t2.time.junit;
 
 import java.util.Date;
 
-import junit.framework.TestCase;
 import ch.agent.core.KeyedException;
 import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.Adjustment;
@@ -14,18 +13,23 @@ import ch.agent.t2.time.Month;
 import ch.agent.t2.time.Resolution;
 import ch.agent.t2.time.SystemTime;
 import ch.agent.t2.time.TimeDomain;
+import ch.agent.t2.time.TimeDomainCatalog;
+import ch.agent.t2.time.TimeDomainCatalogSingleton;
 import ch.agent.t2.time.TimeDomainDefinition;
-import ch.agent.t2.time.TimeDomainManager;
 import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.time.Week;
 import ch.agent.t2.time.Workday;
 import ch.agent.t2.time.Year;
 import ch.agent.t2.time.engine.Time2;
+import junit.framework.TestCase;
 
 public class TimeTest extends TestCase {
 
-	private static void dump(Object expr) {
-		// System.out.println(expr);
+	private static final boolean PRINT = false;
+	
+	private static void dump(Object o) {
+		if (PRINT)
+			System.out.println(o.toString());
 	}
 
 	private class TestTime extends Time2 {
@@ -36,60 +40,64 @@ public class TimeTest extends TestCase {
 		
 	}
 	
+	private final static TimeDomainCatalog catalog = TimeDomainCatalogSingleton.instance();
+	
+	private static TimeDomain getTimeDomain(TimeDomainDefinition def) {
+		TimeDomain domain = catalog.get(def);
+		return domain == null ? def.asTimeDomain() : domain;
+	}
+	
 	private TimeDomain hour() {
-		return TimeDomainManager.getFactory().get(
-				new TimeDomainDefinition("time_hour", Resolution.HOUR, 0L), true);
+		return getTimeDomain(new TimeDomainDefinition("time_hour", Resolution.HOUR, 0L));
 	}
 	
 	private TimeDomain min() {
-		return TimeDomainManager.getFactory().get(
-				new TimeDomainDefinition("time_min", Resolution.MIN, 0L), true);
+		return getTimeDomain(new TimeDomainDefinition("time_min", Resolution.MIN, 0L));
 	}
 	
 	private TimeDomain sec() {
-		return TimeDomainManager.getFactory().get(
-				new TimeDomainDefinition("time_sec", Resolution.SEC, 0L), true);
+		return getTimeDomain(new TimeDomainDefinition("time_sec", Resolution.SEC, 0L));
 	}
 	
 	private TimeDomain msec() {
-		return TimeDomainManager.getFactory().get(
-				new TimeDomainDefinition("time_msec", Resolution.MSEC, 0L), true);
+		return getTimeDomain(new TimeDomainDefinition("time_msec", Resolution.MSEC, 0L));
 	}
 	
 	private TimeDomain usec() {
-		return TimeDomainManager.getFactory().get(
-				new TimeDomainDefinition("time_usec", Resolution.USEC, 0L), true);
+		return getTimeDomain(new TimeDomainDefinition("time_usec", Resolution.USEC, 0L));
 	}
 	
-	private TimeDomain day1() {
-		return TimeDomainManager.getFactory().get(new TimeDomainDefinition("daily1", Resolution.DAY, 0L), true);
-	}
-		
-	public void testDay1() {
+	public void testDay() {
 		try {
-			TimeIndex t = new Day("1999-10-11");
-			for (TimeDomain d : TimeDomainManager.getFactory().getBuiltIns()) {
-				dump(d.getLabel());
-			}
-			TimeDomain d = TimeDomainManager.getFactory().get("daily");
-			assertSame(d, t.getTimeDomain());
-			assertTrue(TimeDomainManager.getFactory().isBuiltIn(Day.DOMAIN));
-			for (TimeDomain domain : TimeDomainManager.getFactory().getTimeDomains()) {
-				dump(domain.toString() + " " + 
-						TimeDomainManager.getFactory().isBuiltIn(domain));
-			}
+			TimeDomainCatalog catalog = TimeDomainCatalogSingleton.instance();
+			TimeDomain d1 = Day.DOMAIN;
+			TimeDomain d2 = new Day("1999-10-11").getTimeDomain();
+			TimeDomain d3 = catalog.get("daily");
+			TimeDomain d4 = catalog.get(new TimeDomainDefinition(null, Resolution.DAY, 0));
+			assertSame(d1, d2);
+			assertSame(d1, d3);
+			assertSame(d1, d4);
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("unexpected exception");
 		}
 	}
 	
-	public void testDay1a() {
+	public void testDay1() {
 		try {
-			day1().time("1999-10-11");
-			fail("exception expected");
+			TimeDomainCatalog catalog = TimeDomainCatalogSingleton.instance();
+			TimeIndex t = new Day("1999-10-11");
+			for (TimeDomain d : catalog.get()) {
+				dump(d.getLabel());
+			}
+			TimeDomain d = TimeDomainCatalogSingleton.instance().get("daily");
+			assertSame(d, t.getTimeDomain());
+			for (TimeDomain domain : catalog.get()) {
+				dump(domain);
+			}
 		} catch (Exception e) {
-			assertEquals(K.T0009, ((KeyedException) e.getCause()).getMsg().getKey());
+			e.printStackTrace();
+			fail("unexpected exception");
 		}
 	}
 	
@@ -105,7 +113,7 @@ public class TimeTest extends TestCase {
 	
 	public void testDay3() {
 		try {
-			TimeDomain d = TimeDomainManager.getFactory().get("weekly");
+			TimeDomain d = TimeDomainCatalogSingleton.instance().get("weekly");
 			TimeIndex t = d.time(0L);
 			new Day(t);
 			fail("exception expected");
@@ -564,7 +572,6 @@ public class TimeTest extends TestCase {
 			TimeIndex time = new Month("2000-12");
 			assertEquals("2000-12", time.toString());
 			assertEquals("monthly", time.getTimeDomain().getLabel());
-			assertTrue(TimeDomainManager.getFactory().isBuiltIn(Month.DOMAIN));
 		} catch (Exception e) {
 			assertEquals(null, e);
 		}
@@ -831,7 +838,6 @@ public class TimeTest extends TestCase {
 		try {
 			TimeIndex time = hour().time("2006-06-21");
 			assertEquals(DayOfWeek.Wed, time.getDayOfWeek());
-			assertFalse(TimeDomainManager.getFactory().isBuiltIn(hour()));
 		} catch (Exception e) {
 			assertEquals(null, e);
 		}
@@ -1092,7 +1098,7 @@ public class TimeTest extends TestCase {
 			/*
 			 * Note : base day 1 is a Sat
 			 */
-			TimeDomain d = TimeDomainManager.getFactory().get(
+			TimeDomain d = TimeDomainCatalogSingleton.instance().get(
 					new TimeDomainDefinition("foo", Resolution.DAY, 0L, 
 							new Cycle(false, false, true, true, true, true, true), null));
 			d.time("0000-01-03");
@@ -1110,7 +1116,7 @@ public class TimeTest extends TestCase {
 
 	public void testCycle2() {
 		try {
-			TimeDomain d = TimeDomainManager.getFactory().get(
+			TimeDomain d = TimeDomainCatalogSingleton.instance().get(
 					new TimeDomainDefinition("foo", Resolution.DAY, 0L, 
 							new Cycle(false, false, true, true, true, true, true), null));
 			d.time("2006-06-19");
@@ -1127,9 +1133,7 @@ public class TimeTest extends TestCase {
 
 	public void testCycle3() {
 		try {
-			TimeDomain d = TimeDomainManager.getFactory().get(
-					new TimeDomainDefinition("foo", Resolution.MONTH, 0L, 
-							new Cycle(false, false, true), null), true);
+			TimeDomain d = getTimeDomain(new TimeDomainDefinition("foo", Resolution.MONTH, 0L, new Cycle(false, false, true), null));
 			d.time("2006-03");
 			d.time("2006-06");
 			d.time("2006-09");
@@ -1319,8 +1323,7 @@ public class TimeTest extends TestCase {
 	
 	public void testSecondMax2() {
 		try {
-			TimeDomain d = TimeDomainManager.getFactory().get(
-					new TimeDomainDefinition("foo", Resolution.SEC, 10000000000L), true);
+			TimeDomain d = getTimeDomain(new TimeDomainDefinition("foo", Resolution.SEC, 10000000000L));
 			TimeIndex time = d.time(Integer.MAX_VALUE);
 			assertEquals("0068-01-19 03:14:07", time.toString());
 			//fail("exception was expected");
@@ -1332,8 +1335,7 @@ public class TimeTest extends TestCase {
 	
 	public void testSecondMax3() {
 		try {
-			TimeDomain d = TimeDomainManager.getFactory().get(
-					new TimeDomainDefinition("fooo", Resolution.SEC, 10000000000L), true);
+			TimeDomain d = getTimeDomain(new TimeDomainDefinition("fooo", Resolution.SEC, 10000000000L));
 			TimeIndex time = d.time(Integer.MAX_VALUE);
 			assertEquals("0068-01-19 03:14:07", time.toString());
 			//fail("exception was expected");
@@ -1376,6 +1378,28 @@ public class TimeTest extends TestCase {
 			TimeIndex time = new SystemTime();
 			String javaDate = new CalendarUtil().format(new Date());
 			assertEquals(time.toString("%04d-%02d-%02d %02d:%02d:%02d"), javaDate);
+		} catch (Exception e) {
+			fail(e.toString());
+		}
+	}
+	
+	public void testSystemTime5() {
+		try {
+			long now1 = System.currentTimeMillis();
+			TimeIndex t = new SystemTime(now1);
+			long now2 = t.asLong() - SystemTime.DOMAIN.getOrigin(); 
+			assertEquals(now2, now1);
+		} catch (Exception e) {
+			fail(e.toString());
+		}
+	}
+	
+	public void testSystemTime6() {
+		try {
+			long now1 = System.currentTimeMillis();
+			SystemTime t = new SystemTime(now1);
+			long now2 = t.asFastJavaTime(); 
+			assertEquals(now2, now1);
 		} catch (Exception e) {
 			fail(e.toString());
 		}

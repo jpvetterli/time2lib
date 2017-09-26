@@ -1,6 +1,5 @@
 package ch.agent.t2.time.junit;
 
-import junit.framework.TestCase;
 import ch.agent.core.KeyedException;
 import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.Adjustment;
@@ -12,11 +11,11 @@ import ch.agent.t2.time.Resolution;
 import ch.agent.t2.time.ThirdFriday;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeDomainDefinition;
-import ch.agent.t2.time.TimeDomainManager;
 import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.time.Week;
 import ch.agent.t2.time.Workday;
 import ch.agent.t2.time.Year;
+import junit.framework.TestCase;
 
 public class TimeConversionTest extends TestCase {
 
@@ -119,12 +118,9 @@ public class TimeConversionTest extends TestCase {
 	public void testCompOlympics() {
 		try {
 			// define time domain "once every fourth year"
-			TimeDomainDefinition year4Adef = new TimeDomainDefinition("year4A", Resolution.YEAR, 0L, new Cycle(true, false, false, false));
-			TimeDomain year4A = TimeDomainManager.getFactory().get(year4Adef, true);
-
+			TimeDomain year4A = new TimeDomainDefinition("year4A", Resolution.YEAR, 0L, new Cycle(true, false, false, false)).asTimeDomain();
 			// define time domain "once every fourth year", shifted
-			TimeDomainDefinition year4Bdef = new TimeDomainDefinition("year4B", Resolution.YEAR, 0L, new Cycle(false, false, true, false));
-			TimeDomain year4B = TimeDomainManager.getFactory().get(year4Bdef, true);
+			TimeDomain year4B = new TimeDomainDefinition("year4B", Resolution.YEAR, 0L, new Cycle(false, false, true, false)).asTimeDomain();
 			TimeIndex y1 = year4A.time("2000");
 			TimeIndex y2 = year4B.time("2002");
 			assertTrue(y2.compareTo(y1) > 0);

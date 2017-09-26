@@ -1,6 +1,5 @@
 package ch.agent.t2.time.junit;
 
-import junit.framework.TestCase;
 import ch.agent.core.KeyedException;
 import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.Adjustment;
@@ -17,64 +16,30 @@ import ch.agent.t2.time.SimpleSubPeriodPattern;
 import ch.agent.t2.time.SubPeriodPattern;
 import ch.agent.t2.time.ThirdFriday;
 import ch.agent.t2.time.TimeDomain;
+import ch.agent.t2.time.TimeDomainCatalog;
+import ch.agent.t2.time.TimeDomainCatalogSingleton;
 import ch.agent.t2.time.TimeDomainDefinition;
-import ch.agent.t2.time.TimeDomainFactory;
-import ch.agent.t2.time.TimeDomainManager;
 import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.time.Workday;
 import ch.agent.t2.time.engine.Time2;
+import junit.framework.TestCase;
 
 public class TimeDomainTest extends TestCase {
 
-	private static TimeDomainFactory getFactory() {
-		return TimeDomainManager.getFactory();
-	}
 	
-	// for testTimeDomain09
-	private static final TimeDomain Test = 
-	getFactory().get(new TimeDomainDefinition("domain10", Resolution.DAY, 42L), true);
-
+	private final static TimeDomainCatalog catalog = TimeDomainCatalogSingleton.instance();
 	
-	private static final TimeDomain GoodTestTimeDOMAIN = 
-		getFactory().get(
-				new TimeDomainDefinition("workweek_we_su", Resolution.DAY, 0L,
-						new Cycle(true, true, false, false, true, true, true), null), true);
-	private static final TimeDomain BadTestTime1DOMAIN = 
-		getFactory().get(
-				new TimeDomainDefinition("workweek", Resolution.DAY, 0L,
-						new Cycle(true, true, false, false, true, true, true), null));
-	private static final TimeDomain BadTestTime2DOMAIN = 
-		getFactory().get(
-				new TimeDomainDefinition(/*"workweek2"*/null, Resolution.DAY, 0L,
-						new Cycle(true, true, true, false, false, true, true), null), true);
-	
-	private class GoodTestTime extends Time2 {
-		private GoodTestTime(String date) throws Exception {
-			super(GoodTestTimeDOMAIN, date);
-		}
-	}
-
-	private class BadTestTime1 extends Time2 {
-		private BadTestTime1(String date) throws Exception {
-			super(BadTestTime1DOMAIN, date);
-		}
-	}
-
-	private class BadTestTime2 extends Time2 {
-
-		private BadTestTime2(String date) throws Exception {
-			super(BadTestTime2DOMAIN, date);
-		}
-
+	private static TimeDomain getTimeDomain(TimeDomainDefinition def) {
+		TimeDomain domain = catalog.get(def);
+		return domain == null ? def.asTimeDomain() : domain;
 	}
 	
 	public void testSameDomain() {
 		try {
-			TimeDomainFactory fac = getFactory();
 			TimeDomain d1 = new Day("0102-03-04").getTimeDomain();;
 			TimeDomain d2 = Day.DOMAIN;
-			TimeDomain d3 = fac.get("daily");
-			TimeDomain d4 = fac.get(new TimeDomainDefinition(null, Resolution.DAY, 0L));
+			TimeDomain d3 = catalog.get("daily");
+			TimeDomain d4 = catalog.get(new TimeDomainDefinition(null, Resolution.DAY, 0L));
 			assertSame(d1, d2);
 			assertSame(d1, d3);
 			assertSame(d1, d4);
@@ -116,7 +81,7 @@ public class TimeDomainTest extends TestCase {
 	public void testOrigin01() {
 		try {
 			TimeDomainDefinition year4defShiftedBy2 = new TimeDomainDefinition("year4s2", Resolution.YEAR, 2L, new Cycle(false, false, true, false));
-			TimeDomain year4s2 = getFactory().get(year4defShiftedBy2, true);
+			TimeDomain year4s2 = getTimeDomain(year4defShiftedBy2);
 			year4s2.time("1996");
 			fail("exception expected");
 		} catch (Exception e) {
@@ -127,7 +92,7 @@ public class TimeDomainTest extends TestCase {
 	public void testOrigin02() {
 		try {
 			TimeDomainDefinition year4defShiftedBy2 = new TimeDomainDefinition("year4s2", Resolution.YEAR, 2L, new Cycle(false, false, true, false));
-			TimeDomain year4s2 = getFactory().get(year4defShiftedBy2, true);
+			TimeDomain year4s2 = getTimeDomain(year4defShiftedBy2);
 			TimeIndex t = year4s2.time("1998");
 			assertEquals("1998", t.toString());
 		} catch (Exception e) {
@@ -137,29 +102,25 @@ public class TimeDomainTest extends TestCase {
 	}
 
 	public void testTimeDomain01() {
-		TimeDomainFactory factory = getFactory();
-		TimeDomain d = factory.get(new TimeDomainDefinition("yearly", Resolution.DAY, 0L));
+		TimeDomain d = getTimeDomain(new TimeDomainDefinition("yearly", Resolution.DAY, 0L));
 		assertEquals("daily", d.getLabel());
 		assertSame(Day.DOMAIN, d);
 	}
 	
 	public void testTimeDomain01a() {
-		TimeDomainFactory factory = getFactory();
-		TimeDomain d = factory.get(new TimeDomainDefinition("foo", Resolution.DAY, 0L));
+		TimeDomain d = getTimeDomain(new TimeDomainDefinition("foo", Resolution.DAY, 0L));
 		assertEquals("daily", d.getLabel());
 		assertSame(Day.DOMAIN, d);
 	}
 	
 	public void testTimeDomain01b() {
-		TimeDomainFactory factory = getFactory();
-		TimeDomain d = factory.get(new TimeDomainDefinition("daily", Resolution.DAY, 0L));
+		TimeDomain d = getTimeDomain(new TimeDomainDefinition("daily", Resolution.DAY, 0L));
 		assertSame(Day.DOMAIN, d);
 	}
 	
 	public void testTimeDomain01c() {
 		try {
-			TimeDomainFactory factory = getFactory();
-			TimeDomain d = factory.get("daily");
+			TimeDomain d = catalog.get("daily");
 			assertSame(Day.DOMAIN, d);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -169,8 +130,7 @@ public class TimeDomainTest extends TestCase {
 	
 	public void testTimeDomain01d() {
 		try {
-			TimeDomainFactory factory = getFactory();
-			TimeDomain d = factory.get(new TimeDomainDefinition("", Resolution.DAY, 0L));
+			TimeDomain d = getTimeDomain(new TimeDomainDefinition("", Resolution.DAY, 0L));
 			assertSame(Day.DOMAIN, d);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -178,23 +138,20 @@ public class TimeDomainTest extends TestCase {
 		}
 	}
 	public void testTimeDomain02() {
-		TimeDomainFactory factory = getFactory();
-		TimeDomain d = factory.get(new TimeDomainDefinition("nightly", Resolution.DAY, 0L));
+		TimeDomain d = getTimeDomain(new TimeDomainDefinition("nightly", Resolution.DAY, 0L));
 		assertEquals("daily", d.getLabel());
 		assertSame(Day.DOMAIN, d);
 	}
 	
 	public void testTimeDomain03() {
-		TimeDomainFactory factory = getFactory();
-		TimeDomain d = factory.get(new TimeDomainDefinition("daily", Resolution.MONTH, 0L));
+		TimeDomain d = getTimeDomain(new TimeDomainDefinition("daily", Resolution.MONTH, 0L));
 		assertFalse("daily".equals(d.getLabel()));
 		assertEquals("monthly", d.getLabel());
 	}
 	
 	public void testTimeDomain04() {
 		try {
-			TimeDomainFactory factory = getFactory();
-			TimeDomain d = factory.get(new TimeDomainDefinition("", Resolution.MONTH, 0L));
+			TimeDomain d = getTimeDomain(new TimeDomainDefinition("", Resolution.MONTH, 0L));
 			assertSame(Month.DOMAIN, d);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -204,8 +161,7 @@ public class TimeDomainTest extends TestCase {
 	
 	public void testTimeDomain05() {
 		try {
-			TimeDomainFactory factory = getFactory();
-			TimeDomain d = factory.get("daily");
+			TimeDomain d = catalog.get("daily");
 			assertSame(Day.DOMAIN, d);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -215,9 +171,8 @@ public class TimeDomainTest extends TestCase {
 	
 	public void testTimeDomain06() {
 		try {
-			TimeDomainFactory factory = getFactory();
-			TimeDomain d = factory.get(new TimeDomainDefinition("workweek_we_su", Resolution.DAY, 0L,
-					new Cycle(true, true, false, false, true, true, true)), true);
+			TimeDomain d = getTimeDomain(new TimeDomainDefinition("workweek_we_su", Resolution.DAY, 0L,
+					new Cycle(true, true, false, false, true, true, true)));
 			TimeIndex t = d.time("2011-05-25");
 			t = t.add(-1);
 			assertEquals(DayOfWeek.Sun, t.getDayOfWeek());
@@ -231,9 +186,8 @@ public class TimeDomainTest extends TestCase {
 	
 	public void testTimeDomain07() {
 		try {
-			TimeDomainFactory factory = getFactory();
-			TimeDomain d = factory.get(new TimeDomainDefinition("daily_tu_sa", Resolution.DAY, 0L,
-					new Cycle(true, false, false, true, true,	true, true)), true);
+			TimeDomain d = getTimeDomain(new TimeDomainDefinition("daily_tu_sa", Resolution.DAY, 0L,
+					new Cycle(true, false, false, true, true,	true, true)));
 			TimeIndex t = d.time("2011-05-25");
 			t = t.add(-1);
 			assertEquals(DayOfWeek.Tue, t.getDayOfWeek());
@@ -247,7 +201,18 @@ public class TimeDomainTest extends TestCase {
 	
 	public void testTimeDomain08() {
 		try {
-			TimeIndex t = new GoodTestTime("2011-05-25");
+			
+			final TimeDomain domain = getTimeDomain(
+					new TimeDomainDefinition("workweek_we_su", Resolution.DAY, 0L, 
+							new Cycle(true, true, false, false, true, true, true), null));
+			
+			final class SomeTime extends Time2 {
+				private SomeTime(String date) throws Exception {
+					super(domain, date);
+				}
+			}
+			
+			TimeIndex t = new SomeTime("2011-05-25");
 			t = t.add(-1);
 			assertEquals(DayOfWeek.Sun, t.getDayOfWeek());
 			t = t.add(+2);
@@ -260,11 +225,34 @@ public class TimeDomainTest extends TestCase {
 	
 	public void testTimeDomain09() {
 		try {
-			TimeIndex t1 = new BadTestTime1("2011-05-25");
-			TimeIndex t2 = new BadTestTime2("2011-05-26");
-			assertEquals("workweek_we_su", t1.getTimeDomain().getLabel());
+			
+			final TimeDomain domain2 = getTimeDomain(
+					new TimeDomainDefinition("workweek-foo-bar", Resolution.DAY, 0L,
+							new Cycle(true, true, false, false, true, true, true), null));
+			
+			final TimeDomain domain3 = getTimeDomain(
+					new TimeDomainDefinition(/*"workweek2"*/null, Resolution.DAY, 0L,
+						new Cycle(true, true, true, false, false, true, true), null));
+	
+			final class SomeTime2 extends Time2 {
+				private SomeTime2(String date) throws Exception {
+					super(domain2, date);
+				}
+			}
+			
+			final class SomeTime3 extends Time2 {
+				private SomeTime3(String date) throws Exception {
+					super(domain3, date);
+				}
+			}
+			
+			TimeIndex t1 = new SomeTime2("2011-05-25");
+			TimeIndex t2 = new SomeTime3("2011-05-26");
+			assertEquals("workweek-foo-bar", t1.getTimeDomain().getLabel());
 			assertTrue(t2.getTimeDomain().getLabel().length() > 0);
-			assertEquals("domain10", Test.getLabel());
+			
+			final TimeDomain testTimeDomain = getTimeDomain(new TimeDomainDefinition("domain10", Resolution.DAY, 42L));
+			assertEquals("domain10", testTimeDomain.getLabel());
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail("exception");
@@ -273,8 +261,7 @@ public class TimeDomainTest extends TestCase {
 
 	public void testTimeDomain10() {
 		try {
-			TimeDomainFactory factory = getFactory();
-			TimeDomain d = factory.get("daily");
+			TimeDomain d = catalog.get("daily");
 			assertEquals("L=daily O=0 U=DAY P=null S=null", d.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -283,8 +270,7 @@ public class TimeDomainTest extends TestCase {
 	}
 	public void testTimeDomain11() {
 		try {
-			TimeDomainFactory factory = getFactory();
-			TimeDomain d = factory.get("workweek");
+			TimeDomain d = catalog.get("workweek");
 			assertEquals("L=workweek O=0 U=DAY P=0011111 S=null", d.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -296,9 +282,8 @@ public class TimeDomainTest extends TestCase {
 	
 	public void testTimeDomain12() {
 		try {
-			getFactory().get(
-					new TimeDomainDefinition("foo", Resolution.DAY, 0L,
-					new Cycle(false)), true);
+			getTimeDomain(new TimeDomainDefinition("foo", Resolution.DAY, 0L,
+					new Cycle(false)));
 			fail("exception expected");
 		} catch (IllegalArgumentException e) {
 		}
@@ -306,28 +291,13 @@ public class TimeDomainTest extends TestCase {
 	
 	public void testTimeDomain13() {
 		try {
-			getFactory().get(
-					new TimeDomainDefinition("foo", Resolution.DAY, 0L,
-					new Cycle(false, false, false)), true);
+			getTimeDomain(new TimeDomainDefinition("foo", Resolution.DAY, 0L,
+					new Cycle(false, false, false)));
 			fail("exception expected");
 		} catch (IllegalArgumentException e) {
 		}
 	}
 	
-	public void testTimeDomain14() {
-		try {
-			getFactory().get(
-					new TimeDomainDefinition("foo2notyetused", Resolution.DAY, 0L,
-							new Cycle(true, false, true, false, true)), true);
-			getFactory().get(
-				new TimeDomainDefinition("foo2", Resolution.DAY, 0L,
-						new Cycle(true, false, true, false, true)), false);
-			fail("exception expected");
-		} catch (Exception e) {
-			assertEquals(K.T0009, ((KeyedException) e.getCause()).getMsg().getKey());
-		}
-	}
-
 	public void testMinTime1() {
 		TimeIndex time = Day.DOMAIN.minTime();
 		assertEquals("0000-01-01", time.toString());
@@ -360,11 +330,10 @@ public class TimeDomainTest extends TestCase {
 
 	public void testMaxTime5() {
 		try {
-			TimeDomain usec = getFactory().get(
+			TimeDomain usec = catalog.get(
 					new TimeDomainDefinition("usec", Resolution.USEC, 0L));
 			if (usec == null)
-				usec = getFactory().get(
-				new TimeDomainDefinition("usec", Resolution.USEC, 0L), true);
+				usec = getTimeDomain(new TimeDomainDefinition("usec", Resolution.USEC, 0L));
 			assertEquals("0000-01-01 00:00:00.000000", usec.minTime().toString());
 			assertEquals("+292277-01-09 04:00:54.775807", usec.maxTime().toString());
 		} catch(Exception e) {
@@ -373,29 +342,10 @@ public class TimeDomainTest extends TestCase {
 		}
 	}
 	
-	public void testSubPeriod00(String input, Adjustment adjust, String expected) {
-		try {
-			TimeDomain d = getFactory().get(
-					new TimeDomainDefinition("abc", Resolution.MONTH, 0L, null, 
-							new SimpleSubPeriodPattern(Resolution.MONTH, Resolution.DAY, new int[]{10,20})), 
-							true);
-			TimeDomain d2 = getFactory().get(
-					new TimeDomainDefinition("abc", Resolution.MONTH, 0L, null, 
-							new SimpleSubPeriodPattern(Resolution.MONTH, Resolution.DAY, new int[]{10,20})));
-			assertEquals("abc", d.getLabel());
-			assertEquals("abc", d2.getLabel());
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail("unexpected exception");
-		}
-	}
-	
 	private void helperSubPeriod01(String input, Adjustment adjust, String expected) {
 		try {
-			TimeDomain d = getFactory().get(
-					new TimeDomainDefinition("abc", Resolution.MONTH, 0L, null, 
-							new SimpleSubPeriodPattern(Resolution.MONTH, Resolution.DAY, new int[]{10,20})), 
-							true);			
+			TimeDomain d = getTimeDomain(new TimeDomainDefinition("abc", Resolution.MONTH, 0L, null, 
+						new SimpleSubPeriodPattern(Resolution.MONTH, Resolution.DAY, new int[]{10,20})));			
 			assertEquals("abc", d.getLabel());
 			TimeIndex t = d.time(input, adjust);
 			TimeIndex day = new Day(expected);
@@ -421,10 +371,8 @@ public class TimeDomainTest extends TestCase {
 	public void testSubPeriod02() {
 		try {
 			
-			TimeDomain d = getFactory().get(
-					new TimeDomainDefinition("abc2", Resolution.MONTH, 0L, null, 
-							new SimpleSubPeriodPattern(Resolution.MONTH, Resolution.DAY, new int[]{2,4})), 
-							true);			
+			TimeDomain d = getTimeDomain(new TimeDomainDefinition("abc2", Resolution.MONTH, 0L, null, 
+							new SimpleSubPeriodPattern(Resolution.MONTH, Resolution.DAY, new int[]{2,4})));			
 			assertEquals("abc2", d.getLabel());
 			TimeIndex t = d.time("2005-01-01", Adjustment.UP);
 			Range r = new Range(t, t.add(23));
@@ -443,10 +391,8 @@ public class TimeDomainTest extends TestCase {
 	
 	private void helperSubPeriod03(String input, Adjustment adjust, String expected) {
 		try {
-			TimeDomain d = getFactory().get(
-					new TimeDomainDefinition("abcd", Resolution.DAY, 0L, null, 
-							new SimpleSubPeriodPattern(Resolution.DAY, Resolution.SEC, new int[]{36000, 54000, 64800})), 
-							true);			
+			TimeDomain d = getTimeDomain(new TimeDomainDefinition("abcd", Resolution.DAY, 0L, null, 
+							new SimpleSubPeriodPattern(Resolution.DAY, Resolution.SEC, new int[]{36000, 54000, 64800})));			
 			assertEquals("abcd", d.getLabel());
 			TimeIndex t = d.time(input, adjust);
 			TimeIndex day = new Day(expected);
@@ -471,11 +417,9 @@ public class TimeDomainTest extends TestCase {
 
 	public void testSubPeriod04() {
 		try {
-			TimeDomain d = getFactory().get(
-					new TimeDomainDefinition("abcde", Resolution.DAY, 0L, 
+			TimeDomain d = getTimeDomain(new TimeDomainDefinition("abcde", Resolution.DAY, 0L, 
 							new Cycle(false, false, true, true, true, true, true), 
-							new SimpleSubPeriodPattern(Resolution.DAY, Resolution.SEC, new int[]{36000, 54000, 63000})), 
-							true);			
+							new SimpleSubPeriodPattern(Resolution.DAY, Resolution.SEC, new int[]{36000, 54000, 63000})));			
 			TimeIndex t = d.time("2005-05-02", Adjustment.UP);
 			Range r = new Range(t, t.add(29));
 //			System.out.println("* testSubPeriod04");
@@ -493,11 +437,10 @@ public class TimeDomainTest extends TestCase {
 	
 	public void testSubPeriod04a() {
 		try {
-			TimeDomain d = getFactory().get(
+			TimeDomain d = getTimeDomain(
 					new TimeDomainDefinition("abcde", Resolution.DAY, 0L, 
 							new Cycle(false, false, true, true, true, true, true), 
-							new SimpleSubPeriodPattern(Resolution.DAY, Resolution.SEC, new int[]{36000, 54000, 63000})), 
-							true);			
+							new SimpleSubPeriodPattern(Resolution.DAY, Resolution.SEC, new int[]{36000, 54000, 63000})));			
 			d.time("2005-05-01", Adjustment.UP);
 			fail("exception expected");
 		} catch (KeyedException e) {
@@ -507,11 +450,10 @@ public class TimeDomainTest extends TestCase {
 	
 	public void testSubPeriod05() {
 		try {
-			TimeDomain d = getFactory().get(
+			TimeDomain d = getTimeDomain(
 					new TimeDomainDefinition("abc4", Resolution.YEAR, 0L, 
 							new Cycle(true, false, false, false), 
-							new SimpleSubPeriodPattern(Resolution.YEAR, Resolution.MONTH, new int[]{3, 9})), 
-							true);			
+							new SimpleSubPeriodPattern(Resolution.YEAR, Resolution.MONTH, new int[]{3, 9})));			
 			TimeIndex t = d.time("2000-01-01", Adjustment.UP);
 			Range r = new Range(t, t.add(3));
 //			System.out.println("* testSubPeriod05");
@@ -529,11 +471,9 @@ public class TimeDomainTest extends TestCase {
 
 	public void testSubPeriod06() {
 		try {
-			getFactory().get(
-					new TimeDomainDefinition("abc", Resolution.DAY, 0L, 
-							new Cycle(true, false, false, false), 
-							new SimpleSubPeriodPattern(Resolution.DAY, Resolution.MIN, new int[]{3, 9})), 
-							true);			
+			getTimeDomain(new TimeDomainDefinition("abc", Resolution.DAY, 0L, 
+					new Cycle(true, false, false, false), 
+					new SimpleSubPeriodPattern(Resolution.DAY, Resolution.MIN, new int[]{3, 9})));			
 			fail("exception expected");
 		} catch (KeyedException e) {
 			assertEquals(K.T1112, e.getMsg().getKey());
@@ -542,11 +482,9 @@ public class TimeDomainTest extends TestCase {
 	
 	public void testSubPeriod07() {
 		try {
-			TimeDomain d = getFactory().get(
-					new TimeDomainDefinition("abc5", Resolution.DAY, 0L, 
+			TimeDomain d = getTimeDomain(new TimeDomainDefinition("abc5", Resolution.DAY, 0L, 
 							null, 
-							new SimpleSubPeriodPattern(Resolution.DAY, Resolution.MONTH, new int[]{3, 9})), 
-							true);			
+							new SimpleSubPeriodPattern(Resolution.DAY, Resolution.MONTH, new int[]{3, 9})));			
 			d.time("2005-05-02", Adjustment.UP);
 			fail("exception expected");
 		} catch (KeyedException e) {
@@ -556,11 +494,9 @@ public class TimeDomainTest extends TestCase {
 	
 	public void testSubPeriod08() {
 		try {
-			TimeDomain d = getFactory().get(
-					new TimeDomainDefinition("abc6", Resolution.DAY, 0L, 
+			TimeDomain d = getTimeDomain(new TimeDomainDefinition("abc6", Resolution.DAY, 0L, 
 							new Cycle(true, false, true), 
-							new SimpleSubPeriodPattern(Resolution.DAY, Resolution.MONTH, new int[]{3, 9})), 
-							true);			
+							new SimpleSubPeriodPattern(Resolution.DAY, Resolution.MONTH, new int[]{3, 9})));			
 			assertEquals("L=abc6 O=0 U=DAY P=101 S=MONTH[3, 9]", d.toString());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -580,8 +516,7 @@ public class TimeDomainTest extends TestCase {
 		try {
 			DayByNameAndRank[] dbnar = new DayByNameAndRank[]{new DayByNameAndRank(DayOfWeek.Fri, 3)};
 			SubPeriodPattern spp = new DayRankingSubPeriodPattern(Resolution.MONTH, dbnar);
-			TimeDomain d = getFactory().get(
-					new TimeDomainDefinition("friday3", Resolution.MONTH, 0L, null, spp), true);			
+			TimeDomain d = getTimeDomain(new TimeDomainDefinition("friday3", Resolution.MONTH, 0L, null, spp));			
 			assertSame(ThirdFriday.DOMAIN, d);
 			TimeIndex t = d.time(initDate, adjust);
 			Range r = new Range(t, t.add(periods));
@@ -624,11 +559,9 @@ public class TimeDomainTest extends TestCase {
 
 	public void testDaySubPeriod02() {
 		try {
-			
 			DayByNameAndRank[] dbnar = new DayByNameAndRank[]{new DayByNameAndRank(DayOfWeek.Fri, 5)};
 			SubPeriodPattern spp = new DayRankingSubPeriodPattern(Resolution.MONTH, dbnar);
-			getFactory().get(
-					new TimeDomainDefinition("abc9", Resolution.MONTH, 0L, null, spp), true);			
+			getTimeDomain(new TimeDomainDefinition("abc9", Resolution.MONTH, 0L, null, spp));
 			fail("exception expected");
 		} catch (Exception e) {
 			assertEquals(K.T1051, ((KeyedException) e.getCause()).getMsg().getKey());
@@ -646,8 +579,7 @@ public class TimeDomainTest extends TestCase {
 					new DayByNameAndRank(DayOfWeek.Fri, 3),
 					new DayByNameAndRank(DayOfWeek.Mon, -1)};
 			SubPeriodPattern spp = new DayRankingSubPeriodPattern(Resolution.MONTH, dbnar);
-			TimeDomain d = getFactory().get(
-					new TimeDomainDefinition("abc10", Resolution.MONTH, 0L, new Cycle(false, false, true), spp), true);			
+			TimeDomain d = getTimeDomain(	new TimeDomainDefinition("abc10", Resolution.MONTH, 0L, new Cycle(false, false, true), spp));			
 			TimeIndex t = d.time(initDate, adjust);
 			Range r = new Range(t, t.add(periods));
 			if (print)
@@ -709,8 +641,7 @@ public class TimeDomainTest extends TestCase {
 					new DayByNameAndRank(DayOfWeek.Tue, 7),
 					new DayByNameAndRank(DayOfWeek.Mon, -2)};
 			SubPeriodPattern spp = new DayRankingSubPeriodPattern(Resolution.YEAR, dbnar);
-			TimeDomain d = getFactory().get(
-					new TimeDomainDefinition("abc11", Resolution.YEAR, 0L, null, spp), true);			
+			TimeDomain d = getTimeDomain(new TimeDomainDefinition("abc11", Resolution.YEAR, 0L, null, spp));			
 			TimeIndex t = d.time(initDate, adjust);
 			Range r = new Range(t, t.add(periods));
 			if (print)

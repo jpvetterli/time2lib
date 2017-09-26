@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.SimpleTimeZone;
 
-import junit.framework.TestCase;
 import ch.agent.core.KeyedException;
 import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.Adjustment;
@@ -16,19 +15,31 @@ import ch.agent.t2.time.Month;
 import ch.agent.t2.time.Resolution;
 import ch.agent.t2.time.SimpleSubPeriodPattern;
 import ch.agent.t2.time.TimeDomain;
+import ch.agent.t2.time.TimeDomainCatalog;
+import ch.agent.t2.time.TimeDomainCatalogSingleton;
 import ch.agent.t2.time.TimeDomainDefinition;
-import ch.agent.t2.time.TimeDomainManager;
 import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.time.Workday;
 import ch.agent.t2.time.Year;
 import ch.agent.t2.time.junit.CalendarUtil;
 import ch.agent.t2.timeutil.JavaDateUtil;
+import junit.framework.TestCase;
 
 
 public class JavaDateUtilTest extends TestCase {
 
-	private static void dump(Object expr) {
-		// System.out.println(expr);
+	private static final boolean PRINT = false;
+	
+	private static void dump(Object o) {
+		if (PRINT)
+			System.out.println(o.toString());
+	}
+
+	private final static TimeDomainCatalog catalog = TimeDomainCatalogSingleton.instance();
+	
+	private static TimeDomain getTimeDomain(TimeDomainDefinition def) {
+		TimeDomain domain = catalog.get(def);
+		return domain == null ? def.asTimeDomain() : domain;
 	}
 
 	private GregorianCalendar gcal;
@@ -39,8 +50,7 @@ public class JavaDateUtilTest extends TestCase {
 	}
 	
 	private TimeDomain usec() {
-		return TimeDomainManager.getFactory().get(
-				new TimeDomainDefinition("time_usec", Resolution.USEC, 0L), true);
+		return getTimeDomain(new TimeDomainDefinition("time_usec", Resolution.USEC, 0L));
 	}
 	
 	@Override
@@ -221,8 +231,7 @@ public class JavaDateUtilTest extends TestCase {
 	
 	public void testAsDate7() {
 		try {
-			TimeDomain d = TimeDomainManager.getFactory().get(
-					new TimeDomainDefinition("time_sec", Resolution.SEC, 0L), true);
+			TimeDomain d = getTimeDomain(new TimeDomainDefinition("time_sec", Resolution.SEC, 0L));
 			TimeIndex time = d.time("1986-09-15 12:15:42");
 			Date date = JavaDateUtil.toJavaDate(time);
 			assertEquals("1986-09-15 12:15:42.000", fullDateFormat.format(date));
@@ -233,10 +242,8 @@ public class JavaDateUtilTest extends TestCase {
 	
 	public void testAsDate8() {
 		try {
-			TimeDomain d = TimeDomainManager.getFactory().get(
-					new TimeDomainDefinition("abc", Resolution.MONTH, 0L,
-					null, new SimpleSubPeriodPattern(Resolution.MONTH, Resolution.DAY, new int[]{10,20})), 
-					true);
+			TimeDomain d = getTimeDomain(new TimeDomainDefinition("abc", Resolution.MONTH, 0L,
+					null, new SimpleSubPeriodPattern(Resolution.MONTH, Resolution.DAY, new int[]{10,20})));
 			TimeIndex t = d.time("2008-06-05", Adjustment.UP); // expect 2008-06-10
 			Date date = JavaDateUtil.toJavaDate(t);
 			assertEquals("2008-06-10 00:00:00.000", fullDateFormat.format(date));
@@ -248,10 +255,8 @@ public class JavaDateUtilTest extends TestCase {
 	
 	public void testAsDate9() {
 		try {
-			TimeDomain d = TimeDomainManager.getFactory().get(
-					new TimeDomainDefinition("abcd", Resolution.DAY, 0L,
-					null, new SimpleSubPeriodPattern(Resolution.DAY, Resolution.SEC, new int[]{36000, 54000, 64800})), 
-					true);
+			TimeDomain d = getTimeDomain(new TimeDomainDefinition("abcd", Resolution.DAY, 0L,
+					null, new SimpleSubPeriodPattern(Resolution.DAY, Resolution.SEC, new int[]{36000, 54000, 64800})));
 			TimeIndex t = d.time("2008-06-25 11:00:00", Adjustment.UP); // expect 2008-06-25 15:00:00
 			Date date = JavaDateUtil.toJavaDate(t);
 			assertEquals("2008-06-25 15:00:00.000", fullDateFormat.format(date));
