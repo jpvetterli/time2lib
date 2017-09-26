@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011-2013 Hauser Olsson GmbH
+ *   Copyright 2011-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,15 +33,16 @@ import ch.agent.t2.time.engine.Time2;
 public class SystemTime extends Time2 {
 
 	private static final long ORIGIN = TimeDomain.DAYS_TO_19700101 * 24 * 60 * 60 * 1000;
-	/**
-	 * A constant holding the definition. 
-	 */
 
-	public static final TimeDomainDefinition DEF = new TimeDomainDefinition("systemtime", Resolution.MSEC, ORIGIN);
+	/**
+	 * A constant holding the domain label.
+	 */
+	public static final String LABEL = "systemtime";
+	
 	/**
 	 * A constant holding the domain.
 	 */
-	public static final TimeDomain DOMAIN = TimeDomainManager.getFactory().get(DEF, true);
+	public static final TimeDomain DOMAIN = new TimeDomainDefinition(LABEL, Resolution.MSEC, ORIGIN).asTimeDomain();
 
 	/**
 	 * Construct a <q>systemtime</q> time from another time object. 
@@ -63,6 +64,26 @@ public class SystemTime extends Time2 {
 		super(DOMAIN, ORIGIN + System.currentTimeMillis());
 	}
 	
+	/**
+	 * Construct a <q>systemtime</q> from a Java fast time.
+	 * A Java fast time is returned for example by
+	 * <pre>
+	 * System.currentTimeMillis()
+	 * </pre>
+	 * 
+	 * To get a Java fast time from a <q>systemtime</q> do
+	 * <pre>
+	 * SystemTime t;
+	 * ...
+	 * long javaTime = t - SystemTime.DOMAIN.getOrigin();
+	 * </pre>
+	 * 
+	 * @param millis a number of milliseconds since the epoch
+	 */
+	public SystemTime(long millis) {
+		super(DOMAIN, ORIGIN + millis);
+	}
+
 	/**
 	 * Construct a <q>systemtime</q> time from a string.
 	 *  
@@ -87,6 +108,17 @@ public class SystemTime extends Time2 {
 	 */
 	public SystemTime(long year, int month, int day, int hour, int min, int sec, int msec) throws T2Exception { 
 		super(DOMAIN, year, month, day, hour, min, sec, msec * 1000, Adjustment.NONE);
+	}
+	
+	/**
+	 * Get the fast Java time corresponding to this
+	 * <q>systemtime</q>. The result can be passed to the java.util.Date
+	 * constructor.
+	 * 
+	 * @return a long representing a fast Java time
+	 */
+	public long asFastJavaTime() {
+		return asLong() - ORIGIN;
 	}
 
 }

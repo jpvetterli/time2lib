@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011-2013 Hauser Olsson GmbH
+ *   Copyright 2011-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,14 +30,14 @@ import ch.agent.t2.time.engine.Time2;
 public class Month extends Time2 {
 
 	/**
-	 * A constant holding the definition. 
+	 * A constant holding the domain label.
 	 */
-	public static final TimeDomainDefinition DEF = new TimeDomainDefinition("monthly", Resolution.MONTH, 0L);
-
+	public static final String LABEL = "monthly";
+	
 	/**
 	 * A constant holding the domain.
 	 */
-	public static final TimeDomain DOMAIN = TimeDomainManager.getFactory().get(DEF, true);
+	public static final TimeDomain DOMAIN = new TimeDomainDefinition(LABEL, Resolution.MONTH, 0L).asTimeDomain();
 
 	/**
 	 * Construct a <q>monthly</q> time from another time object. 

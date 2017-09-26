@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011-2013 Hauser Olsson GmbH
+ *   Copyright 2011-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,36 +24,20 @@ import ch.agent.t2.time.engine.Time2;
 /**
  * A Day is a {@link Time2} with day resolution.
  * The domain label is <b>daily</b>.
- * <p>
- * Here are four equivalent ways of constructing <q>daily</q> times:
- * <blockquote>
- * <pre>
- * TimeIndex day1 = new Day("2005-01-01");
- * TimeIndex day2 = Day.DOMAIN.time("2005-01-01");
- * TimeIndex day3 = TimeDomainManager.getFactory()
- *     .get("daily").time("2005-01-01");
- * TimeIndex day4 = TimeDomainManager.getFactory()
- *     .get(new TimeDomainDefinition("daily", Resolution.DAY, 0L), true)
- *     .time("2005-01-01");
- * assertSame(day1.getTimeDomain(), day2.getTimeDomain());
- * assertSame(day1.getTimeDomain(), day3.getTimeDomain());
- * assertSame(day1.getTimeDomain(), day4.getTimeDomain());
- * </pre>
- * </blockquote>
  *
  * @author Jean-Paul Vetterli
  */
 public class Day extends Time2 {
 
 	/**
-	 * A constant holding the definition. 
+	 * A constant holding the domain label.
 	 */
-	public static final TimeDomainDefinition DEF = new TimeDomainDefinition("daily", Resolution.DAY, 0L);
-
+	public static final String LABEL = "daily";
+	
 	/**
 	 * A constant holding the domain.
 	 */
-	public static final TimeDomain DOMAIN = TimeDomainManager.getFactory().get(DEF, true);
+	public static final TimeDomain DOMAIN = new TimeDomainDefinition(LABEL, Resolution.DAY, 0L).asTimeDomain();
 
 	/**
 	 * Construct a <q>daily</q> time from another time object. 

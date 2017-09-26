@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011-2013 Hauser Olsson GmbH
+ *   Copyright 2011-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,20 +30,18 @@ import ch.agent.t2.time.engine.Time2;
 public class ThirdFriday extends Time2 {
 
 	/**
-	 * A constant holding the definition. 
+	 * A constant holding the domain label.
 	 */
-	public static final TimeDomainDefinition DEF = init();
-
+	public static final String LABEL = "friday3";
+	
 	/**
 	 * A constant holding the domain.
 	 */
-	public static final TimeDomain DOMAIN = TimeDomainManager.getFactory().get(DEF, true);
-
-	private static TimeDomainDefinition init() {
-		DayByNameAndRank[] dbnar = new DayByNameAndRank[]{new DayByNameAndRank(DayOfWeek.Fri, 3)};
-		SubPeriodPattern spp = new DayRankingSubPeriodPattern(Resolution.MONTH, dbnar);
-		return new TimeDomainDefinition("friday3", Resolution.MONTH, 0L, null, spp);
-	}
+	public static final TimeDomain DOMAIN = new TimeDomainDefinition(
+		LABEL, Resolution.MONTH, 0L, null, 
+		new DayRankingSubPeriodPattern(Resolution.MONTH, 
+		new DayByNameAndRank[]{new DayByNameAndRank(DayOfWeek.Fri, 3)})
+	).asTimeDomain();
 
 	/**
 	 * Construct a <q>friday3</q> time from another time object. 

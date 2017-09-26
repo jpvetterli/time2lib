@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011-2013 Hauser Olsson GmbH
+ *   Copyright 2011-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,15 +34,16 @@ import ch.agent.t2.time.engine.Time2;
 public class DateTime extends Time2 {
 
 	private static final long ORIGIN = TimeDomain.DAYS_TO_20000101 * 24 * 60 * 60;
-	/**
-	 * A constant holding the definition. 
-	 */
 
-	public static final TimeDomainDefinition DEF = new TimeDomainDefinition("datetime", Resolution.SEC, ORIGIN);
+	/**
+	 * A constant holding the domain label.
+	 */
+	public static final String LABEL = "datetime";
+	
 	/**
 	 * A constant holding the domain.
 	 */
-	public static final TimeDomain DOMAIN = TimeDomainManager.getFactory().get(DEF, true);
+	public static final TimeDomain DOMAIN = new TimeDomainDefinition(LABEL, Resolution.SEC, ORIGIN).asTimeDomain();
 
 	/**
 	 * Construct a <q>datetime</q> time from another time object. 
