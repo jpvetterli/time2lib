@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011-2013 Hauser Olsson GmbH
+ *   Copyright 2011-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +23,7 @@ import ch.agent.t2.time.Adjustment;
 import ch.agent.t2.time.BasePeriodPattern;
 import ch.agent.t2.time.DayOfWeek;
 import ch.agent.t2.time.ExternalTimeFormat;
+import ch.agent.t2.time.ExternalTimeFormatSingleton;
 import ch.agent.t2.time.Resolution;
 import ch.agent.t2.time.SubPeriodPattern;
 import ch.agent.t2.time.TimeDomain;
@@ -52,7 +53,7 @@ import ch.agent.t2.time.TimeParts;
 public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
 
 	
-	private int hash; // the object is immutable, so hash must be computed only once
+	private int hash = 0; // the object is immutable, so hash must be computed only once
 
 	private String label;
 	
@@ -66,8 +67,6 @@ public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
 	
 	private SubPeriodPattern subPeriodPattern;
 	
-	private int serialNumber = -1; // -1 for non-built-ins, should be accessible only from classes in package
-	
 	private TimeIndex minTime, maxTime, minOffsetCompatibleTime, maxOffsetCompatibleTime;
 	private long minNumericTime, maxNumericTime;
 	
@@ -77,7 +76,7 @@ public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
 	 * @param def a non-null time domain definition
 	 * @param externalFormat a non-null external format
 	 */
-	protected TimeFactory(TimeDomainDefinition def, ExternalTimeFormat externalFormat) {
+	public TimeFactory(TimeDomainDefinition def, ExternalTimeFormat externalFormat) {
 		super();
 		this.label = def.getLabel();
 		this.baseUnit = def.getBaseUnit();
@@ -92,39 +91,16 @@ public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
 	}
 	
 	/**
-	 * Return true if the domain is built-in.
+	 * Construct a TimeFactory for the given time domain definition and the default
+	 * external time format.
 	 * 
-	 * @return true if the domain is built-in
+	 * @param def
+	 *            a non-null time domain definition
 	 */
-	boolean isBuiltIn() {
-		return serialNumber >= 0;
+	public TimeFactory(TimeDomainDefinition def) {
+		this(def, ExternalTimeFormatSingleton.instance());
 	}
-
-	/**
-	 * Marks the domain as built-in and set its serial number. 
-	 * This number gives the position of the domain in the sequence of declarations. 
-	 * The sequence of invocations of this method should begin with an argument 
-	 * of 0, and proceed with arguments incremented by 1.
-	 * 
-	 * @param serialNumber
-	 *            a non-negative number
-	 */
-	void markBuiltIn(int serialNumber) {
-		if (serialNumber < 0)
-			throw new IllegalArgumentException("serialNumber negative");
-		this.serialNumber = serialNumber;
-	}
-
-	/**
-	 * Return the serial number of the built-in time domain. 
-	 * Return -1 if domain is not built-in.
-	 * 
-	 * @return the serial number
-	 */
-	int getSerialNumber() {
-		return serialNumber;
-	}
-
+	
 	@Override
 	public String getLabel() {
 		return label != null ? label : toString();
@@ -170,57 +146,52 @@ public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
 		return o1 == null && o2 == null || o1 != null && o1.equals(o2);
 	}
 	
-	/**
-	 * This method tests if the given domain properties match those of
-	 * this domain.
-	 * 
-	 * @param baseUnit a resolution
-	 * @param origin a number 
-	 * @param basePattern a base period pattern
-	 * @param subPattern a sub period pattern
-	 * @return true if all these properties match those of this domain
-	 */
-	public boolean matches(Resolution baseUnit, long origin, BasePeriodPattern basePattern, SubPeriodPattern subPattern) {
-		/*
-		 * IMPORTANT: the method relies on equals being overridden.
-		 */
-		if (!this.baseUnit.equals(baseUnit))
+	private boolean equalsIgnoringLabel(TimeFactory domain) {
+		if (!domain.baseUnit.equals(baseUnit))
 			return false;
-		if (origin != this.origin)
+		if (domain.origin != origin)
 			return false;
-		if (!equals(basePeriodPattern, basePattern))
+		if (!equals(basePeriodPattern, domain.basePeriodPattern))
 			return false;
-		return equals(subPeriodPattern, subPattern);
+		return equals(subPeriodPattern, domain.subPeriodPattern);
 	}
-
+	
+	@Override
+	public boolean similar(TimeDomain domain) {
+		if (this == domain)
+			return true;
+		if (domain == null)
+			return false;
+		if (getClass() != domain.getClass())
+			return false;
+		return equalsIgnoringLabel((TimeFactory) domain);
+	}
+	
+	public int hashCode() {
+		if (hash == 0) {
+			final int prime = 31;
+			int result = 1;
+			result = prime * result + ((basePeriodPattern == null) ? 0 : basePeriodPattern.hashCode());
+			result = prime * result + ((baseUnit == null) ? 0 : baseUnit.hashCode());
+			result = prime * result + ((label == null) ? 0 : label.hashCode());
+			result = prime * result + (int) (origin ^ (origin >>> 32));
+			result = prime * result + ((subPeriodPattern == null) ? 0 : subPeriodPattern.hashCode());
+			hash = result;
+		}
+		return hash;
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
-		if (!(obj instanceof TimeFactory))
+		if (obj == null)
 			return false;
-		if (!((TimeFactory) obj).baseUnit.equals(baseUnit))
+		if (getClass() != obj.getClass())
 			return false;
-		if (((TimeFactory) obj).origin != origin)
+		if (!equals(label, ((TimeFactory) obj).label))
 			return false;
-		if (!equals(basePeriodPattern, ((TimeFactory) obj).basePeriodPattern))
-			return false;
-		return equals(subPeriodPattern, ((TimeFactory) obj).subPeriodPattern);
-	}
-	
-	@Override
-	public int hashCode() {
-		int h = hash;
-		if (h == 0) {
-			h = (new Long(origin)).hashCode();
-			h = 31 * h + baseUnit.hashCode(); // why 31?
-			if (basePeriodPattern != null)
-				h = 31 * h + basePeriodPattern.hashCode(); // why not?
-			if (subPeriodPattern != null)
-				h = 31 * h + subPeriodPattern.hashCode(); // saw it in java.util.String
-			hash = h;
-		}
-		return h;
+		return equalsIgnoringLabel((TimeFactory) obj);
 	}
 
 	@Override

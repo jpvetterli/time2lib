@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011-2013 Hauser Olsson GmbH
+ *   Copyright 2011-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import ch.agent.t2.time.ExternalTimeFormat;
 import ch.agent.t2.time.Resolution;
 import ch.agent.t2.time.ThirdFriday;
 import ch.agent.t2.time.TimeDomain;
+import ch.agent.t2.time.TimeDomainCatalogSingleton;
 import ch.agent.t2.time.TimeDomainDefinition;
-import ch.agent.t2.time.TimeDomainManager;
 import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.time.TimeParts;
 import ch.agent.t2.time.Workday;
@@ -120,7 +120,7 @@ public class Time2 implements TimeIndex {
 	 * @param domain a non-null {@link TimeFactory}
 	 * @param time a valid numerical time index
 	 */
-	protected Time2(TimeDomain domain, long time) {
+	public Time2(TimeDomain domain, long time) {
 		this(domain);
 		try {
 			this.domain.valid(time, false);
@@ -147,7 +147,7 @@ public class Time2 implements TimeIndex {
 	 * @param adjust a non-null allowed adjustment mode
 	 * @throws T2Exception
 	 */
-	protected Time2(TimeDomain domain, long year, int month, int day, int hour, int min, int sec,
+	public Time2(TimeDomain domain, long year, int month, int day, int hour, int min, int sec,
 			int usec, Adjustment adjust) throws T2Exception {
 		this(domain);
 		TimeParts tp = new TimeParts();
@@ -175,7 +175,7 @@ public class Time2 implements TimeIndex {
 	 * @param adjustment a non-null allowed adjustment mode
 	 * @throws T2Exception
 	 */
-	protected Time2(TimeDomain domain, String time, Adjustment adjustment) throws T2Exception {
+	public Time2(TimeDomain domain, String time, Adjustment adjustment) throws T2Exception {
 		this(domain);
 		set(time, adjustment);
 	}
@@ -193,7 +193,7 @@ public class Time2 implements TimeIndex {
 	 * @param time a string containing a representation of a date and time
 	 * @throws T2Exception
 	 */
-	protected Time2(TimeDomain domain, String time) throws T2Exception {
+	public Time2(TimeDomain domain, String time) throws T2Exception {
 		this(domain, time, Adjustment.NONE);
 	}
 	
@@ -418,20 +418,20 @@ public class Time2 implements TimeIndex {
 			if (compareResols == 0) {
 				// convert  both to unrestricted domain
 				TimeDomainDefinition def = new TimeDomainDefinition(null, getTimeDomain().getResolution(), 0L);
-				TimeDomain unrestrictedDomain = TimeDomainManager.getFactory().get(def, true);
+				TimeDomain unrestrictedDomain = TimeDomainCatalogSingleton.instance().get(def);
 				TimeIndex converted = convertOrThrowRTE(unrestrictedDomain, this);
 				TimeIndex otherConverted = convertOrThrowRTE(unrestrictedDomain, otherTime);
 				return converted.compareTo(otherConverted);
 			} else if (compareResols < 0) {
 				// convert  both to highest resolution
 				TimeDomainDefinition def = new TimeDomainDefinition(null, otherTime.getTimeDomain().getResolution(), 0L);
-				TimeDomain unrestrictedDomain = TimeDomainManager.getFactory().get(def, true);
+				TimeDomain unrestrictedDomain = TimeDomainCatalogSingleton.instance().get(def);
 				TimeIndex converted = convertOrThrowRTE(unrestrictedDomain, this);
 				return converted.compareTo(otherTime);
 			} else {
 				// convert  both to highest resolution
 				TimeDomainDefinition def = new TimeDomainDefinition(null, getTimeDomain().getResolution(), 0L);
-				TimeDomain unrestrictedDomain = TimeDomainManager.getFactory().get(def, true);
+				TimeDomain unrestrictedDomain = TimeDomainCatalogSingleton.instance().get(def);
 				TimeIndex otherConverted = convertOrThrowRTE(unrestrictedDomain, otherTime);
 				return compareTo(otherConverted);
 			}

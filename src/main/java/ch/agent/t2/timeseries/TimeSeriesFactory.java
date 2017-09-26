@@ -53,7 +53,6 @@ public class TimeSeriesFactory {
 	/**
 	 * Singleton implements thread-safe and lazy initialization of the TimeSeriesFactory instance.
 	 */
-	// See comment in TimeDomainFactory.Singleton.
 	private static class Singleton {
 		private static TimeSeriesFactory singleton = new TimeSeriesFactory();
 	}

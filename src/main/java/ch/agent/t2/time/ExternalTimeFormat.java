@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011-2013 Hauser Olsson GmbH
+ *   Copyright 2011-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import ch.agent.t2.T2Exception;
 /**
  * ExternalTimeFormat defines the interface for scanning time strings and for
  * formatting time. The actual class or classes to use are defined using
- * {@link TimeDomainManager}.
+ * {@link TimeDomainCatalogSingleton}.
  * 
  * @author Jean-Paul Vetterli
  */

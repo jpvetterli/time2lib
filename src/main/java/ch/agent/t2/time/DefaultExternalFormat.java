@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011-2013 Hauser Olsson GmbH
+ *   Copyright 2011-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -100,58 +100,23 @@ public class DefaultExternalFormat implements ExternalTimeFormat {
 		private int u;
 	}
 	
-	private static final String PATTERN_1 = "((?:\\+\\d+)?\\d\\d\\d\\d)(?:-(\\d\\d)(?:-(\\d\\d)(?:[T ]([0-9:.,]*)(?:Z|([+-][0-9:.,]*))?)?)?)?";
+	private static final Pattern pattern1 = Pattern.compile("((?:\\+\\d+)?\\d\\d\\d\\d)(?:-(\\d\\d)(?:-(\\d\\d)(?:[T ]([0-9:.,]*)(?:Z|([+-][0-9:.,]*))?)?)?)?");
 	// note: colon intentionally allowed in time pattern, improves error diagnostics
-	private static final String PATTERN_2 = "(\\d\\d\\d\\d)(?:(\\d\\d)(?:(\\d\\d)(?:T([0-9:.,]*)(?:Z|([+-][0-9:.,]*))?)?)?)?";
-	private static final String TIME_PATTERN_1 = "(\\d\\d)(?::(\\d\\d)(?::(\\d\\d)(?:[.,](\\d\\d?\\d?\\d?\\d?\\d?))?)?)?";
-	private static final String TIME_PATTERN_2 = "(\\d\\d)(?:(\\d\\d)(?:(\\d\\d)(?:[.,](\\d\\d?\\d?\\d?\\d?\\d?))?)?)?";
-	
-	/**
-	 * Singleton implements thread-safe and lazy initialization of the
-	 * DefaultExternalFormat instance.
-	 * 
-	 */
-	private static class Singleton {
-		private static DefaultExternalFormat singleton;
-		static {
-			singleton = new DefaultExternalFormat();
-		};
-	}
-	
-	/**
-	 * Return the DefaultExternalFormat instance.
-	 * @return the DefaultExternalFormat instance
-	 */
-	public static DefaultExternalFormat getInstance() {
-		return Singleton.singleton;
-	}
-
-	private Matcher matcher1; 
-	private Matcher timeMatcher1;
-	private Matcher matcher2;
-	private Matcher timeMatcher2;
+	private static final Pattern pattern2 = Pattern.compile("(\\d\\d\\d\\d)(?:(\\d\\d)(?:(\\d\\d)(?:T([0-9:.,]*)(?:Z|([+-][0-9:.,]*))?)?)?)?");
+	private static final Pattern timePattern1 = Pattern.compile("(\\d\\d)(?::(\\d\\d)(?::(\\d\\d)(?:[.,](\\d\\d?\\d?\\d?\\d?\\d?))?)?)?");
+	private static final Pattern timePattern2 = Pattern.compile("(\\d\\d)(?:(\\d\\d)(?:(\\d\\d)(?:[.,](\\d\\d?\\d?\\d?\\d?\\d?))?)?)?");
 	
 	/**
 	 * Construct a DefaultExternalFormat.
 	 */
 	public DefaultExternalFormat() {
 		super();
-		try {
-			matcher1 = Pattern.compile(PATTERN_1).matcher("");
-			timeMatcher1 = Pattern.compile(TIME_PATTERN_1).matcher("");
-			matcher2 = Pattern.compile(PATTERN_2).matcher("");
-			timeMatcher2 = Pattern.compile(TIME_PATTERN_2).matcher("");
-		} catch(Exception e) {
-			throw new RuntimeException("bug", e);
-		}
 	}
 	
 	@Override
 	public TimeParts scan(String datetime) throws T2Exception {
 		if (datetime == null)
 			throw new IllegalArgumentException("date null");
-		Matcher matcher;
-		Matcher timeMatcher;
 		
 		int hyphen = datetime.indexOf('-');
 		if (hyphen > 0) {
@@ -162,18 +127,11 @@ public class DefaultExternalFormat implements ExternalTimeFormat {
 		}
 		// hyphen == 0 (first position) handled by matchers
 		
-		if (hyphen >= 0) {
-			matcher = matcher1;
-			timeMatcher = timeMatcher1;
-		} else {
-			matcher = matcher2;
-			timeMatcher = timeMatcher2;
-		}
-
-		matcher.reset(datetime);
+		boolean syntaxMode1 = hyphen >= 0;
+		Matcher matcher = syntaxMode1 ? pattern1.matcher(datetime) : pattern2.matcher(datetime);
 		
 		if (!matcher.matches())
-			throw T2Msg.exception(matcher == matcher1 ? K.T1081 : K.T1082, datetime);
+			throw T2Msg.exception(syntaxMode1 ? K.T1081 : K.T1082, datetime);
 		else {
 			if (matcher.groupCount() != 5)
 				throw new RuntimeException("bug: unexpected count " + matcher.groupCount());
@@ -201,18 +159,18 @@ public class DefaultExternalFormat implements ExternalTimeFormat {
 						tp.setDay(Integer.valueOf(group).intValue());
 						break;
 					case 3:
-						HMSU hmsd = scanTime(group, timeMatcher);
+						HMSU hmsd = scanTime(syntaxMode1 ? timePattern1.matcher(group) : timePattern2.matcher(group));
 						if (hmsd == null)
-							throw T2Msg.exception(matcher == matcher1 ? K.T1083 : K.T1084, group);
+							throw T2Msg.exception(syntaxMode1 ? K.T1083 : K.T1084, group);
 						tp.setHour(hmsd.h);
 						tp.setMin(hmsd.m);
 						tp.setSec(hmsd.s);
 						tp.setUsec(hmsd.u);
 						break;
 					case 4:
-						hmsd = scanTime(group.substring(1), timeMatcher);
+						hmsd = scanTime(syntaxMode1 ? timePattern1.matcher(group.substring(1)) : timePattern2.matcher(group.substring(1)));
 						if (hmsd == null)
-							throw T2Msg.exception(matcher == matcher1 ? K.T1085 : K.T1086, group);
+							throw T2Msg.exception(syntaxMode1 ? K.T1085 : K.T1086, group);
 						TimeParts.TimeZoneOffset tzo = tp.new TimeZoneOffset(group.startsWith("-"));
 						tzo.setHour(hmsd.h);
 						tzo.setMin(hmsd.m);
@@ -238,9 +196,7 @@ public class DefaultExternalFormat implements ExternalTimeFormat {
 	 * @return an HMSU object
 	 * @throws T2Exception
 	 */
-	private HMSU scanTime(String time, Matcher matcher) throws T2Exception {
-		matcher.reset(time);
-		
+	private HMSU scanTime(Matcher matcher) throws T2Exception {
 		if (!matcher.matches())
 			return null;
 		else {

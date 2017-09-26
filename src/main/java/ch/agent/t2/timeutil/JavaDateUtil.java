@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011-2013 Hauser Olsson GmbH
+ *   Copyright 2011-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,17 +37,10 @@ import ch.agent.t2.time.TimeIndex;
  * @author Jean-Paul Vetterli
  */
 public class JavaDateUtil {
-
-	private static long epoch = TimeDomain.DAYS_TO_19700101 * 24L * 3600000L;
 	
-	private static long gregorianCutover = Long.MIN_VALUE;
+	private final static long gregorianCutover = new GregorianCalendar(new SimpleTimeZone(0, "No DST time zone")).getGregorianChange().getTime();
 	
-	private static TimeZone utcTimeZone;
-	
-	static {
-		utcTimeZone = TimeZone.getTimeZone("UTC");
-		gregorianCutover = new GregorianCalendar(new SimpleTimeZone(0, "No DST time zone")).getGregorianChange().getTime();
-	}
+	private final static TimeZone utcTimeZone = TimeZone.getTimeZone("UTC");
 	
 	/**
 	 * Return the Java date corresponding to the given time index.
@@ -117,12 +110,13 @@ public class JavaDateUtil {
 	private static long yearOrMonthToMillisecSinceEpoch (long year, int month) throws T2Exception {
 		TimeIndex m = Day.DOMAIN.time(year, month, 1, 0, 0, 0, 0, Adjustment.NONE);
 		long index = m.asLong() * 24L * 3600000L;
-		return index = index - epoch;
+		return index - (TimeDomain.DAYS_TO_19700101 * 24L * 3600000L);
 	}
 	
 	private static long dayOrLessToMillisecSinceEpoch (TimeIndex t) throws T2Exception {
-		long index = new SystemTime(t.toString()).asLong();
-		return index - epoch;
+		if (!(t instanceof SystemTime))
+			t = new SystemTime(t.toString());
+		return ((SystemTime) t).asFastJavaTime();
 	}
 	
 }

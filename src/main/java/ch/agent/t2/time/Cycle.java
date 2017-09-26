@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011-2013 Hauser Olsson GmbH
+ *   Copyright 2011-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -101,20 +101,6 @@ public class Cycle implements BasePeriodPattern {
 	}
 	
 	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (!(obj instanceof Cycle))
-			return false;
-		return Arrays.equals(pattern, (((Cycle)obj).pattern));
-	}
-	
-	@Override
-	public int hashCode() {
-		return Arrays.hashCode(pattern);
-	}
-
-	@Override
 	public String toString() {
 		StringBuilder s = new StringBuilder();
 		if (pattern != null) {
@@ -124,6 +110,28 @@ public class Cycle implements BasePeriodPattern {
 		} else 
 			s.append("(no cycle)");
 		return s.toString();
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + Arrays.hashCode(pattern);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Cycle other = (Cycle) obj;
+		if (!Arrays.equals(pattern, other.pattern))
+			return false;
+		return true;
 	}
 
 	/**

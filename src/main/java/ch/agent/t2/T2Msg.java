@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011-2013 Hauser Olsson GmbH
+ *   Copyright 2011-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,8 +34,11 @@ public class T2Msg extends KeyedMessage {
 		public static final String T0005 = "T0005";
 		public static final String T0006 = "T0006";
 		public static final String T0007 = "T0007";
-		public static final String T0008 = "T0008";
-		public static final String T0009 = "T0009";
+		public static final String T0012 = "T0012";
+		public static final String T0013 = "T0013";
+		public static final String T0014 = "T0014";
+		public static final String T0015 = "T0015";
+		public static final String T0016 = "T0016";
 		
 		public static final String T1014 = "T1014";
 		public static final String T1015 = "T1015";

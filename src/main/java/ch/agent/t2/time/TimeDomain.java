@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011-2013 Hauser Olsson GmbH
+ *   Copyright 2011-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +19,14 @@ package ch.agent.t2.time;
 import ch.agent.t2.T2Exception;
 
 /**
- * The TimeDomain is a fundamental property of a {@link TimeIndex}. Most
- * importantly, the domain defines the <b>resolution</b> of a time index.
- * Incrementing a time index yields the next index in the domain's resolution,
- * like next year, next day, next microsecond, etc. In a more sophisticated
- * domain, like one defining the sequence of working days, incrementing a time
- * index yields the next working day, with Monday directly following Friday. The
- * available resolution units are listed in {@link Resolution}.
+ * The time domain is an immutable object encapsulating all fundamental
+ * properties of a time index. Most importantly, the domain defines the
+ * <b>resolution</b> of a time index. Incrementing a time index yields the next
+ * index in the domain's resolution, like next year, next day, next microsecond,
+ * etc. In a more sophisticated domain, like one defining the sequence of
+ * working days, incrementing a time index yields the next working day, with
+ * Monday directly following Friday. The available resolution units are listed
+ * in {@link Resolution}.
  * <p>
  * Another property of a time domain is the <b>origin</b>. To understand its
  * role it is necessary to know that time is internally represented by a
@@ -38,18 +39,19 @@ import ch.agent.t2.T2Exception;
  * origin and the method {@link TimeDomain#timeFromOffset(long)} does the
  * reverse.
  * <p>
- * Another important property of a time domain is its <b>label</b>. 
- * When an application uses a time domain factory, obtained using 
- * {@link TimeDomainManager#getFactory()}, the label should uniquely identify the time 
- * domain, making it safe to get a domain <q>by name</q>.
+ * Another important property of a time domain is its <b>label</b>. When an
+ * application uses a time domain catalog, obtained using
+ * {@link TimeDomainCatalogSingleton#instance}, the label should uniquely
+ * identify the time domain, making it safe to get a domain
+ * <q>by name</q>.
  * <p>
- * A TimeDomain is also a time index factory, with a choice of methods for creating
- * {@link TimeIndex} objects.
+ * A TimeDomain is also a time index factory, with a choice of methods for
+ * creating {@link TimeIndex} objects.
  * <p>
- * The <em>Time2</em> package implements dates and time in the spirit of the
- * ISO 8601 standard. A future version may adhere exactly to the standard. To
- * keep a long story short, the <em>t2.time</em> package applies a <a
- * href="http://en.wikipedia.org/wiki/Proleptic_Gregorian_calendar">Proleptic
+ * The <em>Time2</em> package implements dates and time in the spirit of the ISO
+ * 8601 standard. A future version may adhere exactly to the standard. To keep a
+ * long story short, the <em>t2.time</em> package applies a
+ * <a href="http://en.wikipedia.org/wiki/Proleptic_Gregorian_calendar">Proleptic
  * Gregorian Calendar</a> and knows only the UTC time zone. The external format
  * of dates and times is defined by implementations of the
  * {@link ExternalTimeFormat} interface. The default is
@@ -72,7 +74,7 @@ import ch.agent.t2.T2Exception;
  * 
  * @author Jean-Paul Vetterli
  * @see TimeIndex
- * @see TimeDomainManager
+ * @see TimeDomainCatalogSingleton
  */
 public interface TimeDomain {
 
@@ -81,13 +83,24 @@ public interface TimeDomain {
 	public static long DAYS_TO_20000101 = 730485L;
 	
 	/**
+	 * Compare to another time domain, ignoring label. Two time domains are similar
+	 * if they have the same implementation and all their members other than the
+	 * label are equal.
+	 * 
+	 * @param domain
+	 *            a time domain
+	 * @return true if the time domains are similar
+	 */
+	boolean similar(TimeDomain domain);
+	
+	/**
 	 * Throw an exception if the domain is not equal to this domain.
 	 * 
 	 * @param domain a time domain
 	 * @throws T2Exception
 	 */
 	void requireEquality(TimeDomain domain) throws T2Exception;
-	
+
 	/**
 	 * Return the resolution of the time domain.
 	 * 
@@ -117,7 +130,7 @@ public interface TimeDomain {
 
 	/**
 	 * Return the label of the time domain, uniquely identifying the domain when
-	 * using a {@link TimeDomainFactory}.
+	 * using a {@link TimeDomainCatalog}.
 	 * 
 	 * @return the label of the time domain
 	 */
