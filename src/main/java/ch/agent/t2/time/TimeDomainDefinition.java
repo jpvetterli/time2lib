@@ -103,8 +103,9 @@ public class TimeDomainDefinition {
 
 	/**
 	 * Construct the time domain corresponding to this definition. This method
-	 * creates a time domain with a default {@link ExternalTimeFormat}.
-	 * Any problem with the definition will be detected the first time this method is executed.
+	 * creates a time domain with a default {@link TimeFormatter} and a default
+	 * {@link TimeScanner}. Any problem with the definition will be detected the
+	 * first time this method is executed.
 	 * 
 	 * @return a time domain
 	 */

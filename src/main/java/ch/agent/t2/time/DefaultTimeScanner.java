@@ -16,7 +16,6 @@
  */
 package ch.agent.t2.time;
 
-import java.util.Formatter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,7 +24,7 @@ import ch.agent.t2.T2Msg;
 import ch.agent.t2.T2Msg.K;
 
 /**
- * DefaultExternalFormat supports the ISO 8601:2004 international
+ * The default time scanner supports the ISO 8601:2004 international
  * standard for the representation of calendar dates and times. Week
  * dates and ordinal dates are not supported.
  * <p>
@@ -59,7 +58,7 @@ import ch.agent.t2.T2Msg.K;
  * </p>
  * The scanner does not interpret numbers itself and from
  * its point of view, hour 42 and minute 88 are fine.
- * The {@link DefaultExternalFormat#scan(String) scan(String)} method returns a TimeParts object, but there is no
+ * The {@link DefaultTimeScanner#scan(String) scan(String)} method returns a TimeParts object, but there is no
  * guarantee that the date and time components have already been validated when the method returns. 
  * The responsibility for validating numbers falls to {@link TimeParts#asRawIndex(Resolution)}. 
  * <p>
@@ -91,8 +90,8 @@ import ch.agent.t2.T2Msg.K;
  * 
  * @author Jean-Paul Vetterli
  */
-public class DefaultExternalFormat implements ExternalTimeFormat {
-
+public class DefaultTimeScanner implements TimeScanner {
+	
 	private class HMSU {
 		private int h;
 		private int m;
@@ -100,42 +99,35 @@ public class DefaultExternalFormat implements ExternalTimeFormat {
 		private int u;
 	}
 	
-	private static final Pattern pattern1 = Pattern.compile("((?:\\+\\d+)?\\d\\d\\d\\d)(?:-(\\d\\d)(?:-(\\d\\d)(?:[T ]([0-9:.,]*)(?:Z|([+-][0-9:.,]*))?)?)?)?");
+	private static final Pattern PATTERN_1 = Pattern.compile("((?:\\+\\d+)?\\d\\d\\d\\d)(?:-(\\d\\d)(?:-(\\d\\d)(?:[T ]([0-9:.,]*)(?:Z|([+-][0-9:.,]*))?)?)?)?");
 	// note: colon intentionally allowed in time pattern, improves error diagnostics
-	private static final Pattern pattern2 = Pattern.compile("(\\d\\d\\d\\d)(?:(\\d\\d)(?:(\\d\\d)(?:T([0-9:.,]*)(?:Z|([+-][0-9:.,]*))?)?)?)?");
-	private static final Pattern timePattern1 = Pattern.compile("(\\d\\d)(?::(\\d\\d)(?::(\\d\\d)(?:[.,](\\d\\d?\\d?\\d?\\d?\\d?))?)?)?");
-	private static final Pattern timePattern2 = Pattern.compile("(\\d\\d)(?:(\\d\\d)(?:(\\d\\d)(?:[.,](\\d\\d?\\d?\\d?\\d?\\d?))?)?)?");
+	private static final Pattern PATTERN_2 = Pattern.compile("(\\d\\d\\d\\d)(?:(\\d\\d)(?:(\\d\\d)(?:T([0-9:.,]*)(?:Z|([+-][0-9:.,]*))?)?)?)?");
+	private static final Pattern TIME_PATTERN_1 = Pattern.compile("(\\d\\d)(?::(\\d\\d)(?::(\\d\\d)(?:[.,](\\d\\d?\\d?\\d?\\d?\\d?))?)?)?");
+	private static final Pattern TIME_PATTERN_2 = Pattern.compile("(\\d\\d)(?:(\\d\\d)(?:(\\d\\d)(?:[.,](\\d\\d?\\d?\\d?\\d?\\d?))?)?)?");
 	
-	/**
-	 * Construct a DefaultExternalFormat.
-	 */
-	public DefaultExternalFormat() {
-		super();
+	public DefaultTimeScanner() {
 	}
-	
+
 	@Override
 	public TimeParts scan(String datetime) throws T2Exception {
+		TimeParts tp = new TimeParts();
 		if (datetime == null)
 			throw new IllegalArgumentException("date null");
-		
 		int hyphen = datetime.indexOf('-');
-		if (hyphen > 0) {
-			// make sure it's not the sign of the time zone offset (T mandatory when no separators)
+		boolean hyphenated = hyphen > 0;
+		if (hyphenated) {
+			// make sure the T is in the date part (T mandatory when no separators)
 			int bigT = datetime.indexOf('T');
 			if (bigT >= 0 && bigT < hyphen)
-				hyphen = -1;
+				hyphenated = false;
 		}
-		// hyphen == 0 (first position) handled by matchers
 		
-		boolean syntaxMode1 = hyphen >= 0;
-		Matcher matcher = syntaxMode1 ? pattern1.matcher(datetime) : pattern2.matcher(datetime);
-		
+		Matcher matcher = hyphenated ? PATTERN_1.matcher(datetime) : PATTERN_2.matcher(datetime); 
 		if (!matcher.matches())
-			throw T2Msg.exception(syntaxMode1 ? K.T1081 : K.T1082, datetime);
+			throw T2Msg.exception(hyphenated ? K.T1081 : K.T1082, datetime);
 		else {
 			if (matcher.groupCount() != 5)
 				throw new RuntimeException("bug: unexpected count " + matcher.groupCount());
-			TimeParts tp = new TimeParts();
 			String group = null;
 			try {
 				for (int i = 0; i < 5; i++) {
@@ -159,18 +151,18 @@ public class DefaultExternalFormat implements ExternalTimeFormat {
 						tp.setDay(Integer.valueOf(group).intValue());
 						break;
 					case 3:
-						HMSU hmsd = scanTime(syntaxMode1 ? timePattern1.matcher(group) : timePattern2.matcher(group));
+						HMSU hmsd = scanTime(hyphenated ? TIME_PATTERN_1.matcher(group) : TIME_PATTERN_2.matcher(group));
 						if (hmsd == null)
-							throw T2Msg.exception(syntaxMode1 ? K.T1083 : K.T1084, group);
+							throw T2Msg.exception(hyphenated ? K.T1083 : K.T1084, group);
 						tp.setHour(hmsd.h);
 						tp.setMin(hmsd.m);
 						tp.setSec(hmsd.s);
 						tp.setUsec(hmsd.u);
 						break;
 					case 4:
-						hmsd = scanTime(syntaxMode1 ? timePattern1.matcher(group.substring(1)) : timePattern2.matcher(group.substring(1)));
+						hmsd = scanTime(hyphenated ? TIME_PATTERN_1.matcher(group.substring(1)) : TIME_PATTERN_2.matcher(group.substring(1)));
 						if (hmsd == null)
-							throw T2Msg.exception(syntaxMode1 ? K.T1085 : K.T1086, group);
+							throw T2Msg.exception(hyphenated ? K.T1085 : K.T1086, group);
 						TimeParts.TimeZoneOffset tzo = tp.new TimeZoneOffset(group.startsWith("-"));
 						tzo.setHour(hmsd.h);
 						tzo.setMin(hmsd.m);
@@ -185,18 +177,18 @@ public class DefaultExternalFormat implements ExternalTimeFormat {
 			} catch (NumberFormatException e) {
 				throw new RuntimeException("bug: group not numeric " + group);
 			}
-			return tp;
 		}
+		return tp;
 	}
-	
+
 	/**
 	 * Return null if match fails.
-	 * @param time
-	 * @param matcher
+	 * @param matcher initialized with the input
 	 * @return an HMSU object
 	 * @throws T2Exception
 	 */
 	private HMSU scanTime(Matcher matcher) throws T2Exception {
+		
 		if (!matcher.matches())
 			return null;
 		else {
@@ -255,47 +247,4 @@ public class DefaultExternalFormat implements ExternalTimeFormat {
 		}
 	}
 
-	@Override
-	public String format(Resolution unit, TimeParts tp) {
-		StringBuilder sb = new StringBuilder();
-		Formatter fmt = new Formatter(sb);
-		String plus = tp.getYear() > 9999 ? "+" : "";
-		switch (unit) {
-		case YEAR:
-			fmt.format("%s%04d", plus, tp.getYear());
-			break;
-		case MONTH:
-			fmt.format("%s%04d-%02d", plus, tp.getYear(), tp.getMonth());
-			break;
-		case DAY:
-			fmt.format("%s%04d-%02d-%02d", plus, tp.getYear(), tp.getMonth(), tp.getDay());
-			break;
-		case HOUR:
-			fmt.format("%s%04d-%02d-%02d %02d", plus, tp.getYear(), tp.getMonth(), tp.getDay(),
-					tp.getHour());
-			break;
-		case MIN:
-			fmt.format("%s%04d-%02d-%02d %02d:%02d", plus, tp.getYear(), tp.getMonth(),
-					tp.getDay(), tp.getHour(), tp.getMin());
-			break;
-		case SEC:
-			fmt.format("%s%04d-%02d-%02d %02d:%02d:%02d", plus, tp.getYear(), tp.getMonth(),
-					tp.getDay(), tp.getHour(), tp.getMin(), tp.getSec());
-			break;
-		case MSEC:
-			fmt.format("%s%04d-%02d-%02d %02d:%02d:%02d.%03d", plus, tp.getYear(),
-					tp.getMonth(), tp.getDay(), tp.getHour(), tp.getMin(), tp.getSec(), tp.getUsec() / 1000);
-			break;
-		case USEC:
-			fmt.format("%s%04d-%02d-%02d %02d:%02d:%02d.%06d", plus, tp.getYear(),
-					tp.getMonth(), tp.getDay(), tp.getHour(), tp.getMin(), tp.getSec(), tp.getUsec());
-			break;
-		default:
-			fmt.close();
-			throw new RuntimeException("bug: " + unit.name());
-		}
-		fmt.close();
-		return sb.toString();
-	}
-	
 }

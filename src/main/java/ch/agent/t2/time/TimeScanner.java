@@ -19,12 +19,11 @@ package ch.agent.t2.time;
 import ch.agent.t2.T2Exception;
 
 /**
- * ExternalTimeFormat defines the interface for scanning time strings and for
- * formatting time. 
+ * A time scanner extracts time parts from a string representation.
  * 
  * @author Jean-Paul Vetterli
  */
-public interface ExternalTimeFormat {
+public interface TimeScanner {
 
 	/**
 	 * Scan the date string into a time parts object. The scanner extracts
@@ -32,20 +31,11 @@ public interface ExternalTimeFormat {
 	 * their validity. From the point of view of the scanner day 42 of month 99
 	 * is okay. 
 	 * 
-	 * @param time
+	 * @param datetime
 	 *            a non-null string containing a date and time specification
 	 * @return a {@link TimeParts}
 	 * @throws Exception
 	 */
-	TimeParts scan(String time) throws T2Exception;
-	
-	/**
-	 * Generate a string representing the time in the time parts object.
-	 * The format can be made to vary depending on the time resolution.
-	 * 
-	 * @param unit a non-null resolution
-	 * @param timeParts a non-null time parts object
-	 * @return a string with the external representation of the time
-	 */
-	String format(Resolution unit, TimeParts timeParts);
+	public TimeParts scan(String datetime) throws T2Exception;
+
 }

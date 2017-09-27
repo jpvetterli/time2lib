@@ -28,9 +28,9 @@ import ch.agent.t2.time.engine.TimeTools;
  * class is intended for use by methods of the library for moving information
  * around. It is not meant to be used directly by applications.
  * <p>
- * Together with {@link DefaultExternalFormat}, TimeParts implements a subset of
+ * Together with {@link DefaultTimeScanner}, TimeParts implements a subset of
  * ISO 8601, the international standard for representing dates and times. Refer
- * to {@link DefaultExternalFormat} for details.
+ * to {@link DefaultTimeScanner} for details.
  * 
  * @author Jean-Paul Vetterli
  */
@@ -39,7 +39,7 @@ public class TimeParts {
 	/**
 	 * A TimeZoneOffset groups all components of a time zone offset. In a typical
 	 * implementation, a TimeZoneOffset is created by
-	 * {@link ExternalTimeFormat#scan(String)} and passed to a {@link TimeParts}
+	 * {@link TimeScanner#scan(String)} and passed to a {@link TimeParts}
 	 * to be processed by
 	 * {@link TimeParts#checkTimeComponentsAndApplyTimeZoneOffset()
 	 * checkTimeComponentsAndApplyTimeZoneOffset()}.

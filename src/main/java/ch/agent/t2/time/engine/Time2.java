@@ -24,12 +24,12 @@ import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.Adjustment;
 import ch.agent.t2.time.Day;
 import ch.agent.t2.time.DayOfWeek;
-import ch.agent.t2.time.DefaultExternalFormat;
-import ch.agent.t2.time.ExternalTimeFormat;
+import ch.agent.t2.time.DefaultTimeScanner;
 import ch.agent.t2.time.Resolution;
 import ch.agent.t2.time.ThirdFriday;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeDomainDefinition;
+import ch.agent.t2.time.TimeFormatter;
 import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.time.TimeParts;
 import ch.agent.t2.time.Workday;
@@ -161,17 +161,20 @@ public class Time2 implements TimeIndex {
 	}
 	
 	/**
-	 * Construct a time index with the given time domain and string, with possible adjustment.
-	 * An <b>unchecked</b> exception is thrown if the concrete time domain
-	 * is not a {@link TimeFactory}.
-	 * The string is interpreted by an instance of {@link ExternalTimeFormat}
-	 * configured. By default it is {@link DefaultExternalFormat}.
+	 * Construct a time index with the given time domain and string, with possible
+	 * adjustment. An <b>unchecked</b> exception is thrown if the concrete time
+	 * domain is not a {@link TimeFactory}. The string is interpreted by the timer
+	 * scanner defined in the time factory. By default it is
+	 * {@link DefaultTimeScanner}.
 	 * <p>
 	 * If necessary the time is adjusted as allowed by the last argument.
 	 * 
-	 * @param domain a non-null {@link TimeFactory}
-	 * @param time a string containing a representation of a date and time
-	 * @param adjustment a non-null allowed adjustment mode
+	 * @param domain
+	 *            a non-null {@link TimeFactory}
+	 * @param time
+	 *            a string containing a representation of a date and time
+	 * @param adjustment
+	 *            a non-null allowed adjustment mode
 	 * @throws T2Exception
 	 */
 	public Time2(TimeDomain domain, String time, Adjustment adjustment) throws T2Exception {
@@ -180,16 +183,17 @@ public class Time2 implements TimeIndex {
 	}
 	
 	/**
-	 * Construct a time index with the given time domain and string.
-	 * An <b>unchecked</b> exception is thrown if the concrete time domain
-	 * is not a {@link TimeFactory}.
-	 * The string is interpreted by an instance of {@link ExternalTimeFormat}
-	 * configured. By default it is {@link DefaultExternalFormat}.
+	 * Construct a time index with the given time domain and string. An
+	 * <b>unchecked</b> exception is thrown if the concrete time domain is not a
+	 * {@link TimeFactory}. The string is interpreted by the timer scanner defined
+	 * in the time factory. By default it is {@link DefaultTimeScanner}. *
 	 * <p>
 	 * No adjustment is allowed.
 	 * 
-	 * @param domain a non-null {@link TimeFactory}
-	 * @param time a string containing a representation of a date and time
+	 * @param domain
+	 *            a non-null {@link TimeFactory}
+	 * @param time
+	 *            a string containing a representation of a date and time
 	 * @throws T2Exception
 	 */
 	public Time2(TimeDomain domain, String time) throws T2Exception {
@@ -335,28 +339,11 @@ public class Time2 implements TimeIndex {
 		}
 	}
 	
-	/**
-	 * Return a string representation of the time. In a <i>full</i>
-	 * representation, all components are always included, from years to
-	 * microseconds. In a standard representation, the formatting is delegated
-	 * to {@link ExternalTimeFormat#format(Resolution, TimeParts)}.
-	 * 
-	 * @param full
-	 *            if true, returns a full representation
-	 * @return a string representation of the time
-	 */
-	public String toString(boolean full) {
+	@Override
+	public String toString(TimeFormatter formatter) {
 		resolve();
-		if (full) {
-			StringBuilder sb = new StringBuilder();
-			Formatter fmt = new Formatter(sb);
-			String plus = tp.getYear() > 9999 ? "+" : "";
-			fmt.format("%s%04d-%02d-%02d %02d:%02d:%02d.%06d", plus, tp.getYear(), tp.getMonth(),
-					tp.getDay(), tp.getHour(), tp.getMin(), tp.getSec(), tp.getUsec());
-			fmt.close();
-			return sb.toString();
-		} else
-			return domain.format(domain.getResolution(), tp);
+		return formatter == null ? domain.format(domain.getResolution(), tp)
+				: formatter.format(domain.getResolution(), tp);
 	}
 	
 	@Override
@@ -380,7 +367,7 @@ public class Time2 implements TimeIndex {
 
 	@Override
 	public String toString() {
-		return toString(false);
+		return toString((TimeFormatter) null);
 	}
 
 	@Override

@@ -22,15 +22,17 @@ import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.Adjustment;
 import ch.agent.t2.time.BasePeriodPattern;
 import ch.agent.t2.time.DayOfWeek;
-import ch.agent.t2.time.ExternalTimeFormat;
-import ch.agent.t2.time.ExternalTimeFormatSingleton;
+import ch.agent.t2.time.DefaultTimeFormatter;
+import ch.agent.t2.time.DefaultTimeScanner;
 import ch.agent.t2.time.Resolution;
 import ch.agent.t2.time.SubPeriodPattern;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeDomainDefinition;
+import ch.agent.t2.time.TimeFormatter;
 import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.time.TimePacker;
 import ch.agent.t2.time.TimeParts;
+import ch.agent.t2.time.TimeScanner;
 
 /**
  * A TimeFactory makes {@link TimeIndex} objects and
@@ -50,7 +52,7 @@ import ch.agent.t2.time.TimeParts;
  * @see BasePeriodPattern
  * @see SubPeriodPattern
  */
-public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
+public class TimeFactory implements TimeDomain, TimePacker, TimeFormatter, TimeScanner {
 
 	
 	private int hash = 0; // the object is immutable, so hash must be computed only once
@@ -61,8 +63,6 @@ public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
 
 	private long origin;
 
-	private ExternalTimeFormat externalFormat;
-	
 	private BasePeriodPattern basePeriodPattern;
 	
 	private SubPeriodPattern subPeriodPattern;
@@ -70,14 +70,25 @@ public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
 	private TimeIndex minTime, maxTime, minOffsetCompatibleTime, maxOffsetCompatibleTime;
 	private long minNumericTime, maxNumericTime;
 	
+	private final TimeFormatter formatter;
+	private final TimeScanner scanner;
+	
 	/**
-	 * Construct a TimeFactory for the given time domain definition and external time format.
+	 * Construct a TimeFactory for the given time domain.
 	 * 
-	 * @param def a non-null time domain definition
-	 * @param externalFormat a non-null external format
+	 * @param def
+	 *            a non-null time domain definition
+	 * @param formatter
+	 *            a non-null time formatter
+	 * @param scanner
+	 *            a non-null time scanner
 	 */
-	public TimeFactory(TimeDomainDefinition def, ExternalTimeFormat externalFormat) {
+	public TimeFactory(TimeDomainDefinition def, TimeFormatter formatter, TimeScanner scanner) {
 		super();
+		if (def == null)
+			throw new IllegalArgumentException("def null");
+		if (formatter == null)
+			throw new IllegalArgumentException("formatter null");
 		this.label = def.getLabel();
 		this.baseUnit = def.getBaseUnit();
 		this.origin = def.getOrigin();
@@ -85,20 +96,32 @@ public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
 		if (this.basePeriodPattern != null && !this.basePeriodPattern.effective())
 			basePeriodPattern = null;
 		this.subPeriodPattern = def.getSubPeriodPattern();
-		this.externalFormat = externalFormat;
 		minNumericTime = 0; // coming soon: negative times
 		maxNumericTime = findMaxIndex(this.basePeriodPattern, this.subPeriodPattern);
+		this.formatter = formatter;
+		this.scanner = scanner;
 	}
 	
 	/**
-	 * Construct a TimeFactory for the given time domain definition and the default
-	 * external time format.
+	 * Constructor providing a default time formatter and time scanner.
 	 * 
 	 * @param def
 	 *            a non-null time domain definition
 	 */
 	public TimeFactory(TimeDomainDefinition def) {
-		this(def, ExternalTimeFormatSingleton.instance());
+		this(def, new DefaultTimeFormatter(), new DefaultTimeScanner());
+	}
+	
+	/**
+	 * Constructor providing a default time scanner.
+	 * 
+	 * @param def
+	 *            a non-null time domain definition
+	 * @param formatter
+	 *            a non-null time formatter
+	 */
+	public TimeFactory(TimeDomainDefinition def, TimeFormatter formatter) {
+		this(def, formatter, new DefaultTimeScanner());
 	}
 	
 	@Override
@@ -305,12 +328,12 @@ public class TimeFactory implements TimeDomain, TimePacker, ExternalTimeFormat {
 
 	@Override
 	public TimeParts scan(String time) throws T2Exception {
-		return externalFormat.scan(time);
+		return scanner.scan(time);
 	}
 
 	@Override
 	public String format(Resolution unit, TimeParts timeParts) {
-		return externalFormat.format(unit, timeParts);
+		return formatter.format(unit, timeParts);
 	}
 
 	@Override

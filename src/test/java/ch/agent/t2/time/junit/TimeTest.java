@@ -10,6 +10,7 @@ import ch.agent.t2.time.DateTime;
 import ch.agent.t2.time.Day;
 import ch.agent.t2.time.DayOfWeek;
 import ch.agent.t2.time.DefaultTimeDomainCatalog;
+import ch.agent.t2.time.FullTimeFormatter;
 import ch.agent.t2.time.Month;
 import ch.agent.t2.time.Resolution;
 import ch.agent.t2.time.SystemTime;
@@ -723,7 +724,7 @@ public class TimeTest extends TestCase {
 			TimeIndex time = domain.time(6588122883467697004L); // == getCycle().computeMaxCompressedTime());
 			String date = time.toString(); // "25252734927766554-07-26"
 			time = domain.time(date);
-			assertEquals(date + " 00:00:00.000000", ((Time2)time).toString(true));
+			assertEquals(date + "T00:00:00.000000", ((Time2)time).toString(new FullTimeFormatter(true)));
 		} catch (Exception e) {
 			e.printStackTrace();
 			assertEquals(null, e);
@@ -1503,7 +1504,7 @@ public class TimeTest extends TestCase {
 		try {
 			TimeIndex t1 = new Month(2009, 1);
 			Day d = new Day(t1.getDayByRank(Resolution.MONTH, DayOfWeek.Fri, 3));
-			dump(d.toString(true) + " " + d.getDayOfWeek());
+			dump(d.toString(new FullTimeFormatter()) + " " + d.getDayOfWeek());
 			assertEquals(DayOfWeek.Fri, d.getDayOfWeek());
 			TimeIndex t2 = d.add(-21);
 			assertEquals(t2.getMonth(), 12);

@@ -184,26 +184,36 @@ public interface TimeIndex extends Comparable<TimeIndex> {
 	TimeIndex convert(TimeDomain domain, Adjustment adjustment) throws T2Exception;
 	
 	/**
-	 * Return a string representation of the time. The order of the time
-	 * components is: year, month, day, hour, minute, second, microsecond.
-	 * Because the format string is a Formatter format, it is possible to
-	 * reorder these components.
+	 * Return a string representation of the time. The order of the time components
+	 * is: year, month, day, hour, minute, second, microsecond. Because the format
+	 * string is a Formatter format, it is possible to reorder these components.
 	 * <p>
 	 * For example <code>"%04d%02d%02d"</code> would produce 19700401 and
 	 * <code>"%3$d.%2$d.%1$04d"</code> would produce 1.4.1970.
 	 * <p>
-	 * As a special trick, when the format string is empty, the date is returned
-	 * in the compact format d.m.yy, with the day and month without a leading zero, and
+	 * As a special trick, when the format string is empty, the date is returned in
+	 * the compact format d.m.yy, with the day and month without a leading zero, and
 	 * the year starting at the 3d digit.
 	 * <p>
-	 * If the argument is null, formatting is delegated to {@link ExternalTimeFormat}.
+	 * If the argument is null, formatting is delegated to the default time
+	 * formatter defined in the time factory.
 	 * <p>
 	 * In case of errors in the format string, an IllegalFormatException is thrown.
-	 *  
+	 * 
 	 * @param format
 	 *            a format string, or an empty string, or null
 	 * @return a string representation of the time
 	 */
 	String toString(String format);
+	
+	/**
+	 * Return a string representation of the time. A time formatter can be
+	 * specified. If null, the default formatter for the time domain will be used.
+	 * 
+	 * @param formatter
+	 *            a time formatter or null
+	 * @return a string representation of the time
+	 */
+	String toString(TimeFormatter formatter);
 	
 }

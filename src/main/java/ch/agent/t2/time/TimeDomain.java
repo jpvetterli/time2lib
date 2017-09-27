@@ -52,9 +52,9 @@ import ch.agent.t2.T2Exception;
  * long story short, the <em>t2.time</em> package applies a
  * <a href="http://en.wikipedia.org/wiki/Proleptic_Gregorian_calendar">Proleptic
  * Gregorian Calendar</a> and knows only the UTC time zone. The external format
- * of dates and times is defined by implementations of the
- * {@link ExternalTimeFormat} interface. The default is
- * {@link DefaultExternalFormat}.
+ * of dates and times depends on which implementation of {@link TimeScanner} has
+ * been configured in the time domain. The default syntax is implemented by
+ * {@link DefaultTimeScanner}.
  * <p>
  * Dates and times are astonishingly complex and messy. Some interesting
  * references are
@@ -186,8 +186,8 @@ public interface TimeDomain {
 	
 	/**
 	 * Return a new TimeIndex corresponding to the given date string. 
-	 * Adjustments are not allowed. The date syntax depends on the actual
-	 * {@link ExternalTimeFormat} used, the default being {@link DefaultExternalFormat}.
+	 * Adjustments are not allowed. The date syntax is the one implemented
+	 * by {@link DefaultTimeScanner}.
 	 * 
 	 * @param date a non-null date string
 	 * @return a TimeIndex in the domain
@@ -196,12 +196,15 @@ public interface TimeDomain {
 	TimeIndex time(String date) throws T2Exception;
 	
 	/**
-	 * Return a new TimeIndex corresponding to the given date string. 
-	 * If necessary, adjustments are made as specified. An exception is
-	 * thrown if an adjustment is required but not allowed.
+	 * Return a new TimeIndex corresponding to the given date string. If necessary,
+	 * adjustments are made as specified. An exception is thrown if an adjustment is
+	 * required but not allowed. The date syntax is the one implemented by
+	 * {@link DefaultTimeScanner}.
 	 * 
-	 * @param date a non-null date string
-	 * @param adjust a non-null adjustment mode
+	 * @param date
+	 *            a non-null date string
+	 * @param adjust
+	 *            a non-null adjustment mode
 	 * @return a TimeIndex in the domain
 	 * @throws T2Exception
 	 */
