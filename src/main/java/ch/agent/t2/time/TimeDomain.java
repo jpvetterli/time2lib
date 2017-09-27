@@ -40,8 +40,7 @@ import ch.agent.t2.T2Exception;
  * reverse.
  * <p>
  * Another important property of a time domain is its <b>label</b>. When an
- * application uses a time domain catalog, obtained using
- * {@link TimeDomainCatalogSingleton#instance}, the label should uniquely
+ * application uses a {@link TimeDomainCatalog}, the label should uniquely
  * identify the time domain, making it safe to get a domain
  * <q>by name</q>.
  * <p>
@@ -74,7 +73,6 @@ import ch.agent.t2.T2Exception;
  * 
  * @author Jean-Paul Vetterli
  * @see TimeIndex
- * @see TimeDomainCatalogSingleton
  */
 public interface TimeDomain {
 

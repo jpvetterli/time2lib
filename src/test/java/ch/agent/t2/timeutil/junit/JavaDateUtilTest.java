@@ -11,12 +11,12 @@ import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.Adjustment;
 import ch.agent.t2.time.DateTime;
 import ch.agent.t2.time.Day;
+import ch.agent.t2.time.DefaultTimeDomainCatalog;
 import ch.agent.t2.time.Month;
 import ch.agent.t2.time.Resolution;
 import ch.agent.t2.time.SimpleSubPeriodPattern;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeDomainCatalog;
-import ch.agent.t2.time.TimeDomainCatalogSingleton;
 import ch.agent.t2.time.TimeDomainDefinition;
 import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.time.Workday;
@@ -35,7 +35,7 @@ public class JavaDateUtilTest extends TestCase {
 			System.out.println(o.toString());
 	}
 
-	private final static TimeDomainCatalog catalog = TimeDomainCatalogSingleton.instance();
+	private final static TimeDomainCatalog catalog = new DefaultTimeDomainCatalog();
 	
 	private static TimeDomain getTimeDomain(TimeDomainDefinition def) {
 		TimeDomain domain = catalog.get(def);

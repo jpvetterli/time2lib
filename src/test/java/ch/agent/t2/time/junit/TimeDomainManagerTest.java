@@ -2,21 +2,15 @@ package ch.agent.t2.time.junit;
 
 import ch.agent.core.KeyedException;
 import ch.agent.t2.time.TimeDomainCatalog;
-import ch.agent.t2.time.TimeDomainCatalogSingleton;
 import junit.framework.TestCase;
 
 public class TimeDomainManagerTest extends TestCase {
 
-	static {
-		System.setProperty("TimeDomainCatalog", CustomTimeDomainCatalog.class.getName());
-	}
-	
 	private TimeDomainCatalog catalog;
-	
 	
 	@Override
 	protected void setUp() throws Exception {
-		catalog = TimeDomainCatalogSingleton.instance();
+		catalog = new CustomTimeDomainCatalog();
 	}
 
 	public void test01() {

@@ -42,7 +42,7 @@ import ch.agent.t2.timeseries.Observation;
  * <blockquote>
  * 
  * <pre>
- * TimeDomainCatalog catalog = TimeDomainCatalogSingleton.instance();
+ * TimeDomainCatalog catalog = new DefaultTimeDomainCatalog();
  * TimeDomain d1 = new Day(&quot;0102-03-04&quot;).getTimeDomain();
  * TimeDomain d2 = Day.DOMAIN;
  * TimeDomain d3 = catalog.get(&quot;daily&quot;);

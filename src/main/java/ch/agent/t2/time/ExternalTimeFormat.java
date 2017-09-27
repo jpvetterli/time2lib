@@ -20,8 +20,7 @@ import ch.agent.t2.T2Exception;
 
 /**
  * ExternalTimeFormat defines the interface for scanning time strings and for
- * formatting time. The actual class or classes to use are defined using
- * {@link TimeDomainCatalogSingleton}.
+ * formatting time. 
  * 
  * @author Jean-Paul Vetterli
  */

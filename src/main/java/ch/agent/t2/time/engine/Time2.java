@@ -29,7 +29,6 @@ import ch.agent.t2.time.ExternalTimeFormat;
 import ch.agent.t2.time.Resolution;
 import ch.agent.t2.time.ThirdFriday;
 import ch.agent.t2.time.TimeDomain;
-import ch.agent.t2.time.TimeDomainCatalogSingleton;
 import ch.agent.t2.time.TimeDomainDefinition;
 import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.time.TimeParts;
@@ -418,20 +417,20 @@ public class Time2 implements TimeIndex {
 			if (compareResols == 0) {
 				// convert  both to unrestricted domain
 				TimeDomainDefinition def = new TimeDomainDefinition(null, getTimeDomain().getResolution(), 0L);
-				TimeDomain unrestrictedDomain = TimeDomainCatalogSingleton.instance().get(def);
+				TimeDomain unrestrictedDomain = new TimeFactory(def);
 				TimeIndex converted = convertOrThrowRTE(unrestrictedDomain, this);
 				TimeIndex otherConverted = convertOrThrowRTE(unrestrictedDomain, otherTime);
 				return converted.compareTo(otherConverted);
 			} else if (compareResols < 0) {
 				// convert  both to highest resolution
 				TimeDomainDefinition def = new TimeDomainDefinition(null, otherTime.getTimeDomain().getResolution(), 0L);
-				TimeDomain unrestrictedDomain = TimeDomainCatalogSingleton.instance().get(def);
+				TimeDomain unrestrictedDomain = new TimeFactory(def);
 				TimeIndex converted = convertOrThrowRTE(unrestrictedDomain, this);
 				return converted.compareTo(otherTime);
 			} else {
 				// convert  both to highest resolution
 				TimeDomainDefinition def = new TimeDomainDefinition(null, getTimeDomain().getResolution(), 0L);
-				TimeDomain unrestrictedDomain = TimeDomainCatalogSingleton.instance().get(def);
+				TimeDomain unrestrictedDomain = new TimeFactory(def);
 				TimeIndex otherConverted = convertOrThrowRTE(unrestrictedDomain, otherTime);
 				return compareTo(otherConverted);
 			}

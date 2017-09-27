@@ -9,6 +9,7 @@ import ch.agent.t2.time.Day;
 import ch.agent.t2.time.DayByNameAndRank;
 import ch.agent.t2.time.DayOfWeek;
 import ch.agent.t2.time.DayRankingSubPeriodPattern;
+import ch.agent.t2.time.DefaultTimeDomainCatalog;
 import ch.agent.t2.time.Month;
 import ch.agent.t2.time.Range;
 import ch.agent.t2.time.Resolution;
@@ -17,7 +18,6 @@ import ch.agent.t2.time.SubPeriodPattern;
 import ch.agent.t2.time.ThirdFriday;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeDomainCatalog;
-import ch.agent.t2.time.TimeDomainCatalogSingleton;
 import ch.agent.t2.time.TimeDomainDefinition;
 import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.time.Workday;
@@ -27,7 +27,7 @@ import junit.framework.TestCase;
 public class TimeDomainTest extends TestCase {
 
 	
-	private final static TimeDomainCatalog catalog = TimeDomainCatalogSingleton.instance();
+	private final static TimeDomainCatalog catalog = new DefaultTimeDomainCatalog();
 	
 	private static TimeDomain getTimeDomain(TimeDomainDefinition def) {
 		TimeDomain domain = catalog.get(def);

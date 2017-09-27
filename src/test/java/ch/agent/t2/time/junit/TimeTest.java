@@ -9,12 +9,12 @@ import ch.agent.t2.time.Cycle;
 import ch.agent.t2.time.DateTime;
 import ch.agent.t2.time.Day;
 import ch.agent.t2.time.DayOfWeek;
+import ch.agent.t2.time.DefaultTimeDomainCatalog;
 import ch.agent.t2.time.Month;
 import ch.agent.t2.time.Resolution;
 import ch.agent.t2.time.SystemTime;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeDomainCatalog;
-import ch.agent.t2.time.TimeDomainCatalogSingleton;
 import ch.agent.t2.time.TimeDomainDefinition;
 import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.time.Week;
@@ -40,7 +40,7 @@ public class TimeTest extends TestCase {
 		
 	}
 	
-	private final static TimeDomainCatalog catalog = TimeDomainCatalogSingleton.instance();
+	private final static TimeDomainCatalog catalog = new DefaultTimeDomainCatalog();
 	
 	private static TimeDomain getTimeDomain(TimeDomainDefinition def) {
 		TimeDomain domain = catalog.get(def);
@@ -69,7 +69,6 @@ public class TimeTest extends TestCase {
 	
 	public void testDay() {
 		try {
-			TimeDomainCatalog catalog = TimeDomainCatalogSingleton.instance();
 			TimeDomain d1 = Day.DOMAIN;
 			TimeDomain d2 = new Day("1999-10-11").getTimeDomain();
 			TimeDomain d3 = catalog.get("daily");
@@ -85,12 +84,11 @@ public class TimeTest extends TestCase {
 	
 	public void testDay1() {
 		try {
-			TimeDomainCatalog catalog = TimeDomainCatalogSingleton.instance();
 			TimeIndex t = new Day("1999-10-11");
 			for (TimeDomain d : catalog.get()) {
 				dump(d.getLabel());
 			}
-			TimeDomain d = TimeDomainCatalogSingleton.instance().get("daily");
+			TimeDomain d = catalog.get("daily");
 			assertSame(d, t.getTimeDomain());
 			for (TimeDomain domain : catalog.get()) {
 				dump(domain);
@@ -113,7 +111,7 @@ public class TimeTest extends TestCase {
 	
 	public void testDay3() {
 		try {
-			TimeDomain d = TimeDomainCatalogSingleton.instance().get("weekly");
+			TimeDomain d = catalog.get("weekly");
 			TimeIndex t = d.time(0L);
 			new Day(t);
 			fail("exception expected");
@@ -1098,7 +1096,7 @@ public class TimeTest extends TestCase {
 			/*
 			 * Note : base day 1 is a Sat
 			 */
-			TimeDomain d = TimeDomainCatalogSingleton.instance().get(
+			TimeDomain d = catalog.get(
 					new TimeDomainDefinition("foo", Resolution.DAY, 0L, 
 							new Cycle(false, false, true, true, true, true, true), null));
 			d.time("0000-01-03");
@@ -1116,7 +1114,7 @@ public class TimeTest extends TestCase {
 
 	public void testCycle2() {
 		try {
-			TimeDomain d = TimeDomainCatalogSingleton.instance().get(
+			TimeDomain d = catalog.get(
 					new TimeDomainDefinition("foo", Resolution.DAY, 0L, 
 							new Cycle(false, false, true, true, true, true, true), null));
 			d.time("2006-06-19");
