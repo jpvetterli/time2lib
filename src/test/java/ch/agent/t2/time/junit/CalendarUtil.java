@@ -18,7 +18,7 @@ public class CalendarUtil {
 
 	private Calendar utcCalendar;
 	private TimeZone utcTimeZone;
-	private Matcher dateTimeMatcher;
+	private Pattern dateTimePattern = Pattern.compile("(\\d\\d\\d\\d)-(\\d\\d)-(\\d\\d) (\\d\\d):(\\d\\d):(\\d\\d)");
 	
 	public CalendarUtil() {
 	}
@@ -70,10 +70,7 @@ public class CalendarUtil {
 	 * @return
 	 */
 	public Date dateUTC(String dateAndTime) throws Exception {
-		if (dateTimeMatcher == null)
-			dateTimeMatcher = Pattern.compile
-				("(\\d\\d\\d\\d)-(\\d\\d)-(\\d\\d) (\\d\\d):(\\d\\d):(\\d\\d)").matcher("");
-		dateTimeMatcher.reset(dateAndTime);
+		Matcher dateTimeMatcher = dateTimePattern.matcher(dateAndTime);
 		if (dateTimeMatcher.matches())
 			return dateUTC(
 				Integer.parseInt(dateTimeMatcher.group(1)), 

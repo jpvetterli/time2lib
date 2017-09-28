@@ -50,7 +50,7 @@ import ch.agent.t2.time.TimeIndex;
 public class DateTimeScanner {
 
 	private TimeDomain domain;
-	private Matcher matcher;
+	private Pattern pattern;
 	private int[] patternGroups;
 	private Map<String, Integer> months;
 	private int twoDigitYearThreshold;
@@ -72,11 +72,11 @@ public class DateTimeScanner {
 	public DateTimeScanner(String pattern, int[] groups) throws T2Exception {
 		if (pattern != null) {
 			try {
-				matcher = Pattern.compile(pattern).matcher("");
+				this.pattern = Pattern.compile(pattern);
 			} catch (PatternSyntaxException e) {
 				throw T2Msg.exception(e, K.T7015, pattern);
 			}
-			int n = matcher.groupCount();
+			int n = this.pattern.matcher("").groupCount();
 			if (n < 1 || n > 7)
 				throw T2Msg.exception(K.T7016, pattern);							
 
@@ -188,10 +188,10 @@ public class DateTimeScanner {
 			throw new IllegalArgumentException("domain == null");
 		if (date == null)
 			throw new IllegalArgumentException("text null");
-		if (matcher == null) {
+		if (pattern == null) {
 			return domain.time(date);
 		} else  {
-			matcher.reset(date);
+			Matcher matcher = pattern.matcher(date);
 			if (matcher.matches()) {
 				int[] t = new int[] { 0, 1, 1, 0, 0, 0, 0};
 				for (int i = 0; i < patternGroups.length; i++) {
