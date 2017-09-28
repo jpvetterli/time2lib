@@ -316,16 +316,18 @@ public class Range implements Iterable<TimeIndex> {
 	}
 	
 	/**
-	 * Return true if another range is within range.
-	 * This is the case if both ends of the other range
-	 * are within this range. The domains must be equal.
+	 * Return true if another range is within range. This is the case if both ends
+	 * of the other range are within this range. The domains must be equal. A range
+	 * equal to this range is considered to be inside and as a corollary an empty
+	 * range is inside another empty range.
 	 * 
-	 * @param range a non-null range
+	 * @param range
+	 *            a non-null range
 	 * @return true if the other range is in the range
 	 */
 	public boolean isInRange(Range range) throws T2Exception {
 		getTimeDomain().requireEquality(range.getTimeDomain());
-		return isInRange(range.first) && isInRange(range.last);
+		return this.equals(range) || isInRange(range.first) && isInRange(range.last); 
 	}
 	
 	/**

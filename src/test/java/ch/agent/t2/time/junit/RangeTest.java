@@ -151,6 +151,19 @@ public class RangeTest extends TestCase {
 			assertEquals(K.T1074, e.getMsg().getKey());
 		}
 	}
+
+	public void test10() {
+		try {
+			Range r1 = new Range(Day.DOMAIN);
+			Range r2 = new Range(Day.DOMAIN);
+			assertTrue(r1.isInRange(r2));
+			assertTrue(r2.isInRange(r1));
+		} catch (KeyedException e) {
+			e.printStackTrace();
+			fail("exception");
+		}
+	}
+
 	
 	private long testIteration1Helper(TimeDomain domain, int sample1, int sample2) {
 		try {
@@ -182,54 +195,6 @@ public class RangeTest extends TestCase {
 		total += testIteration1Helper(ThirdFriday.DOMAIN, s1, s2);
 		dump(String.format("total: %dms", total)); 
 	}
-
-//	public void test9() {
-//		try {
-//			Range r1 = new Range(Day.DOMAIN, "2005-03-01", "2005-03-07", Adjustment.NONE);
-//			Range r2 = new Range(DateTime.DOMAIN, "2005-03-03 10:15:00", "2005-03-05 17:30:00", Adjustment.NONE);
-//			Range inter = r1.intersection(r2);
-//			assertEquals("[2005-03-03, 2005-03-05]", inter.toString());
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			fail("exception");
-//		}
-//	}
-//
-//	public void test9a() {
-//		try {
-//			Range r1 = new Range(DateTime.DOMAIN, "2005-03-01 10:15:00", "2005-03-05 17:30:00", Adjustment.NONE);
-//			Range r2 = new Range(Day.DOMAIN, "2005-03-03", "2005-03-07", Adjustment.NONE);
-//			Range inter = r1.intersection(r2);
-//			assertEquals("[2005-03-03 00:00:00, 2005-03-05 17:30:00]", inter.toString());
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			fail("exception");
-//		}
-//	}
-//	
-//	public void test10() {
-//		try {
-//			Range r1 = new Range(Day.DOMAIN, "2005-03-01", "2005-03-07", Adjustment.NONE);
-//			Range r2 = new Range(DateTime.DOMAIN, "2005-03-03 10:15:00", "2005-03-05 17:30:00", Adjustment.NONE);
-//			Range uni = r1.union(r2);
-//			assertEquals("[2005-03-01, 2005-03-07]", uni.toString());
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			fail("exception");
-//		}
-//	}
-//
-//	public void test10a() {
-//		try {
-//			Range r1 = new Range(DateTime.DOMAIN, "2005-03-01 10:15:00", "2005-03-05 17:30:00", Adjustment.NONE);
-//			Range r2 = new Range(Day.DOMAIN, "2005-03-03", "2005-03-07", Adjustment.NONE);
-//			Range uni = r1.union(r2);
-//			assertEquals("[2005-03-01 10:15:00, 2005-03-07 00:00:00]", uni.toString());
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//			fail("exception");
-//		}
-//	}
 
 	
 }
