@@ -15,6 +15,7 @@ import ch.agent.t2.time.Range;
 import ch.agent.t2.time.Resolution;
 import ch.agent.t2.time.SimpleSubPeriodPattern;
 import ch.agent.t2.time.SubPeriodPattern;
+import ch.agent.t2.time.SystemTime;
 import ch.agent.t2.time.ThirdFriday;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeDomainCatalog;
@@ -308,6 +309,28 @@ public class TimeDomainTest extends TestCase {
 		assertEquals("0000-01-03", time.toString());
 	}
 	
+	public void testMinTime3() {
+		try {
+			TimeIndex time = Day.DOMAIN.minTime(true);
+			assertEquals("0000-01-01", time.toString());
+			assertEquals(0, time.asOffset());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("unexpected exception");
+		}
+	}
+	
+	public void testMinTime4() {
+		try {
+			TimeIndex time = SystemTime.DOMAIN.minTime(true);
+			assertEquals("1970-01-01 00:00:00.000", time.toString());
+			assertEquals(0, time.asOffset());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("unexpected exception");
+		}
+	}
+	
 	public void testMaxTime1() {
 		TimeIndex time = Day.DOMAIN.maxTime();
 		assertEquals("+25252734927766554-07-27", time.toString());
@@ -339,6 +362,26 @@ public class TimeDomainTest extends TestCase {
 		} catch(Exception e) {
 			e.printStackTrace();
 			fail(e.getMessage());
+		}
+	}
+	
+	public void testMaxTime6() {
+		try {
+			TimeIndex time = Day.DOMAIN.maxTime(true);
+			assertEquals(Integer.MAX_VALUE, time.asOffset());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("unexpected exception");
+		}
+	}
+	
+	public void testMaxTime7() {
+		try {
+			TimeIndex time = SystemTime.DOMAIN.maxTime(true);
+			assertEquals(Integer.MAX_VALUE, time.asOffset());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("unexpected exception");
 		}
 	}
 	

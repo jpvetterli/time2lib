@@ -68,7 +68,8 @@ public class TimeFactory implements TimeDomain, TimePacker, TimeFormatter, TimeS
 	private SubPeriodPattern subPeriodPattern;
 	
 	private TimeIndex minTime, maxTime, minOffsetCompatibleTime, maxOffsetCompatibleTime;
-	private long minNumericTime, maxNumericTime;
+	
+	private long min, max; // we must keep them 
 	
 	private final TimeFormatter formatter;
 	private final TimeScanner scanner;
@@ -96,10 +97,16 @@ public class TimeFactory implements TimeDomain, TimePacker, TimeFormatter, TimeS
 		if (this.basePeriodPattern != null && !this.basePeriodPattern.effective())
 			basePeriodPattern = null;
 		this.subPeriodPattern = def.getSubPeriodPattern();
-		minNumericTime = 0; // coming soon: negative times
-		maxNumericTime = findMaxIndex(this.basePeriodPattern, this.subPeriodPattern);
+		min = 0;
+		max = findMaxIndex(this.basePeriodPattern, this.subPeriodPattern);
 		this.formatter = formatter;
 		this.scanner = scanner;
+		
+		// derived data:
+		minTime = new Time2(this, min);
+		maxTime = new Time2(this, max);
+		minOffsetCompatibleTime = new Time2(this, getOrigin());
+		maxOffsetCompatibleTime = new Time2(this, Integer.MAX_VALUE + getOrigin());
 	}
 	
 	/**
@@ -246,9 +253,7 @@ public class TimeFactory implements TimeDomain, TimePacker, TimeFormatter, TimeS
 
 	@Override
 	public TimeIndex minTime() {
-		if (minTime == null)
-			minTime = new Time2(this, minNumericTime);
-		return minTime;
+		return minTime(false);
 	}
 
 	@Override
@@ -258,28 +263,12 @@ public class TimeFactory implements TimeDomain, TimePacker, TimeFormatter, TimeS
 	
 	@Override
 	public TimeIndex minTime(boolean offsetCompatible) {
-		if (offsetCompatible) {
-			if (minOffsetCompatibleTime == null)
-				minOffsetCompatibleTime = new Time2(this, Integer.MIN_VALUE + getOrigin());
-			return minOffsetCompatibleTime;
-		} else {
-			if (minTime == null)
-				minTime = new Time2(this, minNumericTime);
-			return minTime;
-		}
+		return offsetCompatible ? minOffsetCompatibleTime : minTime;
 	}
 
 	@Override
 	public TimeIndex maxTime(boolean offsetCompatible) {
-		if (offsetCompatible) {
-			if (maxOffsetCompatibleTime == null)
-				maxOffsetCompatibleTime = new Time2(this, Integer.MAX_VALUE + getOrigin());
-			return maxOffsetCompatibleTime;
-		} else {
-			if (maxTime == null)
-				maxTime = new Time2(this, maxNumericTime);
-			return maxTime;
-		}
+		return offsetCompatible ? maxOffsetCompatibleTime : maxTime;
 	}
 
 	@Override
@@ -304,7 +293,7 @@ public class TimeFactory implements TimeDomain, TimePacker, TimeFormatter, TimeS
 		 * Please do not remove this note until negative numeric times have been
 		 * implemented. And tested.
 		 */
-		if (t >= minNumericTime && t <= maxNumericTime)
+		if (t >= min && t <= max)
 			return true;
 		else {
 			if (testOnly)
