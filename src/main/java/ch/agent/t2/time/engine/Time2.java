@@ -82,16 +82,7 @@ public class Time2 implements TimeIndex {
 
 	private long internalTime;
 
-	private boolean internalTimeModified;
-
-	private TimeParts tp;
-	
-	/**
-	 * The parameterless constructor is not used.
-	 */
-	@SuppressWarnings("unused")
-	private Time2() {
-	}
+	private TimeParts timeParts;
 	
 	/**
 	 * Construct a time index with the given time domain.
@@ -215,6 +206,11 @@ public class Time2 implements TimeIndex {
 		setInternalTime(incrT);
 	}
 	
+	public Time2(TimeDomain domain, TimeParts tp, Adjustment adjust) throws T2Exception {
+		this(domain);
+		set(tp, adjust);
+	}
+	
 	@Override
 	public TimeIndex convert(TimeDomain domain) throws T2Exception {
 		return convert(domain, Adjustment.NONE);
@@ -224,17 +220,7 @@ public class Time2 implements TimeIndex {
 	public TimeIndex convert(TimeDomain domain, Adjustment adjustment) throws T2Exception {
 		if (getTimeDomain().equals(domain))
 			return this;
-		resolve();
-		switch(getTimeDomain().getResolution()) {
-		case YEAR:
-			tp.setMonth(1);
-		case MONTH:
-			tp.setDay(1);
-			break;
-		default:
-		}
-		return new Time2(domain, tp.getYear(), tp.getMonth(), tp.getDay(), tp.getHour(),
-				tp.getMin(), tp.getSec(), tp.getUsec(), adjustment);
+		return new Time2(domain, getTP(), adjustment);
 	}
 
 	@Override
@@ -276,50 +262,42 @@ public class Time2 implements TimeIndex {
 	 */
 	TimeParts getTimeParts() {
 		// package private
-		resolve();
-		return tp;
+		return getTP();
 	}
 
 	@Override
 	public long getYear() {
-		resolve();
-		return tp.getYear();
+		return getTP().getYear();
 	}
 
 	@Override
 	public int getMonth() {
-		resolve();
-		return tp.getMonth();
+		return getTP().getMonth();
 	}
 
 	@Override
 	public int getDay() {
-		resolve();
-		return tp.getDay();
+		return getTP().getDay();
 	}
 
 	@Override
 	public int getHour() {
-		resolve();
-		return tp.getHour();
+		return getTP().getHour();
 	}
 
 	@Override
 	public int getMinute() {
-		resolve();
-		return tp.getMin();
+		return getTP().getMin();
 	}
 
 	@Override
 	public int getSecond() {
-		resolve();
-		return tp.getSec();
+		return getTP().getSec();
 	}
 
 	@Override
 	public int getMicrosecond() {
-		resolve();
-		return tp.getUsec();
+		return getTP().getUsec();
 	}
 
 	@Override
@@ -341,16 +319,15 @@ public class Time2 implements TimeIndex {
 	
 	@Override
 	public String toString(TimeFormatter formatter) {
-		resolve();
-		return formatter == null ? domain.format(domain.getResolution(), tp)
-				: formatter.format(domain.getResolution(), tp);
+		return formatter == null ? domain.format(domain.getResolution(), getTP())
+				: formatter.format(domain.getResolution(), getTP());
 	}
 	
 	@Override
 	public String toString(String format) {
 		if (format == null)
 			return toString();
-		resolve();
+		TimeParts tp = getTP();
 		if (format.length() == 0) {
 			// TODO: should be localized (e.g. m/d yy)
 			String yy = tp.getYear() + "";
@@ -463,18 +440,7 @@ public class Time2 implements TimeIndex {
 	 * @throws T2Exception
 	 */
 	private void set(String date, Adjustment adjust) throws T2Exception {
-		TimeParts tp = domain.scan(date);
-		set(tp, adjust);
-	}
-	
-	/**
-	 * If not yet done, resolve a numerical time index into its constituent elements.
-	 */
-	private void resolve() {
-		if (internalTimeModified) {
-			tp = domain.unpack(getInternalTime());
-			internalTimeModified = false;
-		}
+		set(domain.scan(date), adjust);
 	}
 	
 	/**
@@ -487,13 +453,23 @@ public class Time2 implements TimeIndex {
 	}
 	
 	/**
-	 * Set the numerical time index. 
+	 * Set the numerical time index. This method is invoked, directly or indirectly,
+	 * only from constructors.
 	 * 
-	 * @param time the numerical time index
+	 * @param time
+	 *            the numerical time index
 	 */
 	private void setInternalTime(long time) {
-		internalTimeModified = true;
+		assert timeParts == null;
 		internalTime = time;
+	}
+
+	private TimeParts getTP() {
+		if (timeParts == null) {
+			// lazy (and expensive), only necessary when formatting or converting the time
+			timeParts = domain.unpack(getInternalTime());
+		}
+		return timeParts;
 	}
 
 }

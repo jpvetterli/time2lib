@@ -185,6 +185,18 @@ public class TimeConversionTest extends TestCase {
 			fail("excecption not expected");
 		}
 	}
+	
+	public void testConvert05a() {
+		try {
+			TimeDomain every5Months = new TimeDomainDefinition("month5", Resolution.MONTH, 0L, new Cycle(true, false, false, false, false)).asTimeDomain();
+			TimeIndex t = every5Months.time("2005-06");
+			TimeIndex day = t.add(1).convert(Day.DOMAIN);
+			assertEquals("2005-11-01", day.toString());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("excecption not expected");
+		}
+	}
 
 	public void testConvert06() {
 		try {
