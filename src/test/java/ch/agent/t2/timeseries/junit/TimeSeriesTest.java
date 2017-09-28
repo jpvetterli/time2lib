@@ -998,9 +998,46 @@ public class TimeSeriesTest extends TestCase {
 			for (Observation<Integer> o : tint)
 				dump(o.toString());
 		} catch (Exception e) {
-//			e.printStackTrace();
+			e.printStackTrace();
 			fail("unexpected exception");
 		}
 	}
 	
+	public void testSparseSubRangeBug1() {
+		try {
+			// with regular time series no problem
+			TimeAddressable<Double> ts = new RegularTimeSeries<Double>(Double.class, Day.DOMAIN);
+			ts.put(new Day("2000-01-15"), 41.);
+			ts.put(new Day("2000-01-20"), 42.);
+			ts.put(new Day("2000-01-30"), 42.);
+			ts.put(new Day("2000-02-10"), 43.);
+			assertEquals(27, ts.getRange().getSize());
+			assertEquals(Double.NaN, ts.get(new Day("2000-01-16")));
+			assertTrue(ts.isMissing(ts.get(new Day("2000-01-16"))));
+			ts = ts.get(0L, Long.MAX_VALUE); 
+			assertEquals(27, ts.getRange().getSize());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("unexpected exception");
+		}
+	}
+	
+	public void testSparseSubRangeBug2() {
+		try {
+			TimeAddressable<Double> ts = new SparseTimeSeries<Double>(Double.class, Day.DOMAIN);
+			ts.put(new Day("2000-01-15"), 41.);
+			ts.put(new Day("2000-01-20"), 42.);
+			ts.put(new Day("2000-01-30"), 42.);
+			ts.put(new Day("2000-02-10"), 43.);
+			assertEquals(27, ts.getRange().getSize());
+			assertEquals(Double.NaN, ts.get(new Day("2000-01-16")));
+			assertTrue(ts.isMissing(ts.get(new Day("2000-01-16"))));
+			ts = ts.get(0L, Long.MAX_VALUE); 
+			assertEquals(27, ts.getRange().getSize());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("unexpected exception");
+		}
+	}
+
 }

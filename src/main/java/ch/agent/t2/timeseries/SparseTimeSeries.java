@@ -115,7 +115,11 @@ public class SparseTimeSeries<T> extends AbstractTimeSeries<T> implements TimeAd
 	private SparseTimeSeries(SparseTimeSeries<T> ts, long first, long last) {
 		super(ts.getType(), ts.getTimeDomain(), ts.getMissingValue());
 		// reallocate to avoid submap problems when inserting out of range
-		this.data =  new TreeMap<Long, T>(ts.data.subMap(first, last + 1));
+		// take care of wrap around, last = Long#MAX_VALUE is used to indicate open range
+		if (last + 1 < last)
+			this.data =  new TreeMap<Long, T>(ts.data.tailMap(first));
+		else
+			this.data =  new TreeMap<Long, T>(ts.data.subMap(first, last + 1));
 	}
 	
 	@Override
