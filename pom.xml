@@ -85,11 +85,6 @@
       <plugin>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.20.1</version>
-        <configuration>
-          <!-- make sure each test runs in a new JVM, to force running static blocks --> 
-          <forkCount>1</forkCount>
-          <reuseForks>false</reuseForks>
-        </configuration>
       </plugin>
 
       <plugin>
