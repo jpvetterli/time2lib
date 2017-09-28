@@ -28,11 +28,6 @@ public class KeyedException extends Exception {
 	
 	protected KeyedMessage msg;
 
-	@SuppressWarnings("unused")
-	private KeyedException() {
-		super();
-	}
-	
 	/**
 	 * Construct an exception with a keyed message.
 	 * 
