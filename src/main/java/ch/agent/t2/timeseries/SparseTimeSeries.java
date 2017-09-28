@@ -26,12 +26,11 @@ import ch.agent.t2.time.Range;
 import ch.agent.t2.time.TimeDomain;
 
 /**
- * SparseTimeSeries implements {@link TimeAddressable}.
- * Missing values are never stored in a sparse time series, but nulls can be
- * stored, unless they are used for representing missing values.
+ * SparseTimeSeries implements {@link TimeAddressable}. Missing values are never
+ * stored in a sparse time series, but nulls can be stored, unless they are used
+ * for representing missing values.
  * <p>
- * <b>Nota bene.</b>
- * The implementation is not thread-safe.
+ * This implementation provides no synchronization.
  * 
  * @author Jean-Paul Vetterli
  * @param <T>
@@ -74,28 +73,36 @@ public class SparseTimeSeries<T> extends AbstractTimeSeries<T> implements TimeAd
 	}
 	
 	private SortedMap<Long,T> data;
-	private Class<T> type;
 	
 	/**
-	 * The parameterless constructor is never used.
-	 */
-	@SuppressWarnings("unused")
-	private SparseTimeSeries() {
-	}
-	
-	/**
-	 * Construct a sparse time series with the given time domain and missing
+	 * Construct a sparse time series with the given type, time domain and missing
 	 * value.
 	 * 
+	 * @param type
+	 *            a non-null data type
 	 * @param domain
 	 *            a non-null time domain
 	 * @param missingValue
-	 *            the object representing missing values
+	 *            an object representing missing values
 	 */
-	protected SparseTimeSeries(Class<T> type, TimeDomain domain, T missingValue) {
-		super(domain, missingValue);
-		this.type = type;
+	public SparseTimeSeries(Class<T> type, TimeDomain domain, T missingValue) {
+		super(type, domain, missingValue);
 		data = new TreeMap<Long,T>();
+	}
+	
+	/**
+	 * Construct a sparse time series with the given type and time domain. The
+	 * missing value object is {@link Double#NaN} for type {@link Double} and null
+	 * for all other types.
+	 * 
+	 * @param type
+	 *            a non-null data type
+	 * @param domain
+	 *            a non-null time domain
+	 */
+	@SuppressWarnings("unchecked")
+	public SparseTimeSeries(Class<T> type, TimeDomain domain) {
+		this(type, domain, (T) (type == Double.class ? Double.NaN : null));
 	}
 	
 	/**
@@ -106,8 +113,7 @@ public class SparseTimeSeries<T> extends AbstractTimeSeries<T> implements TimeAd
 	 * @param last a numerical time index giving the end of the range
 	 */
 	private SparseTimeSeries(SparseTimeSeries<T> ts, long first, long last) {
-		super(ts.getTimeDomain(), ts.getMissingValue());
-		this.type = ts.type;
+		super(ts.getType(), ts.getTimeDomain(), ts.getMissingValue());
 		// reallocate to avoid submap problems when inserting out of range
 		this.data =  new TreeMap<Long, T>(ts.data.subMap(first, last + 1));
 	}
@@ -119,12 +125,12 @@ public class SparseTimeSeries<T> extends AbstractTimeSeries<T> implements TimeAd
 	
 	@Override
 	public TimeAddressable<T> makeEmptyCopy() {
-		return new SparseTimeSeries<T>(type, getTimeDomain(), getMissingValue());
+		return new SparseTimeSeries<T>(getType(), getTimeDomain(), getMissingValue());
 	}
 
 	@Override
 	public TimeIndexable<T> asIndexable() throws T2Exception {
-		TimeIndexable<T> ts = TimeSeriesFactory.make(getTimeDomain(), type);
+		TimeIndexable<T> ts = new RegularTimeSeries<T>(getType(), getTimeDomain(), getMissingValue());
 		ts.put(this, null);
 		return ts;
 	}
@@ -140,7 +146,7 @@ public class SparseTimeSeries<T> extends AbstractTimeSeries<T> implements TimeAd
 	public TimeAddressable<T> get(Range range) throws T2Exception {
 		getTimeDomain().requireEquality(range.getTimeDomain());
 		if (range.isEmpty())
-			return new SparseTimeSeries<T>(type, getTimeDomain(), getMissingValue());
+			return new SparseTimeSeries<T>(getType(), getTimeDomain(), getMissingValue());
 		else
 			return get(range.getFirstIndex(), range.getLastIndex()); 
 	}

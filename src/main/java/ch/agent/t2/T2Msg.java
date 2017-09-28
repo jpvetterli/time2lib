@@ -30,6 +30,7 @@ public class T2Msg extends KeyedMessage {
 
 	public class K {
 		public static final String T0001 = "T0001";
+		public static final String T0003 = "T0003";
 		public static final String T0004 = "T0004";
 		public static final String T0005 = "T0005";
 		public static final String T0006 = "T0006";

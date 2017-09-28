@@ -23,6 +23,7 @@ import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
 import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.Range;
+import ch.agent.t2.time.Resolution;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeIndex;
 
@@ -35,26 +36,51 @@ import ch.agent.t2.time.TimeIndex;
  */
 public abstract class AbstractTimeSeries<T> implements TimeAddressable<T> {
 
-	private TimeDomain domain;
+	/**
+	 * Construct a time series of the type and domain specified. When
+	 * {@code forceParse} is true, or when the domain resolution is less than a day,
+	 * the time series returned is addressable (sparse), else it is indexable
+	 * (regular).
+	 * 
+	 * @param <X>
+	 *            corresponds to the value type
+	 * @param type
+	 *            non-null value type
+	 * @param domain
+	 *            a non-null time domain
+	 * @param forceSparse
+	 *            if true, always return a sparse time series
+	 * @return a time series
+	 */
+	public static <X>TimeAddressable<X> make(Class<X> type, TimeDomain domain, boolean forceSparse) {
+		return forceSparse || domain.compareResolutionTo(Resolution.DAY) < 0 ? new SparseTimeSeries<X>(type, domain)
+				: new RegularTimeSeries<X>(type, domain);
+	}
 	
-	private T missingValue; // for each type, there is a single object (can use ==)
+	private final TimeDomain domain;
+	private final Class<T> type;
+	private final T missingValue;
 
 	/**
 	 * The parameterless constructor always throws an UnsupportedOperationException.
 	 */
-	protected AbstractTimeSeries() {
+	public AbstractTimeSeries() {
 		throw new UnsupportedOperationException();
 	}
 	
 	/**
-	 * Construct a time series with the given time domain and missing value.
+	 * Construct a time series with the given time domain, data type, and missing value.
 	 * 
+	 * @param type data type of observations
 	 * @param domain a non-null time domain
 	 * @param missingValue the object to use for representing missing values
 	 */
-	public AbstractTimeSeries(TimeDomain domain, T missingValue) {
+	public AbstractTimeSeries(Class<T> type, TimeDomain domain, T missingValue) {
+		if (type == null)
+			throw new IllegalArgumentException("type null");
 		if (domain == null)
-			throw new IllegalArgumentException("calendar null");
+			throw new IllegalArgumentException("domain null");
+		this.type = type;
 		this.domain = domain;
 		this.missingValue = missingValue;
 	}
@@ -84,6 +110,11 @@ public abstract class AbstractTimeSeries<T> implements TimeAddressable<T> {
 		if (!domain.equals(t.getTimeDomain()))
 			throw T2Msg.exception(K.T5011);
 		return get(t.asLong());
+	}
+
+	@Override
+	public Class<T> getType() {
+		return type;
 	}
 
 	@Override

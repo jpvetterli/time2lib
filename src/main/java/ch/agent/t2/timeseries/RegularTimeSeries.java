@@ -16,6 +16,7 @@
  */
 package ch.agent.t2.timeseries;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -31,14 +32,34 @@ import ch.agent.t2.time.TimeDomain;
 /**
  * RegularTimeSeries implements {@link TimeIndexable}.
  * <p>
- * <b>Nota bene.</b>
- * The implementation is not thread-safe.
+ * This implementation provides no synchronization.
+ * <p>
+ * The maximum allowed gap in a time series is by default 500. It can be set to
+ * another value using the system property "RegularTimeSeries.MaxGap".
  * 
  * @author Jean-Paul Vetterli
- * @param <T> the value type
+ * @param <T>
+ *            the value type
  */
 public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeIndexable<T> {
 
+	public static final String MAXGAP_PROPERTY = "RegularTimeSeries.MaxGap";
+	private static final int DEFAULT_MAXGAP = 500;
+	private static final int MAXGAP;
+	static {
+		String prop = System.getProperty(MAXGAP_PROPERTY);
+		if (prop != null) {
+			try {
+				MAXGAP = Integer.valueOf(prop);
+				if (MAXGAP < 0)
+					throw new IllegalArgumentException(prop + "<0");
+			} catch (Exception e) {
+				throw new IllegalArgumentException(new T2Msg(K.T0003, MAXGAP_PROPERTY, prop).toString(), e);
+			}
+		} else
+			MAXGAP = DEFAULT_MAXGAP;
+	}
+	
 	/**
 	 * TimeSeriesIterator is an {@link Iterator} returning {@link Observation} objects.
 	 */
@@ -78,35 +99,41 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 	}
 
 	private List<T> data;
-	private T[] template;
 	private long start; // negative when no data
-	private T[] empty;
-	private int maxGap;
-	
-	/**
-	 * The parameterless constructor is never used.
-	 */
-	@SuppressWarnings("unused")
-	private RegularTimeSeries() {
-	}
 	
 	/**
 	 * Construct a regular time series.
-	 * <p>
-	 * The template argument is required for turning the generic collection into an array.
 	 * 
-	 * @param domain a non-null time domain
-	 * @param template a non-null array, typically empty
-	 * @param missingValue an object representing missing values for this value type
-	 * @param maxGap the largest run of missing values allowed
+	 * @param type
+	 *            a non-null data type
+	 * @param domain
+	 *            a non-null time domain
+	 * @param missingValue
+	 *            an object representing missing values
 	 */
-	protected RegularTimeSeries(TimeDomain domain, T[] template, T missingValue, int maxGap) {
-		super(domain, missingValue);
+	public RegularTimeSeries(Class<T> type, TimeDomain domain, T missingValue) {
+		super(type, domain, missingValue);
 		this.data = new ArrayList<T>();
 		this.start = -1;
-		this.template = template;
-		this.empty = new ArrayList<T>(0).toArray(template);
-		this.maxGap = maxGap;
+	}
+	
+	/**
+	 * Construct a regular time series. The missing value object is
+	 * {@link Double#NaN} for type {@link Double} and null for all other types.
+	 * 
+	 * @param type
+	 *            a non-null data type
+	 * @param domain
+	 *            a non-null time domain
+	 */
+	@SuppressWarnings("unchecked")
+	public RegularTimeSeries(Class<T> type, TimeDomain domain) {
+		this(type, domain, (T) (type == Double.class ? Double.NaN : null));
+	}
+	
+	@SuppressWarnings("unchecked")
+	private T[] template() {
+		return (T[])Array.newInstance(getType(), 0);
 	}
 	
 	/**
@@ -119,10 +146,7 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 	 */
 	private RegularTimeSeries(RegularTimeSeries<T> ts, int fromOffset, int toOffset) {
 		// no need to clone domain, template, empty, or missingValue
-		super(ts.getTimeDomain(), ts.getMissingValue());
-		this.template = ts.template;
-		this.empty = ts.empty;
-		this.maxGap = ts.maxGap;
+		super(ts.getType(), ts.getTimeDomain(), ts.getMissingValue());
 		if (toOffset > fromOffset) {
 			this.data = new ArrayList<T>(ts.data.subList(fromOffset, toOffset));
 			this.start = ts.start + fromOffset;
@@ -252,12 +276,12 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 
 	@Override
 	public int getMaxGap() {
-		return maxGap;
+		return MAXGAP;
 	}
 
 	@Override
 	public TimeIndexable<T> makeEmptyCopy() {
-		return new RegularTimeSeries<T>(getTimeDomain(), template, getMissingValue(), maxGap);
+		return new RegularTimeSeries<T>(getType(), getTimeDomain(), getMissingValue());
 	}
 	
 	@Override
@@ -275,8 +299,8 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 	@Override
 	public T[] getArray() {
 		if (start < 0)
-			return empty;
-		return data.toArray(template);
+			return template();
+		return data.toArray(template());
 	}
 	
 	@Override
@@ -284,15 +308,15 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 		long first = range.getFirstIndex();
 		long last = range.getLastIndex();
 		if (start < 0)
-			return empty;
+			return template();
 		int firstOffset = offset(first, start);
 		int lastOffset = offset(last, start);
 		if (firstOffset >= data.size())
-			return empty;
+			return template();
 		if (lastOffset >= data.size())
 			lastOffset = data.size() - 1;
 		// subList() is a view but toArray() makes a copy
-		return data.subList(firstOffset, lastOffset + 1).toArray(template);
+		return data.subList(firstOffset, lastOffset + 1).toArray(template());
 	}
 	
 	@Override
@@ -532,8 +556,8 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 				// ... left ...
 				int padSize = -offset - 1;
 				if (padSize > 0) {
-					if (padSize > maxGap)
-						throw T2Msg.exception(K.T5018, padSize, maxGap, getTimeDomain().time(index).toString());
+					if (padSize > MAXGAP)
+						throw T2Msg.exception(K.T5018, padSize, MAXGAP, getTimeDomain().time(index).toString());
 					List<T> pad = new ArrayList<T>(padSize);
 					for (int i = 0; i < padSize; i++)
 						pad.add(getMissingValue());
@@ -545,8 +569,8 @@ public class RegularTimeSeries<T> extends AbstractTimeSeries<T> implements TimeI
 				// ... or to the right
 				int padSize = offset - data.size();
 				if (padSize > 0) {
-					if (padSize > maxGap) // versions 1.26 to 1.49 had "padSize > 10* MAX_GAP" ???
-						throw T2Msg.exception(K.T5019, padSize, maxGap, getTimeDomain().time(index).toString());
+					if (padSize > MAXGAP)
+						throw T2Msg.exception(K.T5019, padSize, MAXGAP, getTimeDomain().time(index).toString());
 					List<T> pad = new ArrayList<T>(padSize);
 					for (int i = 0; i < padSize; i++)
 						pad.add(getMissingValue());

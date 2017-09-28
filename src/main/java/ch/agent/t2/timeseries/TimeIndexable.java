@@ -31,8 +31,8 @@ import ch.agent.t2.time.Range;
  * A TimeIndexable places restrictions on the length of a single run of missing
  * values. Any of the {@link TimeAddressable#put put} methods can throw an exception
  * when a certain threshold is exceeded. The threshold can be queried with
- * {@link TimeIndexable#getMaxGap()}. The maximum allowed gap can be modified for future
- * time series with {@link TimeSeriesFactory#setMaxGap(int)}.
+ * {@link TimeIndexable#getMaxGap()}. The maximum allowed gap can be modified for an 
+ * application by setting the system property {@link RegularTimeSeries#MAXGAP_PROPERTY}.
  * <p>
  * The definitions of {@link #copy} and {@link TimeIndexable#makeEmptyCopy()} are
  * overridden to return a {@link TimeIndexable} instead of a {@link TimeAddressable}.

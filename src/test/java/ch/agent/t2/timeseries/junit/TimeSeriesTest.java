@@ -2,7 +2,6 @@ package ch.agent.t2.timeseries.junit;
 
 import java.util.Iterator;
 
-import junit.framework.TestCase;
 import ch.agent.core.KeyedException;
 import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.Adjustment;
@@ -11,12 +10,15 @@ import ch.agent.t2.time.Range;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.time.Workday;
+import ch.agent.t2.timeseries.AbstractTimeSeries;
 import ch.agent.t2.timeseries.Filler;
 import ch.agent.t2.timeseries.Observation;
+import ch.agent.t2.timeseries.RegularTimeSeries;
+import ch.agent.t2.timeseries.SparseTimeSeries;
 import ch.agent.t2.timeseries.TimeAddressable;
 import ch.agent.t2.timeseries.TimeIndexable;
-import ch.agent.t2.timeseries.TimeSeriesFactory;
 import ch.agent.t2.timeseries.UpdateReviewer;
+import junit.framework.TestCase;
 
 public class TimeSeriesTest extends TestCase {
 
@@ -55,7 +57,7 @@ public class TimeSeriesTest extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		ti = TimeSeriesFactory.make(dom, Integer.class);
+		ti = new RegularTimeSeries<Integer>(Integer.class, dom);
 		time = dom.time("2006-06-23");
 		ti.put(time, 123);
 		time = dom.time("2006-06-26");
@@ -76,7 +78,7 @@ public class TimeSeriesTest extends TestCase {
 	
 	public void test1b() {
 		try {
-			TimeAddressable<Integer>tint = TimeSeriesFactory.make(Day.DOMAIN, Integer.class);
+			TimeAddressable<Integer>tint = new RegularTimeSeries<Integer>(Integer.class, Day.DOMAIN);
 			tint.put(new Day("2000-01-15"), 41);
 			tint.put(new Day("2000-01-20"), 42);
 			assertEquals(6, tint.getRange().getSize());
@@ -143,7 +145,7 @@ public class TimeSeriesTest extends TestCase {
 	
 	public void test7() {
 		try {
-			ta = TimeSeriesFactory.make(dom, Double.class, true);
+			ta = new SparseTimeSeries<Double>(Double.class, dom);
 			time = dom.time("2006-06-21"); ta.put(time, 1d); 
 			time = time.add(1); ta.put(time, 2d); 
 			time = time.add(1); ta.put(time, 3d); 
@@ -163,7 +165,7 @@ public class TimeSeriesTest extends TestCase {
 	
 	public void test8() {
 		try {
-			ta = TimeSeriesFactory.make(dom, Double.class, false);
+			ta = AbstractTimeSeries.make(Double.class, dom, false);
 			time = dom.time("2006-06-21"); ta.put(time, 1d); 
 			time = time.add(1); ta.put(time, 2d); 
 			time = time.add(1); ta.put(time, 3d); 
@@ -184,7 +186,7 @@ public class TimeSeriesTest extends TestCase {
 	public void test9() {
 		try {
 			TimeDomain calendar = Day.DOMAIN;
-			TimeAddressable<Double> ts = TimeSeriesFactory.make(calendar, Double.class, true);
+			TimeAddressable<Double> ts = new SparseTimeSeries<Double>(Double.class, calendar);
 			long t1 = calendar.time("2008-02-26").asLong();
 			Double[] d1 = {Double.NaN, Double.NaN, 3d, Double.NaN, 5d, Double.NaN};
 			ts.put(t1, d1);
@@ -199,7 +201,7 @@ public class TimeSeriesTest extends TestCase {
 	public void test10() {
 		try {
 			TimeDomain calendar = Day.DOMAIN;
-			TimeAddressable<Double> ts = TimeSeriesFactory.make(calendar, Double.class);
+			TimeAddressable<Double> ts = new RegularTimeSeries<Double>(Double.class, calendar);
 			long t1 = calendar.time("2008-02-26").asLong();
 			Double[] d1 = {Double.NaN, Double.NaN, 3d, Double.NaN, 5d, Double.NaN};
 			ts.put(t1, d1);
@@ -214,7 +216,7 @@ public class TimeSeriesTest extends TestCase {
 	public void test11() {
 		try {
 			TimeDomain calendar = Day.DOMAIN;
-			TimeAddressable<Double> ts = TimeSeriesFactory.make(calendar, Double.class);
+			TimeAddressable<Double> ts = new RegularTimeSeries<Double>(Double.class, calendar);
 			long t1 = calendar.time("2008-02-25").asLong();
 			Double[] d1 = {0d, Double.NaN, Double.NaN, 3d, Double.NaN, 5d, Double.NaN, Double.NaN, 8d};
 			ts.put(t1, d1);
@@ -233,7 +235,7 @@ public class TimeSeriesTest extends TestCase {
 	public void test12() {
 		try {
 			TimeDomain calendar = Day.DOMAIN;
-			TimeAddressable<Double> ts = TimeSeriesFactory.make(calendar, Double.class);
+			TimeAddressable<Double> ts = new RegularTimeSeries<Double>(Double.class, calendar);
 			long t1 = calendar.time("2008-02-25").asLong();
 			Double[] d1 = {0d, Double.NaN, Double.NaN, 3d, Double.NaN, 5d, Double.NaN, Double.NaN, 8d};
 			ts.put(t1, d1);
@@ -254,7 +256,7 @@ public class TimeSeriesTest extends TestCase {
 	public void test13S() {
 		try {
 			TimeDomain calendar = Day.DOMAIN;
-			TimeAddressable<Double> ts = TimeSeriesFactory.make(calendar, Double.class, true);
+			TimeAddressable<Double> ts = new SparseTimeSeries<Double>(Double.class, calendar);
 			long t1 = calendar.time("2008-02-25").asLong();
 			Double[] d1 = {0d, Double.NaN, Double.NaN, 3d, Double.NaN, 5d, Double.NaN, Double.NaN, 8d};
 			ts.put(t1, d1);
@@ -276,7 +278,7 @@ public class TimeSeriesTest extends TestCase {
 	public void test13R() {
 		try {
 			TimeDomain calendar = Day.DOMAIN;
-			TimeAddressable<Double> ts = TimeSeriesFactory.make(calendar, Double.class);
+			TimeAddressable<Double> ts = new RegularTimeSeries<Double>(Double.class, calendar);
 			long t1 = calendar.time("2008-02-25").asLong();
 			Double[] d1 = {0d, Double.NaN, Double.NaN, 3d, Double.NaN, 5d, Double.NaN, Double.NaN, 8d};
 			ts.put(t1, d1);
@@ -298,7 +300,7 @@ public class TimeSeriesTest extends TestCase {
 	public void test13aS() {
 		try {
 			TimeDomain calendar = Day.DOMAIN;
-			TimeAddressable<Double> ts = TimeSeriesFactory.make(calendar, Double.class, true);
+			TimeAddressable<Double> ts = new SparseTimeSeries<Double>(Double.class, calendar);
 			long t1 = calendar.time("2008-02-25").asLong();
 			Double[] d1 = {0d, Double.NaN, Double.NaN, 3d, Double.NaN, 5d, Double.NaN, Double.NaN, 8d};
 			ts.put(t1, d1);
@@ -318,7 +320,7 @@ public class TimeSeriesTest extends TestCase {
 	public void test13aR() {
 		try {
 			TimeDomain calendar = Day.DOMAIN;
-			TimeAddressable<Double> ts = TimeSeriesFactory.make(calendar, Double.class);
+			TimeAddressable<Double> ts = new RegularTimeSeries<Double>(Double.class, calendar);
 			long t1 = calendar.time("2008-02-25").asLong();
 			Double[] d1 = {0d, Double.NaN, Double.NaN, 3d, Double.NaN, 5d, Double.NaN, Double.NaN, 8d};
 			ts.put(t1, d1);
@@ -339,7 +341,7 @@ public class TimeSeriesTest extends TestCase {
 	public void test13a1R() {
 		try {
 			TimeDomain calendar = Day.DOMAIN;
-			TimeAddressable<Double> ts = TimeSeriesFactory.make(calendar, Double.class);
+			TimeAddressable<Double> ts = new RegularTimeSeries<Double>(Double.class, calendar);;
 			long t1 = calendar.time("2008-02-25").asLong();
 			Double[] d1 = {0d, Double.NaN, Double.NaN, 3d, Double.NaN, 5d, Double.NaN, Double.NaN, 8d};
 			ts.put(t1, d1);
@@ -360,7 +362,7 @@ public class TimeSeriesTest extends TestCase {
 	public void test13bS() {
 		try {
 			TimeDomain calendar = Day.DOMAIN;
-			TimeAddressable<Double> ts = TimeSeriesFactory.make(calendar, Double.class, true);
+			TimeAddressable<Double> ts = new SparseTimeSeries<Double>(Double.class, calendar);
 			long t1 = calendar.time("2008-02-25").asLong();
 			Double[] d1 = {0d, Double.NaN, Double.NaN, 3d, Double.NaN, 5d, Double.NaN, Double.NaN, 8d};
 			ts.put(t1, d1);
@@ -379,7 +381,7 @@ public class TimeSeriesTest extends TestCase {
 	public void test13bR() {
 		try {
 			TimeDomain calendar = Day.DOMAIN;
-			TimeAddressable<Double> ts = TimeSeriesFactory.make(calendar, Double.class);
+			TimeAddressable<Double> ts = new RegularTimeSeries<Double>(Double.class, calendar);;
 			long t1 = calendar.time("2008-02-25").asLong();
 			Double[] d1 = {0d, Double.NaN, Double.NaN, 3d, Double.NaN, 5d, Double.NaN, Double.NaN, 8d};
 			ts.put(t1, d1);
@@ -399,7 +401,7 @@ public class TimeSeriesTest extends TestCase {
 	public void test13cR() {
 		try {
 			TimeDomain calendar = Day.DOMAIN;
-			TimeAddressable<Double> ts = TimeSeriesFactory.make(calendar, Double.class);
+			TimeAddressable<Double> ts = new RegularTimeSeries<Double>(Double.class, calendar);;
 			long t1 = calendar.time("2008-02-25").asLong();
 			Double[] d1 = {Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN};
 			ts.put(t1, d1);
@@ -415,7 +417,7 @@ public class TimeSeriesTest extends TestCase {
 	public void test13cS() {
 		try {
 			TimeDomain calendar = Day.DOMAIN;
-			TimeAddressable<Double> ts = TimeSeriesFactory.make(calendar, Double.class, true);
+			TimeAddressable<Double> ts = new SparseTimeSeries<Double>(Double.class, calendar);
 			long t1 = calendar.time("2008-02-25").asLong();
 			Double[] d1 = {Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN};
 			ts.put(t1, d1);
@@ -430,7 +432,7 @@ public class TimeSeriesTest extends TestCase {
 	
 	public void test14() {
 		try {
-			ta = TimeSeriesFactory.make(dom, Double.class);
+			ta = new RegularTimeSeries<Double>(Double.class, dom);
 			time = dom.time("2006-06-21"); ta.put(time, 1d); 
 			time = time.add(1); ta.put(time, 2d); 
 			time = time.add(1); ta.put(time, 3d); 
@@ -453,7 +455,7 @@ public class TimeSeriesTest extends TestCase {
 	
 	public void test15() {
 		try {
-			ta = TimeSeriesFactory.make(dom, Double.class, true);
+			ta = new SparseTimeSeries<Double>(Double.class, dom);
 			time = dom.time("2006-06-21"); ta.put(time, 1d); 
 			time = time.add(1); ta.put(time, 2d); 
 			time = time.add(1); ta.put(time, 3d); 
@@ -481,7 +483,7 @@ public class TimeSeriesTest extends TestCase {
 
 	public void test17() {
 		try {
-			ta = TimeSeriesFactory.make(Day.DOMAIN, Double.class);
+			ta = new RegularTimeSeries<Double>(Double.class, Day.DOMAIN);
 			ta.put(new Day("2006-04-04"), 4d);
 			ta.put(new Day("2006-04-08"), 8d);
 			ta.put(new Day("2006-04-09"), 9d);
@@ -500,7 +502,7 @@ public class TimeSeriesTest extends TestCase {
 	public void test17a() {
 		// note: once upon a time, tb was a view of ta; it was messy
 		try {
-			ta = TimeSeriesFactory.make(Day.DOMAIN, Double.class);
+			ta = new RegularTimeSeries<Double>(Double.class, Day.DOMAIN);
 			ta.put(new Day("2006-04-04"), 4d);
 			ta.put(new Day("2006-04-08"), 8d);
 			ta.put(new Day("2006-04-09"), 9d);
@@ -524,7 +526,7 @@ public class TimeSeriesTest extends TestCase {
 	public void test17b() {
 		// note: once upon a time, tb was a view of ta; it was messy
 		try {
-			ta = TimeSeriesFactory.make(Day.DOMAIN, Double.class);
+			ta = new RegularTimeSeries<Double>(Double.class, Day.DOMAIN);
 			ta.put(new Day("2006-04-04"), 4d);
 			ta.put(new Day("2006-04-08"), 8d);
 			ta.put(new Day("2006-04-09"), 9d);
@@ -549,7 +551,7 @@ public class TimeSeriesTest extends TestCase {
 	public void test17c() {
 		// note: once upon a time, tb was a view of ta; it was messy
 		try {
-			ta = TimeSeriesFactory.make(Day.DOMAIN, Double.class, false);
+			ta = AbstractTimeSeries.make(Double.class, Day.DOMAIN, false);
 			ta.put(new Day("2006-04-04"), 4d);
 			ta.put(new Day("2006-04-08"), 8d);
 			ta.put(new Day("2006-04-09"), 9d);
@@ -574,7 +576,7 @@ public class TimeSeriesTest extends TestCase {
 	public void test17d() {
 		// note: once upon a time, tb was a view of ta; it was messy
 		try {
-			ta = TimeSeriesFactory.make(Day.DOMAIN, Double.class, true);
+			ta = new SparseTimeSeries<Double>(Double.class, Day.DOMAIN);
 			ta.put(new Day("2006-04-04"), 4d);
 			ta.put(new Day("2006-04-08"), 8d);
 			ta.put(new Day("2006-04-09"), 9d);
@@ -598,7 +600,7 @@ public class TimeSeriesTest extends TestCase {
 	
 	public void test17d1() {
 		try {
-			ta = TimeSeriesFactory.make(Day.DOMAIN, Double.class, true);
+			ta = new SparseTimeSeries<Double>(Double.class, Day.DOMAIN);
 			ta.put(new Day("2006-04-04"), 4d);
 			ta.put(new Day("2006-04-08"), 8d);
 			ta.put(new Day("2006-04-09"), 9d);
@@ -623,7 +625,7 @@ public class TimeSeriesTest extends TestCase {
 	
 	public void test17d2() {
 		try {
-			ta = TimeSeriesFactory.make(Day.DOMAIN, Double.class, true);
+			ta = new SparseTimeSeries<Double>(Double.class, Day.DOMAIN);
 			ta.put(new Day("2006-04-04"), 4d);
 			ta.put(new Day("2006-04-08"), 8d);
 			ta.put(new Day("2006-04-09"), 9d);
@@ -649,7 +651,7 @@ public class TimeSeriesTest extends TestCase {
 
 	public void test17e() {
 		try {
-			ta = TimeSeriesFactory.make(Day.DOMAIN, Double.class, false);
+			ta = AbstractTimeSeries.make(Double.class, Day.DOMAIN, false);
 			ta.put(new Day("2006-04-04"), 4d);
 			ta.put(new Day("2006-04-08"), 8d);
 			ta.put(new Day("2006-04-09"), 9d);
@@ -668,7 +670,7 @@ public class TimeSeriesTest extends TestCase {
 	
 	public void test17f() {
 		try {
-			ta = TimeSeriesFactory.make(Day.DOMAIN, Double.class, true);
+			ta = new SparseTimeSeries<Double>(Double.class, Day.DOMAIN);
 			ta.put(new Day("2006-04-04"), 4d);
 			ta.put(new Day("2006-04-08"), 8d);
 			ta.put(new Day("2006-04-09"), 9d);
@@ -686,7 +688,7 @@ public class TimeSeriesTest extends TestCase {
 	
 	public void test17g() {
 		try {
-			ta = TimeSeriesFactory.make(Day.DOMAIN, Double.class, false);
+			ta = AbstractTimeSeries.make(Double.class, Day.DOMAIN, false);
 			ta.put(new Day("2006-04-04"), 4d);
 			ta.put(new Day("2006-04-08"), 8d);
 			ta.put(new Day("2006-04-09"), 9d);
@@ -706,7 +708,7 @@ public class TimeSeriesTest extends TestCase {
 
 	public void test17h() {
 		try {
-			ta = TimeSeriesFactory.make(Day.DOMAIN, Double.class, true);
+			ta = new SparseTimeSeries<Double>(Double.class, Day.DOMAIN);
 			ta.put(new Day("2006-04-04"), 4d);
 			ta.put(new Day("2006-04-08"), 8d);
 			ta.put(new Day("2006-04-09"), 9d);
@@ -727,7 +729,7 @@ public class TimeSeriesTest extends TestCase {
 	public void test18R() {
 		try {
 			TimeDomain calendar = Day.DOMAIN;
-			TimeAddressable<Double> ts = TimeSeriesFactory.make(calendar, Double.class);
+			TimeAddressable<Double> ts = new RegularTimeSeries<Double>(Double.class, calendar);;
 			long t1 = calendar.time("2008-02-25").asLong();
 			Double[] d1 = {0d, 1d, 2d, null};
 			ts.put(t1, d1);
@@ -744,7 +746,7 @@ public class TimeSeriesTest extends TestCase {
 	public void test18S() {
 		try {
 			TimeDomain calendar = Day.DOMAIN;
-			TimeAddressable<Double> ts = TimeSeriesFactory.make(calendar, Double.class, true);
+			TimeAddressable<Double> ts = new SparseTimeSeries<Double>(Double.class, calendar);
 			long t1 = calendar.time("2008-02-25").asLong();
 			Double[] d1 = {0d, 1d, 2d, null};
 			ts.put(t1, d1);
@@ -761,7 +763,7 @@ public class TimeSeriesTest extends TestCase {
 	public void test19R() {
 		try {
 			TimeDomain calendar = Day.DOMAIN;
-			TimeAddressable<Double> ts = TimeSeriesFactory.make(calendar, Double.class);
+			TimeAddressable<Double> ts = new RegularTimeSeries<Double>(Double.class, calendar);;
 			long t1 = calendar.time("2008-02-25").asLong();
 			Double[] d1 = {1d, Double.NaN, 2d};
 			ts.put(t1, d1);
@@ -778,7 +780,7 @@ public class TimeSeriesTest extends TestCase {
 	public void test19S() {
 		try {
 			TimeDomain calendar = Day.DOMAIN;
-			TimeAddressable<Double> ts = TimeSeriesFactory.make(calendar, Double.class, true);
+			TimeAddressable<Double> ts = new SparseTimeSeries<Double>(Double.class, calendar);
 			long t1 = calendar.time("2008-02-25").asLong();
 			Double[] d1 = {1d, Double.NaN, 2d};
 			ts.put(t1, d1);
@@ -813,8 +815,8 @@ public class TimeSeriesTest extends TestCase {
 	public void test20R() {
 		Reviewer1 rev = new Reviewer1();
 		try {
-			TimeAddressable<Double> ts1 = TimeSeriesFactory.make(Day.DOMAIN, Double.class);
-			TimeAddressable<Double> ts2 = TimeSeriesFactory.make(Day.DOMAIN, Double.class);
+			TimeAddressable<Double> ts1 = new RegularTimeSeries<Double>(Double.class, Day.DOMAIN);
+			TimeAddressable<Double> ts2 = new RegularTimeSeries<Double>(Double.class, Day.DOMAIN);
 			TimeIndex date = Day.DOMAIN.time("2008-02-25");
 			ts1.put(date.asLong(), new Double[]{1d, 2d, 3d, 4d, Double.NaN, 6d});
 			ts2.put(date.asLong(), new Double[]{1d, 2d, 5d, 5d, 5d, 6d});
@@ -828,8 +830,8 @@ public class TimeSeriesTest extends TestCase {
 	public void test20S() {
 		Reviewer1 rev = new Reviewer1();
 		try {
-			TimeAddressable<Double> ts1 = TimeSeriesFactory.make(Day.DOMAIN, Double.class, true);
-			TimeAddressable<Double> ts2 = TimeSeriesFactory.make(Day.DOMAIN, Double.class);
+			TimeAddressable<Double> ts1 = new SparseTimeSeries<Double>(Double.class, Day.DOMAIN);
+			TimeAddressable<Double> ts2 = new RegularTimeSeries<Double>(Double.class, Day.DOMAIN);
 			TimeIndex date = Day.DOMAIN.time("2008-02-25");
 			ts1.put(date.asLong(), new Double[]{1d, 2d, 3d, 4d, Double.NaN, 6d});
 			ts2.put(date.asLong(), new Double[]{1d, 2d, 5d, 5d, 5d, 6d});
@@ -843,7 +845,7 @@ public class TimeSeriesTest extends TestCase {
 
 	public void test21() {
 		try {
-			TimeAddressable<Double> ts = TimeSeriesFactory.make(Day.DOMAIN, Double.class, true);
+			TimeAddressable<Double> ts = new SparseTimeSeries<Double>(Double.class, Day.DOMAIN);
 			TimeIndex date = Day.DOMAIN.time("2008-02-25");
 			ts.put(date.asLong(), new Double[]{1d, 2d, 3d, 4d, Double.NaN, 6d});
 			assertTrue(ts.get(1, 0).getRange().isEmpty());
@@ -866,7 +868,7 @@ public class TimeSeriesTest extends TestCase {
 	
 	public void test22() {
 		try {
-			ta = TimeSeriesFactory.make(Day.DOMAIN, Double.class);
+			ta = new RegularTimeSeries<Double>(Double.class, Day.DOMAIN);
 			ta.put(new Day("2006-04-04"), 4d);
 			ta.put(new Day("2006-04-08"), 8d);
 			ta.put(new Day("2006-04-09"), 9d);
@@ -896,8 +898,7 @@ public class TimeSeriesTest extends TestCase {
 	
 	public void test23() {
 		try {
-//			TimeSeriesFactory.getInstance().define(Double.class, null);
-			ta = TimeSeriesFactory.make(Day.DOMAIN, Double.class);
+			ta = new RegularTimeSeries<Double>(Double.class, Day.DOMAIN);
 			ta.put(new Day("2006-04-04"), 4d);
 			ta.put(new Day("2006-04-08"), 8d);
 			ta.put(new Day("2006-04-09"), 9d);
@@ -920,7 +921,7 @@ public class TimeSeriesTest extends TestCase {
 
 	public void test24() {
 		try {
-			ta = TimeSeriesFactory.make(Day.DOMAIN, Double.class);
+			ta = new RegularTimeSeries<Double>(Double.class, Day.DOMAIN);
 			ta.put(new Day("2006-04-04"), 4d);
 			ta.put(new Day("2006-04-08"), 8d);
 			ta.put(new Day("2006-04-09"), 9d);
@@ -936,7 +937,7 @@ public class TimeSeriesTest extends TestCase {
 
 	public void test25() {
 		try {
-			ta = TimeSeriesFactory.make(Day.DOMAIN, Double.class);
+			ta = new RegularTimeSeries<Double>(Double.class, Day.DOMAIN);
 			ta.put(new Day("2006-04-04"), 4d);
 			ta.put(new Day("2006-04-08"), 8d);
 			ta.put(new Day("2006-04-09"), 9d);
@@ -949,6 +950,55 @@ public class TimeSeriesTest extends TestCase {
 			assertSame(ta.getMissingValue(), ta.get(Day.DOMAIN.time("2006-04-17")));
 		} catch (Exception e) {
 			e.printStackTrace();
+			fail("unexpected exception");
+		}
+	}
+	
+	public void testMissingValue0() {
+		try {
+			TimeAddressable<Double> ts = new RegularTimeSeries<Double>(Double.class, Day.DOMAIN);
+			ts.put(new Day("2000-01-15"), 41d);
+			ts.put(new Day("2000-01-20"), 42d);
+			assertEquals(6, ts.getRange().getSize());
+			assertEquals(new Double(Double.NaN), ts.get(new Day("2000-01-16")));
+			assertTrue(ts.isMissing(ts.get(new Day("2000-01-16"))));
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("unexpected exception");
+		}
+	}
+	
+	public void testMissingValue1() {
+		try {
+			TimeAddressable<Double> ta = new RegularTimeSeries<Double>(Double.class, Day.DOMAIN, new Double(42.4242));
+			TimeIndex time = Day.DOMAIN.time("2006-06-21"); ta.put(time, 1d); 
+			time = time.add(1); 
+			time = time.add(1); ta.put(time, 3d); 
+			Iterator<Observation<Double>> i = ta.iterator();
+			i.next();
+			Observation<Double> obs = i.next();
+			assertEquals("2006-06-22", obs.getTime().toString());
+			assertEquals(42.4242, obs.getValue());
+			assertTrue(ta.isMissing(obs.getValue()));
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("unexpected exception");
+		}
+	}
+	
+	public void testMissingValue2() {
+		try {
+			TimeAddressable<Integer> tint = new RegularTimeSeries<Integer>(Integer.class, Day.DOMAIN, new Integer(100));
+			tint.put(new Day("2000-01-15"), 41);
+			tint.put(new Day("2000-01-20"), 42);
+			assertEquals(6, tint.getRange().getSize());
+			assertEquals(new Integer(100), tint.get(new Day("2000-01-16")));
+			assertTrue(tint.isMissing(tint.get(new Day("2000-01-16"))));
+			dump("test2");
+			for (Observation<Integer> o : tint)
+				dump(o.toString());
+		} catch (Exception e) {
+//			e.printStackTrace();
 			fail("unexpected exception");
 		}
 	}

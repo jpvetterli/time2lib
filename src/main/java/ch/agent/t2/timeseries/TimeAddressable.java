@@ -138,8 +138,7 @@ public interface TimeAddressable<T> extends Iterable<Observation<T>> {
 	
 	/**
 	 * Put a value identified by a time index into the time series. The value
-	 * can only be null when null was defined to represent missing values in
-	 * {@link TimeSeriesFactory}.
+	 * can only be null when null was defined to represent missing values.
 	 * 
 	 * @param time
 	 *            a non-null time index
@@ -152,7 +151,7 @@ public interface TimeAddressable<T> extends Iterable<Observation<T>> {
 	/**
 	 * Put an array of values identified with time index of its first element
 	 * into the time series. Values elements can only be null when null was
-	 * defined to represent missing values in {@link TimeSeriesFactory}.
+	 * defined to represent missing values.
 	 * 
 	 * @param time
 	 *            a non-null time index
@@ -165,7 +164,7 @@ public interface TimeAddressable<T> extends Iterable<Observation<T>> {
 	/**
 	 * Put a value identified by a numerical time index into the time series.
 	 * The value can only be null when null was defined to represent missing
-	 * values in {@link TimeSeriesFactory}.
+	 * values.
 	 * 
 	 * @param time
 	 *            a numerical time index
@@ -178,7 +177,7 @@ public interface TimeAddressable<T> extends Iterable<Observation<T>> {
 	/**
 	 * Put an array of values identified with the numerical time index of its
 	 * first element into the time series. Values elements can only be null when
-	 * null was defined to represent missing values in {@link TimeSeriesFactory}
+	 * null was defined to represent missing values.
 	 * .
 	 * 
 	 * @param time
@@ -273,7 +272,14 @@ public interface TimeAddressable<T> extends Iterable<Observation<T>> {
 	 * @return a time domain
 	 */
 	TimeDomain getTimeDomain();
-	
+
+	/**
+	 * Return the type of he observations.
+	 * 
+	 * @return a time domain
+	 */
+	Class<T> getType();
+
 	/**
 	 * Return an indexable time series corresponding to this one. Return the
 	 * time series itself if it is already indexable. If not, create an
