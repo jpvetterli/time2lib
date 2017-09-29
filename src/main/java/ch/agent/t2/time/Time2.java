@@ -24,9 +24,7 @@ import ch.agent.t2.T2Msg.K;
 
 
 /**
- * Time2 implements the behavior of {@link TimeIndex} as an immutable object. It
- * requires the implementation of the {@link TimeDomain} object passed to
- * constructors to be a {@link TimeFactory} object.
+ * Time2 implements the behavior of {@link TimeIndex} as an immutable object. 
  * <p>
  * The design goals of <em>Time2</em> are flexibility and performance. It is not
  * a replacement for {@link java.util.Date java.util.Date} and is not a
@@ -68,35 +66,26 @@ public class Time2 implements TimeIndex {
 
 	private int hash; // Time2 is immutable, so hash needs to be computed only once
 	
-	private TimeFactory domain;
+	private TimeDomain domain;
 
 	private final long time;
 
 	private TimeParts timeParts;
 	
-	private static TimeFactory asTimeFactory(TimeDomain domain) {
-		if (domain == null)
-			throw new IllegalArgumentException("domain null");
-		try {
-			return (TimeFactory) domain;
-		} catch (ClassCastException e) {
-			throw new IllegalArgumentException("domain " + domain.getLabel() + " is not a " +  TimeFactory.class.getSimpleName());
-		}
-	}
-	
 	/**
 	 * Construct a time index with the given time domain and numerical time index.
-	 * An <b>unchecked</b> exception is thrown if the concrete time domain
-	 * is not a {@link TimeFactory} or if the numerical time index is
+	 * An <b>unchecked</b> exception is thrown if the numerical time index is
 	 * out of range. The range depends on the domain but is very large. 
 	 * 
-	 * @param domain a non-null {@link TimeFactory}
+	 * @param domain a non-null time domain
 	 * @param time a valid numerical time index
 	 */
 	public Time2(TimeDomain domain, long time) {
-		this.domain = asTimeFactory(domain);
+		if (domain == null)
+			throw new IllegalArgumentException("domain null");
+		this.domain = domain;
 		try {
-			this.domain.valid(time, false);
+			this.domain.getPacker().valid(time, false);
 		} catch (T2Exception e) {
 			throw new IllegalArgumentException("time", e);
 		}
@@ -105,12 +94,12 @@ public class Time2 implements TimeIndex {
 	
 	/**
 	 * Construct a time index with the given time domain and parameters. An
-	 * <b>unchecked</b> exception is thrown if the concrete time domain is not a
-	 * {@link TimeFactory}. If necessary the time is adjusted as allowed by the last
+	 * <b>unchecked</b> exception is thrown if the time specified is not valid for
+	 * the domain. If necessary the time is adjusted as allowed by the last
 	 * argument.
 	 * 
 	 * @param domain
-	 *            a non-null {@link TimeFactory}
+	 *            a non-null time domain
 	 * @param year
 	 *            a year, which can be unusually large, depending on the domain
 	 * @param month
@@ -130,8 +119,8 @@ public class Time2 implements TimeIndex {
 	 *            a non-null allowed adjustment mode
 	 * @throws T2Exception
 	 */
-	public Time2(TimeDomain domain, long year, int month, int day, int hour, int min, int sec,			int usec, Adjustment adjust) throws T2Exception {
-		this(domain, asTimeFactory(domain).pack(new TimeParts(year, month, day, hour, min, sec, usec), adjust));
+	public Time2(TimeDomain domain, long year, int month, int day, int hour, int min, int sec, int usec, Adjustment adjust) throws T2Exception {
+		this(domain, domain.getPacker().pack(new TimeParts(year, month, day, hour, min, sec, usec), adjust));
 	}
 	
 	/**
@@ -148,20 +137,18 @@ public class Time2 implements TimeIndex {
 	 *             on failure
 	 */
 	public Time2(TimeDomain domain, TimeParts timeParts, Adjustment adjust) throws T2Exception {
-		this(domain, asTimeFactory(domain).pack(timeParts, adjust));
+		this(domain, domain.getPacker().pack(timeParts, adjust));
 	}
 	
 	/**
 	 * Construct a time index with the given time domain and string, with possible
-	 * adjustment. An <b>unchecked</b> exception is thrown if the concrete time
-	 * domain is not a {@link TimeFactory}. The string is interpreted by the timer
-	 * scanner defined in the time factory. By default it is
-	 * {@link DefaultTimeScanner}.
+	 * adjustment. The string is interpreted by the {@link TimeScanner} defined in
+	 * the time domain.
 	 * <p>
 	 * If necessary the time is adjusted as allowed by the last argument.
 	 * 
 	 * @param domain
-	 *            a non-null {@link TimeFactory}
+	 *            a non-null time domain
 	 * @param time
 	 *            a string containing a representation of a date and time
 	 * @param adjustment
@@ -169,19 +156,17 @@ public class Time2 implements TimeIndex {
 	 * @throws T2Exception
 	 */
 	public Time2(TimeDomain domain, String time, Adjustment adjustment) throws T2Exception {
-		this(domain, asTimeFactory(domain).scan(time), adjustment);
+		this(domain, domain.getScanner().scan(time), adjustment);
 	}
 	
 	/**
-	 * Construct a time index with the given time domain and string. An
-	 * <b>unchecked</b> exception is thrown if the concrete time domain is not a
-	 * {@link TimeFactory}. The string is interpreted by the timer scanner defined
-	 * in the time factory. By default it is {@link DefaultTimeScanner}. *
+	 * Construct a time index with the given time domain and string. The string is
+	 * interpreted by the {@link TimeScanner} defined in the time domain.
 	 * <p>
 	 * No adjustment is allowed.
 	 * 
 	 * @param domain
-	 *            a non-null {@link TimeFactory}
+	 *            a non-null time domain
 	 * @param time
 	 *            a string containing a representation of a date and time
 	 * @throws T2Exception
@@ -228,7 +213,7 @@ public class Time2 implements TimeIndex {
 		if (increment > 0 && after < before || increment < 0 && after > before)
 			throw T2Msg.exception(K.T1075, toString(), increment);
 		try {
-			domain.valid(after, false);
+			domain.getPacker().valid(after, false);
 		} catch (T2Exception e) {
 			throw T2Msg.exception(e, K.T1075, toString(), increment);
 		}
@@ -291,7 +276,7 @@ public class Time2 implements TimeIndex {
 
 	@Override
 	public DayOfWeek getDayOfWeek() throws T2Exception {
-		return domain.getDayOfWeek(this);
+		return domain.getPacker().getDayOfWeek(this);
 	}
 
 	@Override
@@ -308,7 +293,7 @@ public class Time2 implements TimeIndex {
 	
 	@Override
 	public String toString(TimeFormatter formatter) {
-		return formatter == null ? domain.format(domain.getResolution(), getTP())
+		return formatter == null ? domain.getFormatter().format(domain.getResolution(), getTP())
 				: formatter.format(domain.getResolution(), getTP());
 	}
 	
@@ -421,7 +406,7 @@ public class Time2 implements TimeIndex {
 	private TimeParts getTP() {
 		if (timeParts == null) {
 			// lazy (and expensive), only necessary when formatting or converting the time
-			timeParts = domain.unpack(getInternalTime());
+			timeParts = domain.getPacker().unpack(getInternalTime());
 		}
 		return timeParts;
 	}

@@ -228,5 +228,26 @@ public interface TimeDomain {
 	 */
 	TimeIndex time(long year, int month, int day, int hour, int min, int sec,
 			int usec, Adjustment adjust) throws T2Exception;
+	
+	/**
+	 * Return the time packer to use for processing times in this domain.
+	 * 
+	 * @return a time packer
+	 */
+	TimePacker getPacker();
+	
+	/**
+	 * Return the time formatter to use when formatting times in this domain.
+	 * 
+	 * @return a time formatter
+	 */
+	TimeFormatter getFormatter();
+	
+	/**
+	 * Return the time scanner to use when scanning strings as times in this domain.
+	 * 
+	 * @return a time scanner
+	 */
+	TimeScanner getScanner();
 
 }

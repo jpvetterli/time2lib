@@ -120,6 +120,21 @@ public class TimeFactory implements TimeDomain, TimePacker, TimeFormatter, TimeS
 	}
 	
 	@Override
+	public TimePacker getPacker() {
+		return this;
+	}
+
+	@Override
+	public TimeFormatter getFormatter() {
+		return this;
+	}
+
+	@Override
+	public TimeScanner getScanner() {
+		return this;
+	}
+
+	@Override
 	public String getLabel() {
 		return label != null ? label : toString();
 	}

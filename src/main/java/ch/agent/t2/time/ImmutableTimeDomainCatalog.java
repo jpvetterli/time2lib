@@ -58,20 +58,16 @@ public abstract class ImmutableTimeDomainCatalog implements TimeDomainCatalog {
 	}
 	
 	private String verify(int i, TimeDomain domain) throws T2Exception {
-		if (domain instanceof TimeFactory) {
-			String label = domain.getLabel();
-			if (label == null || label.length() == 0)
-				throw T2Msg.exception(K.T0014, i);
-			if (domains.containsKey(label))
-				throw T2Msg.exception(K.T0015, i, label);
-			for (TimeDomain d : domains.values()) {
-				if (domain.similar(d)) 
-					throw T2Msg.exception(K.T0016, label, d.getLabel());
-			}
-			return label;
-		} else {
-			throw T2Msg.exception(K.T0013, i);
+		String label = domain.getLabel();
+		if (label == null || label.length() == 0)
+			throw T2Msg.exception(K.T0014, i);
+		if (domains.containsKey(label))
+			throw T2Msg.exception(K.T0015, i, label);
+		for (TimeDomain d : domains.values()) {
+			if (domain.similar(d))
+				throw T2Msg.exception(K.T0016, label, d.getLabel());
 		}
+		return label;
 	}
 	
 	@Override
