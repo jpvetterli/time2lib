@@ -17,12 +17,12 @@ import ch.agent.t2.time.SimpleSubPeriodPattern;
 import ch.agent.t2.time.SubPeriodPattern;
 import ch.agent.t2.time.SystemTime;
 import ch.agent.t2.time.ThirdFriday;
+import ch.agent.t2.time.Time2;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeDomainCatalog;
 import ch.agent.t2.time.TimeDomainDefinition;
 import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.time.Workday;
-import ch.agent.t2.time.engine.Time2;
 import junit.framework.TestCase;
 
 public class TimeDomainTest extends TestCase {

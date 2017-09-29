@@ -22,7 +22,6 @@ import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
 import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.TimeParts.HMSU;
-import ch.agent.t2.time.engine.TimeTools;
 
 /**
  * A SimpleSubPeriodPattern defines one or more sub periods within a base period.

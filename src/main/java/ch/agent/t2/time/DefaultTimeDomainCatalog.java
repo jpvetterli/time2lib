@@ -16,9 +16,6 @@
  */
 package ch.agent.t2.time;
 
-import ch.agent.t2.time.engine.ImmutableTimeDomainCatalog;
-
-
 /**
  * A default time domain catalog. It provides various built-in time domain
  * objects accessible in various ways.

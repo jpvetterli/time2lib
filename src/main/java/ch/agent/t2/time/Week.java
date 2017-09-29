@@ -19,7 +19,6 @@ package ch.agent.t2.time;
 import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
 import ch.agent.t2.T2Msg.K;
-import ch.agent.t2.time.engine.Time2;
 
 /**
  * A Week is a {@link Time2} with day resolution and a cycle of 6 days OFF and 1 day

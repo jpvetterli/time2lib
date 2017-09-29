@@ -24,7 +24,6 @@ import ch.agent.t2.T2Msg;
 import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.TimeParts.HMSU;
 import ch.agent.t2.time.TimeParts.TimeZoneOffset;
-import ch.agent.t2.time.engine.TimeTools;
 
 /**
  * The default time scanner supports the ISO 8601:2004 international

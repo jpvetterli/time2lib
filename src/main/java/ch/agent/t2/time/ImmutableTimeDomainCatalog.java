@@ -14,7 +14,7 @@
  * limitations under the License.
  * 
  */
-package ch.agent.t2.time.engine;
+package ch.agent.t2.time;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -26,9 +26,6 @@ import java.util.TreeSet;
 import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
 import ch.agent.t2.T2Msg.K;
-import ch.agent.t2.time.TimeDomain;
-import ch.agent.t2.time.TimeDomainCatalog;
-import ch.agent.t2.time.TimeDomainDefinition;
 
 /**
  * ImmutableTimeDomainCatalog implements the behavior of an immutable time

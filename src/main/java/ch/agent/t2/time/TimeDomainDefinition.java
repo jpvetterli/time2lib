@@ -16,8 +16,6 @@
  */
 package ch.agent.t2.time;
 
-import ch.agent.t2.time.engine.TimeFactory;
-
 /**
  * TimeDomainDefinition is a helper class encapsulating properties of a time
  * domain. Time domain definitions are immutable.

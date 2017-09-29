@@ -19,7 +19,6 @@ package ch.agent.t2.time;
 import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
 import ch.agent.t2.T2Msg.K;
-import ch.agent.t2.time.engine.TimeTools;
 
 /**
  * A TimeParts object groups the components of date and time, from the year down

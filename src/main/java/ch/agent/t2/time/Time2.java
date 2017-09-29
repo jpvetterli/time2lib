@@ -14,26 +14,13 @@
  * limitations under the License.
  * 
  */
-package ch.agent.t2.time.engine;
+package ch.agent.t2.time;
 
 import java.util.Formatter;
 
 import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
 import ch.agent.t2.T2Msg.K;
-import ch.agent.t2.time.Adjustment;
-import ch.agent.t2.time.Day;
-import ch.agent.t2.time.DayOfWeek;
-import ch.agent.t2.time.DefaultTimeScanner;
-import ch.agent.t2.time.Resolution;
-import ch.agent.t2.time.ThirdFriday;
-import ch.agent.t2.time.TimeDomain;
-import ch.agent.t2.time.TimeDomainDefinition;
-import ch.agent.t2.time.TimeFormatter;
-import ch.agent.t2.time.TimeIndex;
-import ch.agent.t2.time.TimeParts;
-import ch.agent.t2.time.Workday;
-import ch.agent.t2.time.Year;
 
 
 /**

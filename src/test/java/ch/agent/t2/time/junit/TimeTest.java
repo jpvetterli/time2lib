@@ -14,6 +14,7 @@ import ch.agent.t2.time.FullTimeFormatter;
 import ch.agent.t2.time.Month;
 import ch.agent.t2.time.Resolution;
 import ch.agent.t2.time.SystemTime;
+import ch.agent.t2.time.Time2;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeDomainCatalog;
 import ch.agent.t2.time.TimeDomainDefinition;
@@ -21,7 +22,6 @@ import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.time.Week;
 import ch.agent.t2.time.Workday;
 import ch.agent.t2.time.Year;
-import ch.agent.t2.time.engine.Time2;
 import junit.framework.TestCase;
 
 public class TimeTest extends TestCase {

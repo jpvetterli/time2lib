@@ -21,7 +21,6 @@ import java.util.Arrays;
 import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
 import ch.agent.t2.T2Msg.K;
-import ch.agent.t2.time.engine.TimeTools;
 
 /**
  * A DayRankingSubperiodPattern defines sub periods within a base period in
