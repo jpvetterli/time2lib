@@ -232,21 +232,21 @@ public interface TimeDomain {
 	/**
 	 * Return the time packer to use for processing times in this domain.
 	 * 
-	 * @return a time packer
+	 * @return a time packer, never null
 	 */
 	TimePacker getPacker();
 	
 	/**
 	 * Return the time formatter to use when formatting times in this domain.
 	 * 
-	 * @return a time formatter
+	 * @return a time formatter, never null
 	 */
 	TimeFormatter getFormatter();
 	
 	/**
 	 * Return the time scanner to use when scanning strings as times in this domain.
 	 * 
-	 * @return a time scanner
+	 * @return a time scanner, never null
 	 */
 	TimeScanner getScanner();
 

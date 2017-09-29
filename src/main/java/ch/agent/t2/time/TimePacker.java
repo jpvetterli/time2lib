@@ -43,6 +43,25 @@ public interface TimePacker {
 	SubPeriodPattern getSubPeriodPattern();
 	
 	/**
+	 * Return the number of time points within a base period. When there is sub
+	 * period pattern, the result is its size, else it is 1.
+	 * 
+	 * @return the number of time points within a base period
+	 */
+	int getBasePeriodSize();
+
+	/**
+	 * Return the time index of the first time point in the base period containing
+	 * the time specified. When there is no period pattern, this is the same as the
+	 * time specified.
+	 * 
+	 * @param t
+	 *            a non-null time index, which must be from this time domain
+	 * @return a time index
+	 */
+	TimeIndex getBasePeriodStart(TimeIndex t);
+
+	/**
 	 * Return true if the numeric time index is valid for the domain. Depending on the
 	 * <em>testOnly</em> argument, the method throws an exception when the time is not valid.
 	 * 

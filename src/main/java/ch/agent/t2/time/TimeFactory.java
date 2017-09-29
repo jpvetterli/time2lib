@@ -441,6 +441,22 @@ public class TimeFactory implements TimeDomain, TimePacker, TimeFormatter, TimeS
 		}
 	}
 	
+	@Override
+	public int getBasePeriodSize() {
+		return subPeriodPattern == null ? 1 : subPeriodPattern.getSize();
+	}
+
+	@Override
+	public TimeIndex getBasePeriodStart(TimeIndex t) {
+		if (t == null)
+			throw new IllegalArgumentException("t null");
+		if (!t.getTimeDomain().equals(this))
+			throw new IllegalArgumentException(new T2Msg(K.T0017, t.getTimeDomain().getLabel(), getLabel()).toString());
+		long size = this.getPacker().getBasePeriodSize();
+		long boundary = (t.asLong() / size) * size;
+		return boundary == t.asLong() ? t : time(boundary);
+	}
+
 	/**
 	 * Return the raw index compressed with the base pattern. When the
 	 * base pattern has no effect, the raw index is simply tested for
