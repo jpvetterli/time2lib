@@ -169,6 +169,60 @@ public class TimeParts {
 	private TimeZoneOffset timeZoneOffset;
 	
 	/**
+	 * Constructor. Any value can passed to parameters, no validation is done.
+	 * 
+	 * @param year
+	 *            the year
+	 * @param month
+	 *            the month
+	 * @param day
+	 *            the day
+	 * @param hour
+	 *            the hour
+	 * @param min
+	 *            the minute
+	 * @param sec
+	 *            the second
+	 * @param usec
+	 *            the microsecond
+	 * @param tzOffset
+	 *            the time zone offset
+	 */
+	public TimeParts(long year, int month, int day, int hour, int min, int sec, int usec, TimeZoneOffset tzOffset) {
+		super();
+		this.year = year;
+		this.month = month;
+		this.day = day;
+		this.hour = hour;
+		this.min = min;
+		this.sec = sec;
+		this.usec = usec;
+	}
+
+	/**
+	 * Constructor with a default time zone offset. Any value can passed to
+	 * parameters, no validation is done.
+	 * 
+	 * @param year
+	 *            the year
+	 * @param month
+	 *            the month
+	 * @param day
+	 *            the day
+	 * @param hour
+	 *            the hour
+	 * @param min
+	 *            the minute
+	 * @param sec
+	 *            the second
+	 * @param usec
+	 *            the microsecond
+	 */
+	public TimeParts(long year, int month, int day, int hour, int min, int sec, int usec) {
+		this(year, month, day, hour, min, sec, usec, null);
+	}
+
+	/**
 	 * Construct a TimeParts object with month and day initialized to 1 and all
 	 * other components to 0.
 	 */

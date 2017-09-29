@@ -37,41 +37,44 @@ import ch.agent.t2.time.Year;
 
 
 /**
- * Time2 implements the behavior of {@link TimeIndex} as an immutable object.
- * The design goals of <em>Time2</em> are flexibility and performance.
- * It is not a replacement for {@link java.util.Date java.util.Date} and is not
- * a competitor to <a href="http://joda-time.sourceforge.net/">Joda Time</a>.
- * <em>Time2</em> has no time zones, no daylight savings, no
- * locales, no Gregorian cutover. Dates before October 15 1582 do
- * not correspond to historical dates. The base of <em>Time2</em> time is 
- * zero microseconds into January 1st of year zero:
+ * Time2 implements the behavior of {@link TimeIndex} as an immutable object. It
+ * requires the implementation of the {@link TimeDomain} object passed to
+ * constructors to be a {@link TimeFactory} object.
  * <p>
- * <blockquote>
- * <code>0000-01-01 00:00:00.000000</code>
- * </blockquote>
+ * The design goals of <em>Time2</em> are flexibility and performance. It is not
+ * a replacement for {@link java.util.Date java.util.Date} and is not a
+ * competitor to <a href="http://joda-time.sourceforge.net/">Joda Time</a>.
+ * <em>Time2</em> has no time zones, no daylight savings, no locales, no
+ * Gregorian cutover. Dates before October 15 1582 do not correspond to
+ * historical dates. The base of <em>Time2</em> time is zero microseconds into
+ * January 1st of year zero:
+ * <p>
+ * <blockquote> <code>0000-01-01 00:00:00.000000</code> </blockquote>
  * <p>
  * It corresponds to the numerical time index 0L.
  * <p>
  * <b>Warning note about time comparisons</b>
  * <p>
- * This class implements {@link Comparable} with simple
- * semantics. Basically, it considers "earlier" as "smaller".
- * When time domain differs, times are converted before performing the
- * comparison. The conversion is done in the following fashion:
+ * This class implements {@link Comparable} with simple semantics. Basically, it
+ * considers "earlier" as "smaller". When time domain differs, times are
+ * converted before performing the comparison. The conversion is done in the
+ * following fashion:
  * <ul>
- * <li>If resolutions differ, the time with the lowest resolution is
- * converted to the one with the highest resolution. For example comparing a
- * {@link Day} to a {@link Year} will compare the day specified to the 
- * implicit default day of the year specified (which is January 1).
+ * <li>If resolutions differ, the time with the lowest resolution is converted
+ * to the one with the highest resolution. For example comparing a {@link Day}
+ * to a {@link Year} will compare the day specified to the implicit default day
+ * of the year specified (which is January 1).
  * <li>If resolutions do not differ, the times are converted to the unrestricted
- * time domain for their resolution. For example the
- * comparison of a {@link Workday} to a {@link ThirdFriday} will convert
- * both to a {@link Day} before comparing.
+ * time domain for their resolution. For example the comparison of a
+ * {@link Workday} to a {@link ThirdFriday} will convert both to a {@link Day}
+ * before comparing.
  * </ul>
- * These semantics are not meaningful for all possible time domains. 
+ * These semantics are not meaningful for all possible time domains.
  * Applications using "exotic" time domains should consider writing a subclass
- * of Time2 and override the {@link Comparable#compareTo(Object) compareTo} method.
+ * of Time2 and override the {@link Comparable#compareTo(Object) compareTo}
+ * method.
  * <p>
+ * 
  * @author Jean-Paul Vetterli
  */
 public class Time2 implements TimeIndex {
@@ -80,22 +83,15 @@ public class Time2 implements TimeIndex {
 	
 	private TimeFactory domain;
 
-	private long internalTime;
+	private final long time;
 
 	private TimeParts timeParts;
 	
-	/**
-	 * Construct a time index with the given time domain.
-	 * An <b>unchecked</b> exception is thrown if the concrete time domain
-	 * is not a {@link TimeFactory}.
-	 * 
-	 * @param domain a non-null {@link TimeFactory}
-	 */
-	private Time2(TimeDomain domain) {
+	private static TimeFactory asTimeFactory(TimeDomain domain) {
 		if (domain == null)
 			throw new IllegalArgumentException("domain null");
 		try {
-			this.domain = (TimeFactory) domain;
+			return (TimeFactory) domain;
 		} catch (ClassCastException e) {
 			throw new IllegalArgumentException("domain " + domain.getLabel() + " is not a " +  TimeFactory.class.getSimpleName());
 		}
@@ -111,44 +107,61 @@ public class Time2 implements TimeIndex {
 	 * @param time a valid numerical time index
 	 */
 	public Time2(TimeDomain domain, long time) {
-		this(domain);
+		this.domain = asTimeFactory(domain);
 		try {
 			this.domain.valid(time, false);
-			setInternalTime(time);
 		} catch (T2Exception e) {
 			throw new IllegalArgumentException("time", e);
 		}
+		this.time = time;
 	}
 	
 	/**
-	 * Construct a time index with the given time domain and parameters.
-	 * An <b>unchecked</b> exception is thrown if the concrete time domain
-	 * is not a {@link TimeFactory}.
-	 * If necessary the time is adjusted as allowed by the last argument.
+	 * Construct a time index with the given time domain and parameters. An
+	 * <b>unchecked</b> exception is thrown if the concrete time domain is not a
+	 * {@link TimeFactory}. If necessary the time is adjusted as allowed by the last
+	 * argument.
 	 * 
-	 * @param domain a non-null {@link TimeFactory}
-	 * @param year a year, which can be unusually large, depending on the domain
-	 * @param month a number between 1 and 12
-	 * @param day the day in the month, starting with 1
-	 * @param hour an hour in the range 0-23
-	 * @param min a minute in the range 0-59
-	 * @param sec a second in the range 0-59
-	 * @param usec the number of microseconds in the current second in the range 0-999999
-	 * @param adjust a non-null allowed adjustment mode
+	 * @param domain
+	 *            a non-null {@link TimeFactory}
+	 * @param year
+	 *            a year, which can be unusually large, depending on the domain
+	 * @param month
+	 *            a number between 1 and 12
+	 * @param day
+	 *            the day in the month, starting with 1
+	 * @param hour
+	 *            an hour in the range 0-23
+	 * @param min
+	 *            a minute in the range 0-59
+	 * @param sec
+	 *            a second in the range 0-59
+	 * @param usec
+	 *            the number of microseconds in the current second in the range
+	 *            0-999999
+	 * @param adjust
+	 *            a non-null allowed adjustment mode
 	 * @throws T2Exception
 	 */
-	public Time2(TimeDomain domain, long year, int month, int day, int hour, int min, int sec,
-			int usec, Adjustment adjust) throws T2Exception {
-		this(domain);
-		TimeParts tp = new TimeParts();
-		tp.setYear(year);
-		tp.setMonth(month);
-		tp.setDay(day);
-		tp.setHour(hour);
-		tp.setMin(min);
-		tp.setSec(sec);
-		tp.setUsec(usec);
-		set(tp, adjust);
+	public Time2(TimeDomain domain, long year, int month, int day, int hour, int min, int sec,			int usec, Adjustment adjust) throws T2Exception {
+		this(domain, asTimeFactory(domain).pack(new TimeParts(year, month, day, hour, min, sec, usec), adjust));
+	}
+	
+	/**
+	 * Constructor a time index from a time parts object with an adjustment
+	 * parameter.
+	 * 
+	 * @param domain
+	 *            the time domain
+	 * @param timeParts
+	 *            the time parts
+	 * @param adjust
+	 *            an adjustment
+	 * @throws T2Exception
+	 *             on failure
+	 */
+	public Time2(TimeDomain domain, TimeParts timeParts, Adjustment adjust) throws T2Exception {
+		this(domain, asTimeFactory(domain).pack(timeParts, adjust));
 	}
 	
 	/**
@@ -169,8 +182,7 @@ public class Time2 implements TimeIndex {
 	 * @throws T2Exception
 	 */
 	public Time2(TimeDomain domain, String time, Adjustment adjustment) throws T2Exception {
-		this(domain);
-		set(time, adjustment);
+		this(domain, asTimeFactory(domain).scan(time), adjustment);
 	}
 	
 	/**
@@ -189,26 +201,6 @@ public class Time2 implements TimeIndex {
 	 */
 	public Time2(TimeDomain domain, String time) throws T2Exception {
 		this(domain, time, Adjustment.NONE);
-	}
-	
-	private Time2(TimeIndex timeIndex, long increment) throws T2Exception {
-		this(timeIndex.getTimeDomain());
-		long t = timeIndex.asLong();
-		long incrT = t + increment;
-		// overflow?
-		if (t > 0 && incrT < 0 || t < 0 && incrT > 0)
-			throw T2Msg.exception(K.T1075, timeIndex.toString(), increment);
-		try {
-			domain.valid(incrT, false);
-		} catch (T2Exception e) {
-			throw T2Msg.exception(e, K.T1075, timeIndex.toString(), increment);
-		}
-		setInternalTime(incrT);
-	}
-	
-	public Time2(TimeDomain domain, TimeParts tp, Adjustment adjust) throws T2Exception {
-		this(domain);
-		set(tp, adjust);
 	}
 	
 	@Override
@@ -243,7 +235,17 @@ public class Time2 implements TimeIndex {
 	
 	@Override
 	public TimeIndex add(long increment) throws T2Exception {
-		return new Time2(this, increment);
+		long before = asLong();
+		long after = before + increment;
+		// overflow? (detected with numeric wraparound)
+		if (increment > 0 && after < before || increment < 0 && after > before)
+			throw T2Msg.exception(K.T1075, toString(), increment);
+		try {
+			domain.valid(after, false);
+		} catch (T2Exception e) {
+			throw T2Msg.exception(e, K.T1075, toString(), increment);
+		}
+		return new Time2(domain, after);
 	}
 	
 	@Override
@@ -421,49 +423,14 @@ public class Time2 implements TimeIndex {
 	}
 	
 	/**
-	 * Set the time from a time parts object.
-	 * Silently ignore elements finer than the resolution.
-	 * 
-	 * @param tp a non-null time parts object
-	 * @param adjust a non-null allowed adjustment mode
-	 * @throws T2Exception
-	 */
-	private void set(TimeParts tp, Adjustment adjust) throws T2Exception {
-		setInternalTime(domain.pack(tp, adjust));
-	}
-
-	/**
-	 * Set the time from a string.
-	 * Silently ignore elements finer than the resolution.
-	 * @param date a non-null string
-	 * @param adjust a non-null allowed adjustment mode
-	 * @throws T2Exception
-	 */
-	private void set(String date, Adjustment adjust) throws T2Exception {
-		set(domain.scan(date), adjust);
-	}
-	
-	/**
 	 * Return the numerical time index.
 	 * 
 	 * @return the numerical time index
 	 */
 	private long getInternalTime() {
-		return internalTime;
+		return time;
 	}
 	
-	/**
-	 * Set the numerical time index. This method is invoked, directly or indirectly,
-	 * only from constructors.
-	 * 
-	 * @param time
-	 *            the numerical time index
-	 */
-	private void setInternalTime(long time) {
-		assert timeParts == null;
-		internalTime = time;
-	}
-
 	private TimeParts getTP() {
 		if (timeParts == null) {
 			// lazy (and expensive), only necessary when formatting or converting the time
