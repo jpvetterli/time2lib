@@ -19,6 +19,7 @@ import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeDomainCatalog;
 import ch.agent.t2.time.TimeDomainDefinition;
 import ch.agent.t2.time.TimeIndex;
+import ch.agent.t2.time.TimeTools;
 import ch.agent.t2.time.Week;
 import ch.agent.t2.time.Workday;
 import ch.agent.t2.time.Year;
@@ -1675,6 +1676,25 @@ public class TimeTest extends TestCase {
 		}
 	}
 	
+	public void testHMSU() {
+		try {
+			assertEquals("00:01:00", TimeTools.computeHMS(60).toString());
+			assertEquals("2777:46:40", TimeTools.computeHMS(10000000).toString());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("exception");
+		}
+	}
+	
+	public void testYMD() {
+		try {
+			assertEquals("0000-01-01", TimeTools.computeYMD(0).toString());
+			assertEquals("25252734927766554-07-27", TimeTools.computeYMD(Long.MAX_VALUE).toString());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("exception");
+		}
+	}
 
 }
 

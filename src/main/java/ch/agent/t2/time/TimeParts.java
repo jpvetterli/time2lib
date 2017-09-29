@@ -85,7 +85,7 @@ public class TimeParts {
 
 		@Override
 		public String toString() {
-			return String.format("%d %d %d", y, m, d);
+			return String.format("%04d-%02d-%02d", y, m, d);
 		}
 	}
 
@@ -147,7 +147,7 @@ public class TimeParts {
 
 		@Override
 		public String toString() {
-			return String.format("%d %d %d %d", h, m, s, u);
+			return u == 0 ? String.format("%02d:%02d:%02d", h, m, s) : String.format("%02d:%02d:%02d.%d", h, m, s, u);
 		}
 
 	}
