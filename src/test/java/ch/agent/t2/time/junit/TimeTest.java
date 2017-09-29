@@ -795,7 +795,7 @@ public class TimeTest extends TestCase {
 	
 	public void testSetString17() {
 		try {
-			String date = "2008-12-31T23:59:60";
+			String date = "2008-12-31T23:59:60"; // leap second
 			TimeIndex t = new DateTime(date);
 			assertEquals("2008-12-31 23:59:59", t.toString());
 			t = t.add(1);

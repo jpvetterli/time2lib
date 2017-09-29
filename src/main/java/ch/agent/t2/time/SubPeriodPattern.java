@@ -69,12 +69,14 @@ public interface SubPeriodPattern {
 	long adjustForSubPeriod(long time, Adjustment adjust, TimeParts timeParts) throws T2Exception;
 
 	/**
-	 * Update the relevant field of the time parts argument for the given sub period.
+	 * Update the relevant field of the time parts argument for the given sub period
+	 * and return a modified copy.
 	 * This method is intended for used by {@link TimePacker#unpack(long)}.
 	 * 
 	 * @param subPeriod a positive number
-	 * @param timeParts a time parts object to be updated 
+	 * @param timeParts a time parts object to be modified 
+	 * @return a new time parts object
 	 */
-	void fillInSubPeriod(int subPeriod, TimeParts timeParts);
+	TimeParts fillInSubPeriod(int subPeriod, TimeParts timeParts);
 	
 }

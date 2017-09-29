@@ -21,11 +21,15 @@ import java.util.Arrays;
 import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
 import ch.agent.t2.T2Msg.K;
+import ch.agent.t2.time.DateTime;
 import ch.agent.t2.time.Day;
 import ch.agent.t2.time.DayOfWeek;
 import ch.agent.t2.time.Resolution;
 import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.time.TimeParts;
+import ch.agent.t2.time.TimeParts.HMSU;
+import ch.agent.t2.time.TimeParts.TimeZoneOffset;
+import ch.agent.t2.time.TimeParts.YMD;
 
 /**
  * TimeTools provides a selection of methods useful in time computations. 
@@ -137,34 +141,50 @@ public class TimeTools {
 	/**
 	 * Extract hours, minutes and seconds from totalSeconds.
 	 * 
-	 * @param totalSeconds a non-negative number
-	 * @param tp a non-null time parts object
+	 * @param totalSeconds
+	 *            a non-negative number
+	 * @return an immutable object with houts, minutes, seconds (and 0 sub-second
+	 *         units)
 	 */
-	public static void computeHMS(long totalSeconds, TimeParts tp) {
-		if (totalSeconds < 0)
-			throw new IllegalArgumentException("totalSeconds negative");
-		// avoid modulo arithmetic
-		long minutes = totalSeconds / 60;
-		tp.setSec((int) (totalSeconds - minutes * 60));
-		tp.setHour((int) (minutes / 60));
-		tp.setMin((int)(minutes - tp.getHour() * 60));
+	public static HMSU computeHMS(long totalSeconds) {
+		return computeHMS(totalSeconds, 0);
 	}
 	
 	/**
-	 * Extract years, month of year and day of month from total days. 
-	 * This method must deal
-	 * with large inputs, corresponding to ridiculously large years. TimeIndex
-	 * inputs are not validated at object creation time. This is for performance
-	 * reasons: many TimeIndex objects to create, few of them to format. So we
-	 * must deal with the issue here. To avoid the consequence of losing
+	 * Extract hours, minutes and seconds from totalSeconds.
+	 * 
+	 * @param totalSeconds
+	 *            a non-negative number
+	 * @param subSeconds
+	 *            a non-negative number of sub-seconds
+	 * @return an immutable object with houts, minutes, seconds, and sub-second
+	 *         units
+	 */
+	public static HMSU computeHMS(long totalSeconds, int subSeconds) {
+		if (totalSeconds < 0)
+			throw new IllegalArgumentException("totalSeconds negative");
+		if (subSeconds < 0)
+			throw new IllegalArgumentException("subSeconds negative");
+		// avoid modulo arithmetic
+		long minutes = totalSeconds / 60;
+		int hours = (int) (minutes / 60);
+		return new HMSU(hours, (int) (minutes - hours * 60), (int) (totalSeconds - minutes * 60), subSeconds);
+	}
+	
+	/**
+	 * Extract years, month of year and day of month from total days. This method
+	 * must deal with large inputs, corresponding to ridiculously large years.
+	 * TimeIndex inputs are not validated at object creation time. This is for
+	 * performance reasons: many TimeIndex objects to create, few of them to format.
+	 * So we must deal with the issue here. To avoid the consequence of losing
 	 * precision when converting large longs to double, we avoid using doubles
 	 * altogether.
 	 * 
-	 * @param days a non-negative number
-	 * @param tp
-	 *            time parts to fill in
+	 * @param days
+	 *            a non-negative number
+	 * @return an immutable object with years, months, and days
 	 */
-	public static void computeYMD(long days, TimeParts tp) {
+	public static YMD computeYMD(long days) {
 		if (days < 0)
 			throw new IllegalArgumentException("" + days);
 
@@ -195,27 +215,210 @@ public class TimeTools {
 			dayOffset += (TimeTools.isLeap(remainingYears) ? 366 : 365);
 		}
 		
-		tp.setYear(y400Intervals * 400 + remainingYears);
-		int[]monthDay = TimeTools.computeMonthAndDay(tp.getYear(), dayOffset + 1);
-		tp.setMonth(monthDay[0]);
-		tp.setDay(monthDay[1]);
+		long y = y400Intervals * 400 + remainingYears;
+		int[]monthDay = TimeTools.computeMonthAndDay(y, dayOffset + 1);
+		return new YMD(y, monthDay[0], monthDay[1]);
 	}
 
 	/**
-	 * Return the numeric representation of the time specified. 
+	 * Return a long number representing a time parts object. The method
+	 * enforces rules on acceptable values of components. Two special features
+	 * of the ISO 8601 standard are supported:
+	 * <ol>
+	 * <li>Midnight can be represented either as hour 0 of the day or as hour 24
+	 * of the preceding day.
+	 * <li>A 61st second, known as a leap second, is tolerated on the last day
+	 * of June or the last day of the year. There is some confusion about when
+	 * leap seconds can be inserted; the last of June or December is mentioned
+	 * by the IERS, see <a
+	 * href="http://hpiers.obspm.fr/iers/bul/bulc/bulletinc.dat">IERS Bulletin C
+	 * 42, July 2011</a>, which should be authoritative since it is the official
+	 * "publisher" of leap seconds.
+	 * </ol>
 	 * <p>
-	 * The method has been deprecrated in version 1.0.1 of the class. 
-	 * Use {@link TimeParts#asRawIndex(Resolution)} instead.
+	 * <b>Note about leap seconds</b>
+	 * <p>
+	 * When a 61st second occurs in the input for a day when leap seconds are
+	 * tolerated, the software simply changes it into the 60th second. This is
+	 * the only case in the Time2 Library where leap seconds play a role. When
+	 * constructing a time with {@link TimeIndex#add(long)} for example, leap seconds play no
+	 * role. Adding 1 second to the {@link DateTime} domain TimeIndex
+	 * represented by 2008-12-31T23:59:59 yields 2009-01-01T00:00:00 instead of
+	 * the official leap second 2008-12-31T23:59:60.
 	 * 
-	 * @param unit a non-null resolution
-	 * @param tp a non-null time parts object
+	 * @param unit
+	 *            a non-null resolution
+	 * @param tp time represented in a time parts object
 	 * @return a numeric time index
 	 * @throws T2Exception
 	 */
-	@Deprecated
 	public static long makeRawIndex(Resolution unit, TimeParts tp) throws T2Exception {
-		return tp.asRawIndex(unit);
+		long time = 0;
+		long year = tp.getYear();
+		int month = tp.getMonth();
+		int day = tp.getDay();
+		int hour = tp.getHour();
+		int min = tp.getMin();
+		int sec = tp.getSec();
+		int usec = tp.getUsec();
+		if (year < 0)
+			throw T2Msg.exception(K.T1014, year);
+		if (unit == Resolution.YEAR) {
+			time = year;
+		} else {
+			if (month < 1 || month > 12)
+				throw T2Msg.exception(K.T1015, month);
+			if (unit == Resolution.MONTH) {
+				time = year * 12 + month - 1; // -1: month 1-based
+			} else {
+				int daysInThisMonth = TimeTools.daysInMonth(year, month);
+				if (day < 1 || day > daysInThisMonth)
+					throw T2Msg.exception(K.T1016, day,	daysInThisMonth);
+				time = year * 365 + TimeTools.leapYears(year)
+						+ TimeTools.daysToMonth(year, month) + day - 1; // -1: day 1-based
+				if (unit != Resolution.DAY) {
+					// get 24 hour notation out of the way (ISO 8601 tolerates 24:00:00) 
+					if (hour == 24) {
+						if (min == 0 && sec == 0 && usec == 0) {
+							hour = 0;
+							time += 1;
+						}
+					}
+					// get leap seconds out of the way
+					if (sec == 60) {
+						if (hour == 23 && min == 59 && usec == 0 && 
+								(month == 12 && day == 31) || 
+								(month == 6 && day == 30)) {
+							sec = 59;
+						} else {
+							throw T2Msg.exception(K.T1025);
+						}
+					}
+					
+					CompositeOverflowAndHMSU checkResult = checkTimeComponentsAndApplyTimeZoneOffset(hour, min, sec, usec, tp.getTZOffset());
+					
+					time += checkResult.overflow;
+					hour = checkResult.hmsu.h();
+					min = checkResult.hmsu.m();
+					sec = checkResult.hmsu.s();
+					usec = checkResult.hmsu.u();
+					
+					time = time * 24 + hour;
+					if (unit != Resolution.HOUR) {
+						time = time * 60 + min;
+						if (unit != Resolution.MIN) {
+							time = time * 60 + sec;
+							if (unit != Resolution.SEC) {
+								if (unit == Resolution.MSEC)
+									time = time * 1000L + usec / 1000;
+								else if (unit == Resolution.USEC)
+									time = time * 1000000L + usec;
+								else
+									throw new RuntimeException("bug: " + unit.name());
+							}
+						}
+					}
+				}
+			}
+		}
+		return time;
 	}
+	
+	private static class CompositeOverflowAndHMSU {
+		int overflow; // -1 underflow, +1 overflow, 0 no overflow
+		HMSU hmsu; // modified values
+		public CompositeOverflowAndHMSU(int overflow, HMSU hmsu) {
+			super();
+			this.overflow = overflow;
+			this.hmsu = hmsu;
+		}
+	}
+	
+	/**
+	 * Apply the time zone offset to time components and resolve all overflows.
+	 * Return a composite with an overflow indicator and modified time components.
+	 * The overflow indicator is 1 if there was an hour overflow, -1 if there was an
+	 * underflow, and 0 in all other cases. As a side effect, the method verifies
+	 * the validity of all time components. Leap seconds and 24 hour notation for
+	 * midnight are not supported (they must be dealt with before calling the
+	 * method).
+	 * 
+	 * @param hour
+	 *            hours
+	 * @param min
+	 *            minutes
+	 * @param sec
+	 *            seconds
+	 * @param usec
+	 *            sub-seconds
+	 * @param tzOffset
+	 *            time zone offset or null
+	 * @return a composite with an overflow indicator and and HMSU object
+	 * @throws T2Exception
+	 */
+	private static CompositeOverflowAndHMSU checkTimeComponentsAndApplyTimeZoneOffset(int hour, int min, int sec, int usec, TimeZoneOffset tzOffset) throws T2Exception {
+		
+		if (hour < 0 || hour > 23)
+			throw T2Msg.exception(K.T1017, hour);
+		if (min < 0 || min > 59)
+			throw T2Msg.exception(K.T1019, min);
+		if (sec < 0 || sec > 59)
+			throw T2Msg.exception(K.T1022, sec);
+		if (usec < 0 || usec > 999999)
+			throw T2Msg.exception(K.T1026, usec);
+		
+		int overflow = 0;
+		
+		if (tzOffset != null) {
+			if (tzOffset.isNegative()) {
+				usec -= tzOffset.getUsec();
+				if (usec > 999999) {
+					usec -= 1000000;
+					sec += 1;
+				}
+				sec -= tzOffset.getSec();
+				if (sec > 59) {
+					sec -= 60;
+					min += 1;
+				}
+				min -= tzOffset.getMin();
+				if (min > 59) {
+					min -= 60;
+					hour += 1;
+				}
+				hour -= tzOffset.getHour();
+				if (hour > 23) {
+					hour -= 24;
+					overflow = 1;
+				}
+			} else {
+				usec -= tzOffset.getUsec();
+				if (usec < 0) {
+					usec += 1000000;
+					sec -= 1;
+				}
+				sec -= tzOffset.getSec();
+				if (sec < 0) {
+					sec += 60;
+					min -= 1;
+				}
+				min -= tzOffset.getMin();
+				if (min < 0) {
+					min += 60;
+					hour -= 1;
+				}
+				hour -= tzOffset.getHour();
+				if (hour < 0) {
+					hour += 24;
+					overflow = -1;
+				}
+			}
+			tzOffset = null;
+		}
+		
+		return new CompositeOverflowAndHMSU(overflow, new HMSU(hour, min, sec, usec));
+	}
+
 	
 	/**
 	 * Return the day index computed from the uncompressed numerical time.

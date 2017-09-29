@@ -37,32 +37,169 @@ import ch.agent.t2.time.engine.TimeTools;
 public class TimeParts {
 	
 	/**
-	 * A TimeZoneOffset groups all components of a time zone offset. In a typical
-	 * implementation, a TimeZoneOffset is created by
-	 * {@link TimeScanner#scan(String)} and passed to a {@link TimeParts}
-	 * to be processed by
-	 * {@link TimeParts#checkTimeComponentsAndApplyTimeZoneOffset()
-	 * checkTimeComponentsAndApplyTimeZoneOffset()}.
+	 * Immutable object encapsulating years, months and days.
+	 */
+	public static class YMD {
+
+		private final long y;
+		private final int m;
+		private final int d;
+
+		/**
+		 * Constructor. There is no validation, all values accepted. Yes, years are
+		 * represented as long.
+		 * 
+		 * @param y
+		 *            years
+		 * @param m
+		 *            months
+		 * @param d
+		 *            days
+		 */
+		public YMD(long y, int m, int d) {
+			super();
+			this.y = y;
+			this.m = m;
+			this.d = d;
+		}
+
+		/**
+		 * @return years
+		 */
+		public long y() {
+			return y;
+		}
+
+		/**
+		 * @return months
+		 */
+		public int m() {
+			return m;
+		}
+
+		/**
+		 * @return days
+		 */
+		public int d() {
+			return d;
+		}
+
+		@Override
+		public String toString() {
+			return String.format("%d %d %d", y, m, d);
+		}
+	}
+
+	/**
+	 * Immutable object encapsulating hours, minutes, seconds and sub-second units.
+	 *
+	 */
+	public static class HMSU {
+
+		private final int h;
+		private final int m;
+		private final int s;
+		private final int u;
+
+		/**
+		 * Constructor.
+		 * There is no validation, all values accepted.
+		 * 
+		 * @param h hours
+		 * @param m minutes
+		 * @param s seconds 
+		 * @param u sub-second units
+		 */
+		public HMSU(int h, int m, int s, int u) {
+			super();
+			this.h = h;
+			this.m = m;
+			this.s = s;
+			this.u = u;
+		}
+
+		/**
+		 * @return hours
+		 */
+		public int h() {
+			return h;
+		}
+
+		/**
+		 * @return minutes
+		 */
+		public int m() {
+			return m;
+		}
+
+		/**
+		 * @return seconds
+		 */
+		public int s() {
+			return s;
+		}
+
+		/**
+		 * @return sub-second units
+		 */
+		public int u() {
+			return u;
+		}
+
+		@Override
+		public String toString() {
+			return String.format("%d %d %d %d", h, m, s, u);
+		}
+
+	}
+	
+	
+	/**
+	 * An immutable object representing a time zone offset. A time zone offset is
+	 * created by {@link TimeScanner#scan(String)} and passed to a {@link TimeParts}
+	 * to be processed by {@link TimeTools#makeRawIndex}.
 	 * <p>
-	 * In a time zone offset, components are either all positive or all
-	 * negative. The sign is determined by a parameter passed to the
-	 * constructor. All components are set using positive values.
+	 * In a time zone offset, components are either all positive or all negative.
+	 * The sign is determined by a parameter passed to the constructor. All
+	 * components are set using positive values.
 	 * <p>
 	 * With a positive offset, the components will be subtracted from the given
-	 * time, and with a negative offset they will be added to it.
-	 * For example in the time representation <code>2001-06-15T02:00+05:00</code>, there is a positive
-	 * offset of five hours and the method {@link TimeZoneOffset#getHour()} returns 5.
-	 * Applying the offset results in the time <code>2001-06-14T21:00</code>.
+	 * time, and with a negative offset they will be added to it. For example in the
+	 * time representation <code>2001-06-15T02:00+05:00</code>, there is a positive
+	 * offset of five hours and the method {@link TimeZoneOffset#getHour()} returns
+	 * 5. Applying the offset results in the time <code>2001-06-14T21:00</code>.
 	 */
-	public class TimeZoneOffset {
-		private int hour;
-		private int min;
-		private int sec;
-		private int usec;
-		private int sign;
+	public static class TimeZoneOffset {
+		private final int hour;
+		private final int min;
+		private final int sec;
+		private final int usec;
+		private final int sign;
 		
-		public TimeZoneOffset(boolean negative) {
+		/**
+		 * Constructor.
+		 * 
+		 * @param negative negative time zone offset
+		 * @param hour offset hours
+		 * @param min offset minutes
+		 * @param sec offset seconds
+		 * @param usec offset microseconds
+		 * @throws T2Exception
+		 */
+		public TimeZoneOffset(boolean negative, int hour, int min, int sec, int usec) throws T2Exception {
 			this.sign = negative ? -1 : 1;
+			if (hour < 0 || hour > 11)
+				throw T2Msg.exception(K.T1018, hour);
+			this.hour = sign * hour;
+			if (min < 0 || min > 59)
+				throw T2Msg.exception(K.T1021, min);
+			this.min = sign * min;
+			if (sec < 0 || sec > 59)
+				throw T2Msg.exception(K.T1023, sec);
+			this.sec = sign * sec;
+			if (usec < 0 || usec > 999999)
+				throw T2Msg.exception(K.T1027, usec);
+			this.usec = sign * usec;
 		}
 
 		/**
@@ -84,36 +221,12 @@ public class TimeParts {
 		}
 
 		/**
-		 * Set the hour offset.
-		 * 
-		 * @param hour a number in [0, 11]
-		 * @throws T2Exception
-		 */
-		public void setHour(int hour) throws T2Exception {
-			if (hour < 0 || hour > 11)
-				throw T2Msg.exception(K.T1018, hour);
-			this.hour = sign * hour;
-		}
-
-		/**
 		 * Return the number to subtract from the minute. 
 		 * 
 		 * @return positive or negative number to subtract from the minute
 		 */
 		public int getMin() {
 			return min;
-		}
-
-		/**
-		 * Set the minute offset.
-		 * 
-		 * @param min a number in [0, 59]
-		 * @throws T2Exception
-		 */
-		public void setMin(int min) throws T2Exception {
-			if (min < 0 || min > 59)
-				throw T2Msg.exception(K.T1021, min);
-			this.min = sign * min;
 		}
 
 		/**
@@ -126,18 +239,6 @@ public class TimeParts {
 		}
 
 		/**
-		 * Set the second offset.
-		 * 
-		 * @param sec a number in [0, 59]
-		 * @throws T2Exception
-		 */
-		public void setSec(int sec) throws T2Exception {
-			if (sec < 0 || sec > 59)
-				throw T2Msg.exception(K.T1023, sec);
-			this.sec = sign * sec;
-		}
-
-		/**
 		 * Return the number to subtract from the microsecond. 
 		 * 
 		 * @return positive or negative number to subtract from the microsecond
@@ -146,27 +247,21 @@ public class TimeParts {
 			return usec;
 		}
 
-		/**
-		 * Set the usec offset.
-		 * 
-		 * @param usec a number in [0, 999999]
-		 * @throws T2Exception
-		 */
-		public void setUsec(int usec) throws T2Exception {
-			if (usec < 0 || usec > 999999)
-				throw T2Msg.exception(K.T1027, usec);
-			this.usec = sign * usec;
+		@Override
+		public String toString() {
+			return String.format("%d:%d:%d.%d", hour, min, sec, usec);
 		}
+
 	}
 	
-	private long year;
-	private int month = 1;
-	private int day = 1;
-	private int hour;
-	private int min;
-	private int sec;
-	private int usec;
-	private TimeZoneOffset timeZoneOffset;
+	private final long year;
+	private final int month;
+	private final int day;
+	private final int hour;
+	private final int min;
+	private final int sec;
+	private final int usec;
+	private final TimeZoneOffset timeZoneOffset;
 	
 	/**
 	 * Constructor. Any value can passed to parameters, no validation is done.
@@ -197,6 +292,7 @@ public class TimeParts {
 		this.min = min;
 		this.sec = sec;
 		this.usec = usec;
+		this.timeZoneOffset = tzOffset;
 	}
 
 	/**
@@ -223,13 +319,6 @@ public class TimeParts {
 	}
 
 	/**
-	 * Construct a TimeParts object with month and day initialized to 1 and all
-	 * other components to 0.
-	 */
-	public TimeParts() {
-	}
-
-	/**
 	 * Return the year. A valid year is non-negative, but there is no guarantee
 	 * that the value returned will be valid.
 	 * 
@@ -240,15 +329,6 @@ public class TimeParts {
 	}
 	
 	/**
-	 * Set the year. Any value is accepted.
-	 * 
-	 * @param year any number
-	 */
-	public void setYear(long year) {
-		this.year = year;
-	}
-
-	/**
 	 * Return the month. A valid month is in the range [1, 12], but there is no
 	 * guarantee that the value returned will be valid.
 	 * 
@@ -258,14 +338,6 @@ public class TimeParts {
 		return month;
 	}
 
-	/**
-	 * Set the month. Any value is accepted.
-	 * 
-	 * @param month any number
-	 */
-	public void setMonth(int month) {
-		this.month = month;
-	}
 
 	/**
 	 * Return the day. A valid day is in the range [1, n], with n the number of
@@ -279,15 +351,6 @@ public class TimeParts {
 	}
 
 	/**
-	 * Set the day. Any value is accepted.
-	 * 
-	 * @param day any number
-	 */
-	public void setDay(int day) {
-		this.day = day;
-	}
-
-	/**
 	 * Return the hour. A valid hour is in the range [0, 23], but there is no
 	 * guarantee that the value returned will be valid.
 	 * 
@@ -295,15 +358,6 @@ public class TimeParts {
 	 */
 	public int getHour() {
 		return hour;
-	}
-
-	/**
-	 * Set the hour. Any value is accepted.
-	 * 
-	 * @param hour any number
-	 */
-	public void setHour(int hour) {
-		this.hour = hour;
 	}
 
 	/**
@@ -317,15 +371,6 @@ public class TimeParts {
 	}
 
 	/**
-	 * Set the minute. Any value is accepted.
-	 * 
-	 * @param min any number
-	 */
-	public void setMin(int min) {
-		this.min = min;
-	}
-
-	/**
 	 * Return the second. A valid second is in the range [0, 59], but there is
 	 * no guarantee that the value returned will be valid.
 	 * 
@@ -333,15 +378,6 @@ public class TimeParts {
 	 */
 	public int getSec() {
 		return sec;
-	}
-
-	/**
-	 * Set the second. Any value is accepted.
-	 * 
-	 * @param sec any number
-	 */
-	public void setSec(int sec) {
-		this.sec = sec;
 	}
 
 	/**
@@ -355,193 +391,14 @@ public class TimeParts {
 	}
 
 	/**
-	 * Set the microsecond. Any value is accepted.
+	 * Return the time zone offset. The result can be null.
 	 * 
-	 * @param usec any number
+	 * @return a time zone offset or null
 	 */
-	public void setUsec(int usec) {
-		this.usec = usec;
-	}
-
-	/**
-	 * Set a time zone offset.
-	 * 
-	 * @param timeZoneOffset
-	 */
-	public void setTimeZoneOffset(TimeZoneOffset timeZoneOffset) {
-		this.timeZoneOffset = timeZoneOffset;
-	}
-
-	/**
-	 * Apply the time zone offset to time components and resolve all overflows.
-	 * Return 1 if there was an hour overflow, -1 if there was an underflow, and
-	 * 0 in all other cases. Applying the time zone offset more than once has no
-	 * effect. As a side effect, the method verifies the validity of all time
-	 * components. Leap seconds and 24 hour notation for midnight are not
-	 * supported.
-	 * 
-	 * @return 1 if hours overflowed, -1 if they underflowed, else return 0
-	 * @throws T2Exception
-	 */
-	protected int checkTimeComponentsAndApplyTimeZoneOffset() throws T2Exception {
-		
-		if (hour < 0 || hour > 23)
-			throw T2Msg.exception(K.T1017, hour);
-		if (min < 0 || min > 59)
-			throw T2Msg.exception(K.T1019, min);
-		if (sec < 0 || sec > 59)
-			throw T2Msg.exception(K.T1022, sec);
-		if (usec < 0 || usec > 999999)
-			throw T2Msg.exception(K.T1026, usec);
-		
-		int overflow = 0;
-		
-		if (timeZoneOffset != null) {
-			if (timeZoneOffset.isNegative()) {
-				usec -= timeZoneOffset.usec;
-				if (usec > 999999) {
-					usec -= 1000000;
-					sec += 1;
-				}
-				sec -= timeZoneOffset.sec;
-				if (sec > 59) {
-					sec -= 60;
-					min += 1;
-				}
-				min -= timeZoneOffset.min;
-				if (min > 59) {
-					min -= 60;
-					hour += 1;
-				}
-				hour -= timeZoneOffset.hour;
-				if (hour > 23) {
-					hour -= 24;
-					overflow = 1;
-				}
-			} else {
-				usec -= timeZoneOffset.usec;
-				if (usec < 0) {
-					usec += 1000000;
-					sec -= 1;
-				}
-				sec -= timeZoneOffset.sec;
-				if (sec < 0) {
-					sec += 60;
-					min -= 1;
-				}
-				min -= timeZoneOffset.min;
-				if (min < 0) {
-					min += 60;
-					hour -= 1;
-				}
-				hour -= timeZoneOffset.hour;
-				if (hour < 0) {
-					hour += 24;
-					overflow = -1;
-				}
-			}
-			timeZoneOffset = null;
-		}
-		
-		return overflow;
-	}
-
-	/**
-	 * Return a long number representing the time components. The method
-	 * enforces rules on acceptable values of components. Two special features
-	 * of the ISO 8601 standard are supported:
-	 * <ol>
-	 * <li>Midnight can be represented either as hour 0 of the day or as hour 24
-	 * of the preceding day.
-	 * <li>A 61st second, known as a leap second, is tolerated on the last day
-	 * of June or the last day of the year. There is some confusion about when
-	 * leap seconds can be inserted; the last of June or December is mentioned
-	 * by the IERS, see <a
-	 * href="http://hpiers.obspm.fr/iers/bul/bulc/bulletinc.dat">IERS Bulletin C
-	 * 42, July 2011</a>, which should be authoritative since it is the official
-	 * "publisher" of leap seconds.
-	 * </ol>
-	 * <p>
-	 * <b>Note about leap seconds</b>
-	 * <p>
-	 * When a 61st second occurs in the input for a day when leap seconds are
-	 * tolerated, the software simply changes it into the 60th second. This is
-	 * the only case in the Time2 Library where leap seconds play a role. When
-	 * constructing a time with {@link TimeIndex#add(long)} for example, leap seconds play no
-	 * role. Adding 1 second to the {@link DateTime} domain TimeIndex
-	 * represented by 2008-12-31T23:59:59 yields 2009-01-01T00:00:00 instead of
-	 * the official leap second 2008-12-31T23:59:60.
-	 * 
-	 * @param unit
-	 *            a non-null resolution
-	 * @return a numeric time index
-	 * @throws T2Exception
-	 */
-	public long asRawIndex(Resolution unit) throws T2Exception {
-		long time = 0;
-		if (year < 0)
-			throw T2Msg.exception(K.T1014, year);
-		if (unit == Resolution.YEAR) {
-			time = year;
-		} else {
-			if (month < 1 || month > 12)
-				throw T2Msg.exception(K.T1015, month);
-			if (unit == Resolution.MONTH) {
-				time = year * 12 + month - 1; // -1: month 1-based
-			} else {
-				int daysInThisMonth = TimeTools.daysInMonth(year, month);
-				if (day < 1 || day > daysInThisMonth)
-					throw T2Msg.exception(K.T1016, day,	daysInThisMonth);
-				time = year * 365 + TimeTools.leapYears(year)
-						+ TimeTools.daysToMonth(year, month) + day - 1; // -1: day 1-based
-				if (unit != Resolution.DAY) {
-					// get 24 hour notation out of the way (ISO 8601 tolerates 24:00:00) 
-					if (hour == 24) {
-						if (min == 0 && sec == 0 && usec == 0) {
-							hour = 0;
-							time += 1;
-						}
-					}
-					// get leap seconds out of the way
-					if (sec == 60) {
-						if (hour == 23 && min == 59 && usec == 0 && 
-								(month == 12 && day == 31) || 
-								(month == 6 && day == 30)) {
-							sec = 59;
-						} else {
-							throw T2Msg.exception(K.T1025);
-						}
-					}
-					time += checkTimeComponentsAndApplyTimeZoneOffset();
-					time = time * 24 + hour;
-					if (unit != Resolution.HOUR) {
-						time = time * 60 + min;
-						if (unit != Resolution.MIN) {
-							time = time * 60 + sec;
-							if (unit != Resolution.SEC) {
-								if (unit == Resolution.MSEC)
-									time = time * 1000L + usec / 1000;
-								else if (unit == Resolution.USEC)
-									time = time * 1000000L + usec;
-								else
-									throw new RuntimeException("bug: " + unit.name());
-							}
-						}
-					}
-				}
-			}
-		}
-		return time;
+	public TimeZoneOffset getTZOffset() {
+		return timeZoneOffset;
 	}
 	
-	/**
-	 * Return true if any part negative.
-	 * @return true if any part negative
-	 */
-	public boolean anyNegative() {
-		return getYear() < 0 || getMonth() < 0 || getDay() < 0 || getHour() < 0 || getMin() < 0 || getSec() < 0 || getUsec() < 0;
-	}
-
 	@Override
 	public String toString() {
 		return String.format("%04d-%02d-%02d %02d:%02d:%02d.%06d", getYear(), getMonth(), getDay(), getHour(), getMin(), getSec(), getUsec());

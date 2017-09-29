@@ -22,6 +22,9 @@ import java.util.regex.Pattern;
 import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
 import ch.agent.t2.T2Msg.K;
+import ch.agent.t2.time.TimeParts.HMSU;
+import ch.agent.t2.time.TimeParts.TimeZoneOffset;
+import ch.agent.t2.time.engine.TimeTools;
 
 /**
  * The default time scanner supports the ISO 8601:2004 international
@@ -60,7 +63,7 @@ import ch.agent.t2.T2Msg.K;
  * its point of view, hour 42 and minute 88 are fine.
  * The {@link DefaultTimeScanner#scan(String) scan(String)} method returns a TimeParts object, but there is no
  * guarantee that the date and time components have already been validated when the method returns. 
- * The responsibility for validating numbers falls to {@link TimeParts#asRawIndex(Resolution)}. 
+ * The responsibility for validating numbers falls to {@link TimeTools#makeRawIndex}. 
  * <p>
  * For the validation to succeed, the components must have the following values:
  * <ul>
@@ -92,13 +95,6 @@ import ch.agent.t2.T2Msg.K;
  */
 public class DefaultTimeScanner implements TimeScanner {
 	
-	private class HMSU {
-		private int h;
-		private int m;
-		private int s;
-		private int u;
-	}
-	
 	private static final Pattern PATTERN_1 = Pattern.compile("((?:\\+\\d+)?\\d\\d\\d\\d)(?:-(\\d\\d)(?:-(\\d\\d)(?:[T ]([0-9:.,]*)(?:Z|([+-][0-9:.,]*))?)?)?)?");
 	// note: colon intentionally allowed in time pattern, improves error diagnostics
 	private static final Pattern PATTERN_2 = Pattern.compile("(\\d\\d\\d\\d)(?:(\\d\\d)(?:(\\d\\d)(?:T([0-9:.,]*)(?:Z|([+-][0-9:.,]*))?)?)?)?");
@@ -110,7 +106,7 @@ public class DefaultTimeScanner implements TimeScanner {
 
 	@Override
 	public TimeParts scan(String datetime) throws T2Exception {
-		TimeParts tp = new TimeParts();
+		TimeParts tp = null;
 		if (datetime == null)
 			throw new IllegalArgumentException("date null");
 		int hyphen = datetime.indexOf('-');
@@ -130,6 +126,11 @@ public class DefaultTimeScanner implements TimeScanner {
 				throw new RuntimeException("bug: unexpected count " + matcher.groupCount());
 			String group = null;
 			try {
+				long year = 0;
+				int month = 1; // allow to scan 2000 and 2000-01 as if 2000-01-01
+				int day = 1; // same remark
+				HMSU hmsu = new HMSU(0, 0, 0, 0);
+				TimeZoneOffset tzo = null;
 				for (int i = 0; i < 5; i++) {
 					group = matcher.group(i + 1);
 					if (group == null || group.length() == 0)
@@ -137,43 +138,35 @@ public class DefaultTimeScanner implements TimeScanner {
 					switch(i) {
 					case 0:
 						try {
-							tp.setYear(Long.valueOf(group).longValue());
+							year = Long.valueOf(group).longValue();
 						} catch (NumberFormatException e) {
 							if (group.startsWith("+"))
-								tp.setYear(Long.valueOf(group.substring(1)).longValue());
+								year = Long.valueOf(group.substring(1)).longValue();
 							// don't ask me
 						}
 						break;
 					case 1:
-						tp.setMonth(Integer.valueOf(group).intValue());
+						month = Integer.valueOf(group).intValue();
 						break;
 					case 2:
-						tp.setDay(Integer.valueOf(group).intValue());
+						day = Integer.valueOf(group).intValue();
 						break;
 					case 3:
-						HMSU hmsd = scanTime(hyphenated ? TIME_PATTERN_1.matcher(group) : TIME_PATTERN_2.matcher(group));
-						if (hmsd == null)
+						hmsu = scanTime(hyphenated ? TIME_PATTERN_1.matcher(group) : TIME_PATTERN_2.matcher(group));
+						if (hmsu == null)
 							throw T2Msg.exception(hyphenated ? K.T1083 : K.T1084, group);
-						tp.setHour(hmsd.h);
-						tp.setMin(hmsd.m);
-						tp.setSec(hmsd.s);
-						tp.setUsec(hmsd.u);
 						break;
 					case 4:
-						hmsd = scanTime(hyphenated ? TIME_PATTERN_1.matcher(group.substring(1)) : TIME_PATTERN_2.matcher(group.substring(1)));
-						if (hmsd == null)
+						HMSU hmsu2 = scanTime(hyphenated ? TIME_PATTERN_1.matcher(group.substring(1)) : TIME_PATTERN_2.matcher(group.substring(1)));
+						if (hmsu2 == null)
 							throw T2Msg.exception(hyphenated ? K.T1085 : K.T1086, group);
-						TimeParts.TimeZoneOffset tzo = tp.new TimeZoneOffset(group.startsWith("-"));
-						tzo.setHour(hmsd.h);
-						tzo.setMin(hmsd.m);
-						tzo.setSec(hmsd.s);
-						tzo.setUsec(hmsd.u);
-						tp.setTimeZoneOffset(tzo);
+						tzo = new TimeZoneOffset(group.startsWith("-"), hmsu2.h(), hmsu2.m(), hmsu2.s(), hmsu2.u());
 						break;
 					default:
 						throw new RuntimeException("bug: " + i);
 					}
 				}
+				tp = new TimeParts(year, month, day, hmsu.h(), hmsu.m(), hmsu.s(), hmsu.u(), tzo);
 			} catch (NumberFormatException e) {
 				throw new RuntimeException("bug: group not numeric " + group);
 			}
@@ -194,8 +187,8 @@ public class DefaultTimeScanner implements TimeScanner {
 		else {
 			if (matcher.groupCount() != 4)
 				throw new RuntimeException("bug: unexpected count " + matcher.groupCount());
-			HMSU hmsd = new HMSU();
 			String group = null;
+			int h = 0, m = 0, s = 0, u = 0;
 			try {
 				for (int i = 0; i < 4; i++) {
 					group = matcher.group(i + 1);
@@ -203,16 +196,16 @@ public class DefaultTimeScanner implements TimeScanner {
 						break;
 					switch(i) {
 					case 0:
-						hmsd.h = Integer.valueOf(group).intValue();
+						h = Integer.valueOf(group).intValue();
 						break;
 					case 1:
-						hmsd.m = Integer.valueOf(group).intValue();
+						m = Integer.valueOf(group).intValue();
 						break;
 					case 2:
-						hmsd.s = Integer.valueOf(group).intValue();
+						s = Integer.valueOf(group).intValue();
 						break;
 					case 3:
-						int u = Integer.valueOf(group).intValue();
+						u = Integer.valueOf(group).intValue();
 						switch (group.length()) {
 						case 1:
 							u = u * 100000;
@@ -234,7 +227,6 @@ public class DefaultTimeScanner implements TimeScanner {
 						default:
 							throw new RuntimeException("bug: " + group.length());
 						}
-						hmsd.u = u;
 						break;
 					default:
 						throw new RuntimeException("bug: " + i);
@@ -243,7 +235,7 @@ public class DefaultTimeScanner implements TimeScanner {
 			} catch (NumberFormatException e) {
 				throw new RuntimeException("bug: group not numeric " + group);
 			}
-			return hmsd;
+			return new HMSU(h, m, s, u);
 		}
 	}
 

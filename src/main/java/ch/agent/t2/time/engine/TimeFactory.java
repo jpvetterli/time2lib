@@ -32,6 +32,8 @@ import ch.agent.t2.time.TimeFormatter;
 import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.time.TimePacker;
 import ch.agent.t2.time.TimeParts;
+import ch.agent.t2.time.TimeParts.HMSU;
+import ch.agent.t2.time.TimeParts.YMD;
 import ch.agent.t2.time.TimeScanner;
 
 /**
@@ -329,7 +331,7 @@ public class TimeFactory implements TimeDomain, TimePacker, TimeFormatter, TimeS
 	public long pack(TimeParts tp, Adjustment adjust) throws T2Exception {
 		try {
 			// input values validated in asRawIndex
-			long time = tp.asRawIndex(this.baseUnit);
+			long time = TimeTools.makeRawIndex(this.baseUnit, tp);
 			if (subPeriodPattern == null)
 				time = compress(time, adjust);
 			else {
@@ -356,74 +358,75 @@ public class TimeFactory implements TimeDomain, TimePacker, TimeFormatter, TimeS
 		if (basePeriodPattern != null)
 			time = basePeriodPattern.expandIndex(time);
 		
-		TimeParts tp = new TimeParts();
 		Resolution unit = this.baseUnit;
+		YMD ymd = null;
+		HMSU hmsu = null;
 		switch (unit) {
 		case YEAR:
-			tp.setYear(time);
+			ymd = new YMD(time, 1, 1);
 			break;
 		case MONTH:
-			tp.setYear(time / 12);
-			tp.setMonth((int) (time - tp.getYear() * 12) + 1);
+			long year = time / 12;
+			ymd = new YMD(year, (int) (time - year * 12) + 1, 1);
 			break;
 		case DAY:
-			TimeTools.computeYMD(time, tp);
+			ymd = TimeTools.computeYMD(time);
 			break;
 		case HOUR:
 			long days = time / 24;
-			tp.setHour((int) (time - days * 24));
-			TimeTools.computeYMD(days, tp);
+			hmsu = new HMSU((int) (time - days * 24), 0, 0, 0);
+			ymd = TimeTools.computeYMD(days);
 			break;
 		case MIN:
 			days = time/ (24 * 60);
 			long minutes = time - days * 24 * 60;
-			tp.setHour((int)(minutes / 60));
-			tp.setMin((int) (minutes - tp.getHour() * 60));
-			TimeTools.computeYMD(days, tp);
+			int hours = (int)(minutes / 60);
+			hmsu = new HMSU(hours, (int) (minutes - hours * 60), 0, 0);
+			ymd = TimeTools.computeYMD(days);
 			break;
 		case SEC:
 			days = time / (24 * 60 * 60);
 			long seconds = time - days * 24L * 60L * 60L;
-			TimeTools.computeYMD(days, tp);
-			TimeTools.computeHMS(seconds, tp);
+			ymd = TimeTools.computeYMD(days);
+			hmsu = TimeTools.computeHMS(seconds);
 			break;
 		case MSEC:
 			days = time / (24L * 60L * 60L * 1000L);
 			long millis = time - days * 24L * 60L * 60L * 1000L;
 			seconds = millis / 1000L;
-			tp.setUsec((int) (millis - seconds * 1000L) * 1000);
-			TimeTools.computeYMD(days, tp);
-			TimeTools.computeHMS(seconds, tp);
+			ymd = TimeTools.computeYMD(days);
+			hmsu = TimeTools.computeHMS(seconds, (int) (millis - seconds * 1000L) * 1000);
 			break;
 		case USEC:
 			days = time / (24L * 60L * 60L * 1000000L);
 			long micros = time - days * 24L * 60L * 60L * 1000000L;
 			seconds = micros / 1000000L;
-			tp.setUsec((int) (micros - seconds * 1000000L));
-			TimeTools.computeYMD(days, tp);
-			TimeTools.computeHMS(seconds, tp);
+			ymd = TimeTools.computeYMD(days);
+			hmsu = TimeTools.computeHMS(seconds, (int) (micros - seconds * 1000000L));
 			break;
 		default:
 			throw new RuntimeException("bug: " + unit.name());
 		}
 		
+		TimeParts tp = makeTimeParts(ymd, hmsu);
 		if (subPeriodPattern != null) {
 			// there is something to do even when subPeriod = 0
-			subPeriodPattern.fillInSubPeriod(subPeriod, tp);
+			tp = subPeriodPattern.fillInSubPeriod(subPeriod, tp);
 		}
 		
-		// make sure nothing is negative
-		if (tp.anyNegative())
-			throw new RuntimeException(String.format("(bug) time=%d %s", time, tp.toString()));
-			
 		return tp;
+	}
+	
+	private TimeParts makeTimeParts(YMD ymd, HMSU hmsu) {
+		return hmsu == null ? new TimeParts(ymd.y(), ymd.m(), ymd.d(), 0, 0, 0, 0) :
+			new TimeParts(ymd.y(), ymd.m(), ymd.d(), hmsu.h(), hmsu.m(), hmsu.s(), hmsu.u());
 	}
 
 	@Override
 	public DayOfWeek getDayOfWeek(TimeIndex time) throws T2Exception {
 		if (subPeriodPattern != null) {
 			if (compareResolutionTo(Resolution.DAY) <= 0) {
-				long numTime = ((Time2) time).getTimeParts().asRawIndex(Resolution.DAY);
+				long numTime = TimeTools.makeRawIndex(Resolution.DAY, ((Time2) time).getTimeParts());
 				return TimeTools.getDayOfWeek(Resolution.DAY, numTime);
 			} else
 				throw T2Msg.exception(K.T1060, getResolution());

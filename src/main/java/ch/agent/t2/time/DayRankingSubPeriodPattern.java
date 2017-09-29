@@ -114,10 +114,11 @@ public class DayRankingSubPeriodPattern implements SubPeriodPattern {
 	}
 
 	@Override
-	public void fillInSubPeriod(int subPeriod, TimeParts tp) {
+	public TimeParts fillInSubPeriod(int subPeriod, TimeParts tp) {
 		if (subPeriod < 0 || subPeriod > ranks.length)
 			throw new IllegalArgumentException(
 					"subPeriod does not agree with ranks.length");
+		TimeParts result = null;
 		try {
 			switch (basePeriodUnit) {
 			case YEAR:
@@ -125,13 +126,13 @@ public class DayRankingSubPeriodPattern implements SubPeriodPattern {
 						ranks[subPeriod].getDayOfWeek(),
 						ranks[subPeriod].getRank());
 				int[] md = TimeTools.computeMonthAndDay(tp.getYear(), yearDay);
-				tp.setMonth(md[0]);
-				tp.setDay(md[1]);
+				result = new TimeParts(tp.getYear(), md[0], md[1], tp.getHour(), tp.getMin(), tp.getSec(), tp.getUsec(), tp.getTZOffset());
 				break;
 			case MONTH:
-				tp.setDay(TimeTools.getDayByRank(tp.getYear(), tp.getMonth(),
+				int day = TimeTools.getDayByRank(tp.getYear(), tp.getMonth(),
 						ranks[subPeriod].getDayOfWeek(),
-						ranks[subPeriod].getRank()));
+						ranks[subPeriod].getRank());
+				result = new TimeParts(tp.getYear(), tp.getMonth(), day, tp.getHour(), tp.getMin(), tp.getSec(), tp.getUsec(), tp.getTZOffset());
 				break;
 			default:
 				throw T2Msg.exception(K.T1118, basePeriodUnit.name(),
@@ -141,6 +142,7 @@ public class DayRankingSubPeriodPattern implements SubPeriodPattern {
 			// errors not expected when unpacking, so this can only be a bug
 			throw new RuntimeException("bug", e);
 		}
+		return result;
 	}
 
 	@Override

@@ -21,6 +21,7 @@ import java.util.Arrays;
 import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
 import ch.agent.t2.T2Msg.K;
+import ch.agent.t2.time.TimeParts.HMSU;
 import ch.agent.t2.time.engine.TimeTools;
 
 /**
@@ -206,23 +207,26 @@ public class SimpleSubPeriodPattern implements SubPeriodPattern {
 	}
 	
 	@Override
-	public void fillInSubPeriod(int subPeriod, TimeParts tp) {
+	public TimeParts fillInSubPeriod(int subPeriod, TimeParts tp) {
 		if (subPeriod < 0 || subPeriod > ranks.length)
 			throw new IllegalArgumentException("subPeriod does not agree with ranks.length");
 		
+		TimeParts result = null;
 		switch (subPeriodUnit) {
 		case MONTH:
-			tp.setMonth(ranks[subPeriod]);
+			result = new TimeParts(tp.getYear(), ranks[subPeriod], tp.getDay(), tp.getHour(), tp.getMin(), tp.getSec(), tp.getUsec(), tp.getTZOffset());
 			break;
 		case DAY:
-			tp.setDay(ranks[subPeriod]);
+			result = new TimeParts(tp.getYear(), tp.getMonth(), ranks[subPeriod], tp.getHour(), tp.getMin(), tp.getSec(), tp.getUsec(), tp.getTZOffset());
 			break;
 		case SEC:
-			TimeTools.computeHMS(ranks[subPeriod], tp);
+			HMSU hmsu = TimeTools.computeHMS(ranks[subPeriod]);
+			result = new TimeParts(tp.getYear(), tp.getMonth(), tp.getDay(),hmsu.h(), hmsu.m(), hmsu.s(), hmsu.u(), tp.getTZOffset());
 			break;
 		default:
 			throw new RuntimeException("bug: " + subPeriodUnit.name());
 		}
+		return result;
 	}
 
 	@Override
