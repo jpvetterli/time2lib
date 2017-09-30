@@ -90,15 +90,15 @@ public class TimeParts {
 	}
 
 	/**
-	 * Immutable object encapsulating hours, minutes, seconds and sub-second units.
+	 * Immutable object encapsulating hours, minutes, seconds and fractional seconds.
 	 *
 	 */
-	public static class HMSU {
+	public static class HMSF {
 
 		private final int h;
 		private final int m;
 		private final int s;
-		private final int u;
+		private final int f;
 
 		/**
 		 * Constructor.
@@ -107,14 +107,14 @@ public class TimeParts {
 		 * @param h hours
 		 * @param m minutes
 		 * @param s seconds 
-		 * @param u sub-second units
+		 * @param f fractional second
 		 */
-		public HMSU(int h, int m, int s, int u) {
+		public HMSF(int h, int m, int s, int f) {
 			super();
 			this.h = h;
 			this.m = m;
 			this.s = s;
-			this.u = u;
+			this.f = f;
 		}
 
 		/**
@@ -139,15 +139,15 @@ public class TimeParts {
 		}
 
 		/**
-		 * @return sub-second units
+		 * @return fractional second
 		 */
-		public int u() {
-			return u;
+		public int f() {
+			return f;
 		}
 
 		@Override
 		public String toString() {
-			return u == 0 ? String.format("%02d:%02d:%02d", h, m, s) : String.format("%02d:%02d:%02d.%d", h, m, s, u);
+			return f == 0 ? String.format("%02d:%02d:%02d", h, m, s) : String.format("%02d:%02d:%02d.%d", h, m, s, f);
 		}
 
 	}
@@ -155,7 +155,7 @@ public class TimeParts {
 	
 	/**
 	 * An immutable object representing a time zone offset. A time zone offset is
-	 * created by {@link TimeScanner#scan(String)} and passed to a {@link TimeParts}
+	 * created by {@link TimeScanner#scan} and passed to a {@link TimeParts}
 	 * to be processed by {@link TimeTools#makeRawIndex}.
 	 * <p>
 	 * In a time zone offset, components are either all positive or all negative.
@@ -172,20 +172,21 @@ public class TimeParts {
 		private final int hour;
 		private final int min;
 		private final int sec;
-		private final int usec;
+		private final int fsec;
 		private final int sign;
 		
 		/**
 		 * Constructor.
 		 * 
+		 * @param unit time unit resolution
 		 * @param negative negative time zone offset
 		 * @param hour offset hours
 		 * @param min offset minutes
 		 * @param sec offset seconds
-		 * @param usec offset microseconds
+		 * @param fsec offset fractional seconds
 		 * @throws T2Exception
 		 */
-		public TimeZoneOffset(boolean negative, int hour, int min, int sec, int usec) throws T2Exception {
+		public TimeZoneOffset(Resolution unit, boolean negative, int hour, int min, int sec, int fsec) throws T2Exception {
 			this.sign = negative ? -1 : 1;
 			if (hour < 0 || hour > 11)
 				throw T2Msg.exception(K.T1018, hour);
@@ -196,11 +197,29 @@ public class TimeParts {
 			if (sec < 0 || sec > 59)
 				throw T2Msg.exception(K.T1023, sec);
 			this.sec = sign * sec;
-			if (usec < 0 || usec > 999999)
-				throw T2Msg.exception(K.T1027, usec);
-			this.usec = sign * usec;
+			if (!good(unit, fsec))
+				throw T2Msg.exception(K.T1027, fsec);
+			this.fsec = sign * fsec;
 		}
 
+		private boolean good(Resolution unit, int fsec) {
+			boolean good = false;
+			if (fsec >= 0) {
+				switch (unit) {
+				case MSEC:
+					good = fsec < 1000;
+					break;
+				case USEC:
+					good = fsec < 1000000;
+					break;
+				default:
+					good = fsec == 0;
+					break;
+				}
+			}
+			return good;
+		}
+		
 		/**
 		 * Return true is offset is negative.
 		 * 
@@ -238,17 +257,17 @@ public class TimeParts {
 		}
 
 		/**
-		 * Return the number to subtract from the microsecond. 
+		 * Return the number to subtract from the fractional second. 
 		 * 
-		 * @return positive or negative number to subtract from the microsecond
+		 * @return positive or negative number to subtract from the fractional second
 		 */
-		public int getUsec() {
-			return usec;
+		public int getFsec() {
+			return fsec;
 		}
 
 		@Override
 		public String toString() {
-			return String.format("%d:%d:%d.%d", hour, min, sec, usec);
+			return String.format("%d:%d:%d.%d", hour, min, sec, fsec);
 		}
 
 	}
@@ -259,7 +278,7 @@ public class TimeParts {
 	private final int hour;
 	private final int min;
 	private final int sec;
-	private final int usec;
+	private final int fsec;
 	private final TimeZoneOffset timeZoneOffset;
 	
 	/**
@@ -277,12 +296,12 @@ public class TimeParts {
 	 *            the minute
 	 * @param sec
 	 *            the second
-	 * @param usec
-	 *            the microsecond
+	 * @param fsec
+	 *            the fractional second (millis, micros, etc. depending on the resolution)
 	 * @param tzOffset
 	 *            the time zone offset
 	 */
-	public TimeParts(long year, int month, int day, int hour, int min, int sec, int usec, TimeZoneOffset tzOffset) {
+	public TimeParts(long year, int month, int day, int hour, int min, int sec, int fsec, TimeZoneOffset tzOffset) {
 		super();
 		this.year = year;
 		this.month = month;
@@ -290,7 +309,7 @@ public class TimeParts {
 		this.hour = hour;
 		this.min = min;
 		this.sec = sec;
-		this.usec = usec;
+		this.fsec = fsec;
 		this.timeZoneOffset = tzOffset;
 	}
 
@@ -331,7 +350,7 @@ public class TimeParts {
 	 * Return the month. A valid month is in the range [1, 12], but there is no
 	 * guarantee that the value returned will be valid.
 	 * 
-	 * @return the year
+	 * @return the month
 	 */
 	public int getMonth() {
 		return month;
@@ -343,7 +362,7 @@ public class TimeParts {
 	 * days in the month, but there is no guarantee that the value returned will
 	 * be valid.
 	 * 
-	 * @return the year
+	 * @return the day
 	 */
 	public int getDay() {
 		return day;
@@ -353,7 +372,7 @@ public class TimeParts {
 	 * Return the hour. A valid hour is in the range [0, 23], but there is no
 	 * guarantee that the value returned will be valid.
 	 * 
-	 * @return the year
+	 * @return the hour
 	 */
 	public int getHour() {
 		return hour;
@@ -363,7 +382,7 @@ public class TimeParts {
 	 * Return the minute. A valid minute is in the range [0, 59], but there is
 	 * no guarantee that the value returned will be valid.
 	 * 
-	 * @return the year
+	 * @return the minute
 	 */
 	public int getMin() {
 		return min;
@@ -373,20 +392,19 @@ public class TimeParts {
 	 * Return the second. A valid second is in the range [0, 59], but there is
 	 * no guarantee that the value returned will be valid.
 	 * 
-	 * @return the year
+	 * @return the second
 	 */
 	public int getSec() {
 		return sec;
 	}
 
 	/**
-	 * Return the microsecond. A valid microsecond is in the range [0, 999999],
-	 * but there is no guarantee that the value returned will be valid.
+	 * Return the fractional second. The value must be interpreted in the context of the resolution.
 	 * 
-	 * @return the year
+	 * @return the fractional second
 	 */
-	public int getUsec() {
-		return usec;
+	public int getFsec() {
+		return fsec;
 	}
 
 	/**
@@ -400,7 +418,7 @@ public class TimeParts {
 	
 	@Override
 	public String toString() {
-		return String.format("%04d-%02d-%02d %02d:%02d:%02d.%06d", getYear(), getMonth(), getDay(), getHour(), getMin(), getSec(), getUsec());
+		return String.format("%04d-%02d-%02d %02d:%02d:%02d.%06d", getYear(), getMonth(), getDay(), getHour(), getMin(), getSec(), getFsec());
 	}
 
 }

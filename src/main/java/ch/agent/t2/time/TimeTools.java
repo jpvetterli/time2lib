@@ -21,7 +21,7 @@ import java.util.Arrays;
 import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
 import ch.agent.t2.T2Msg.K;
-import ch.agent.t2.time.TimeParts.HMSU;
+import ch.agent.t2.time.TimeParts.HMSF;
 import ch.agent.t2.time.TimeParts.TimeZoneOffset;
 import ch.agent.t2.time.TimeParts.YMD;
 
@@ -140,7 +140,7 @@ public class TimeTools {
 	 * @return an immutable object with houts, minutes, seconds (and 0 sub-second
 	 *         units)
 	 */
-	public static HMSU computeHMS(long totalSeconds) {
+	public static HMSF computeHMS(long totalSeconds) {
 		return computeHMS(totalSeconds, 0);
 	}
 	
@@ -154,7 +154,7 @@ public class TimeTools {
 	 * @return an immutable object with houts, minutes, seconds, and sub-second
 	 *         units
 	 */
-	public static HMSU computeHMS(long totalSeconds, int subSeconds) {
+	public static HMSF computeHMS(long totalSeconds, int subSeconds) {
 		if (totalSeconds < 0)
 			throw new IllegalArgumentException("totalSeconds negative");
 		if (subSeconds < 0)
@@ -162,7 +162,7 @@ public class TimeTools {
 		// avoid modulo arithmetic
 		long minutes = totalSeconds / 60;
 		int hours = (int) (minutes / 60);
-		return new HMSU(hours, (int) (minutes - hours * 60), (int) (totalSeconds - minutes * 60), subSeconds);
+		return new HMSF(hours, (int) (minutes - hours * 60), (int) (totalSeconds - minutes * 60), subSeconds);
 	}
 	
 	/**
@@ -254,7 +254,7 @@ public class TimeTools {
 		int hour = tp.getHour();
 		int min = tp.getMin();
 		int sec = tp.getSec();
-		int usec = tp.getUsec();
+		int fsec = tp.getFsec();
 		if (year < 0)
 			throw T2Msg.exception(K.T1014, year);
 		if (unit == Resolution.YEAR) {
@@ -273,14 +273,14 @@ public class TimeTools {
 				if (unit != Resolution.DAY) {
 					// get 24 hour notation out of the way (ISO 8601 tolerates 24:00:00) 
 					if (hour == 24) {
-						if (min == 0 && sec == 0 && usec == 0) {
+						if (min == 0 && sec == 0 && fsec == 0) {
 							hour = 0;
 							time += 1;
 						}
 					}
 					// get leap seconds out of the way
 					if (sec == 60) {
-						if (hour == 23 && min == 59 && usec == 0 && 
+						if (hour == 23 && min == 59 && fsec == 0 && 
 								(month == 12 && day == 31) || 
 								(month == 6 && day == 30)) {
 							sec = 59;
@@ -289,13 +289,13 @@ public class TimeTools {
 						}
 					}
 					
-					CompositeOverflowAndHMSU checkResult = checkTimeComponentsAndApplyTimeZoneOffset(hour, min, sec, usec, tp.getTZOffset());
+					CompositeOverflowAndHMSU checkResult = checkTimeComponentsAndApplyTimeZoneOffset(unit, hour, min, sec, fsec, tp.getTZOffset());
 					
 					time += checkResult.overflow;
 					hour = checkResult.hmsu.h();
 					min = checkResult.hmsu.m();
 					sec = checkResult.hmsu.s();
-					usec = checkResult.hmsu.u();
+					fsec = checkResult.hmsu.f();
 					
 					time = time * 24 + hour;
 					if (unit != Resolution.HOUR) {
@@ -304,9 +304,9 @@ public class TimeTools {
 							time = time * 60 + sec;
 							if (unit != Resolution.SEC) {
 								if (unit == Resolution.MSEC)
-									time = time * 1000L + usec / 1000;
+									time = time * 1000L + fsec;
 								else if (unit == Resolution.USEC)
-									time = time * 1000000L + usec;
+									time = time * 1000000L + fsec;
 								else
 									throw new RuntimeException("bug: " + unit.name());
 							}
@@ -320,8 +320,8 @@ public class TimeTools {
 	
 	private static class CompositeOverflowAndHMSU {
 		int overflow; // -1 underflow, +1 overflow, 0 no overflow
-		HMSU hmsu; // modified values
-		public CompositeOverflowAndHMSU(int overflow, HMSU hmsu) {
+		HMSF hmsu; // modified values
+		public CompositeOverflowAndHMSU(int overflow, HMSF hmsu) {
 			super();
 			this.overflow = overflow;
 			this.hmsu = hmsu;
@@ -337,20 +337,22 @@ public class TimeTools {
 	 * midnight are not supported (they must be dealt with before calling the
 	 * method).
 	 * 
+	 * @param unit 
+	 *            time resolution
 	 * @param hour
 	 *            hours
 	 * @param min
 	 *            minutes
 	 * @param sec
 	 *            seconds
-	 * @param usec
-	 *            sub-seconds
+	 * @param fsec
+	 *            fractional seconds
 	 * @param tzOffset
 	 *            time zone offset or null
 	 * @return a composite with an overflow indicator and and HMSU object
 	 * @throws T2Exception
 	 */
-	private static CompositeOverflowAndHMSU checkTimeComponentsAndApplyTimeZoneOffset(int hour, int min, int sec, int usec, TimeZoneOffset tzOffset) throws T2Exception {
+	private static CompositeOverflowAndHMSU checkTimeComponentsAndApplyTimeZoneOffset(Resolution unit, int hour, int min, int sec, int fsec, TimeZoneOffset tzOffset) throws T2Exception {
 		
 		if (hour < 0 || hour > 23)
 			throw T2Msg.exception(K.T1017, hour);
@@ -358,17 +360,30 @@ public class TimeTools {
 			throw T2Msg.exception(K.T1019, min);
 		if (sec < 0 || sec > 59)
 			throw T2Msg.exception(K.T1022, sec);
-		if (usec < 0 || usec > 999999)
-			throw T2Msg.exception(K.T1026, usec);
+		if (fsec < 0 || fsec > 999999)
+			throw T2Msg.exception(K.T1026, fsec);
 		
 		int overflow = 0;
 		
 		if (tzOffset != null) {
 			if (tzOffset.isNegative()) {
-				usec -= tzOffset.getUsec();
-				if (usec > 999999) {
-					usec -= 1000000;
-					sec += 1;
+				switch (unit) {
+				case MSEC:
+					fsec -= tzOffset.getFsec();
+					if (fsec > 999) {
+						fsec -= 1000;
+						sec += 1;
+					}
+					break;
+				case USEC:
+					fsec -= tzOffset.getFsec();
+					if (fsec > 999999) {
+						fsec -= 1000000;
+						sec += 1;
+					}
+					break;
+				default:
+					// ignore
 				}
 				sec -= tzOffset.getSec();
 				if (sec > 59) {
@@ -386,10 +401,23 @@ public class TimeTools {
 					overflow = 1;
 				}
 			} else {
-				usec -= tzOffset.getUsec();
-				if (usec < 0) {
-					usec += 1000000;
-					sec -= 1;
+				switch (unit) {
+				case MSEC:
+					fsec -= tzOffset.getFsec();
+					if (fsec < 0) {
+						fsec += 1000;
+						sec -= 1;
+					}
+					break;
+				case USEC:
+					fsec -= tzOffset.getFsec();
+					if (fsec < 0) {
+						fsec += 1000000;
+						sec -= 1;
+					}
+					break;
+				default:
+					// ignore
 				}
 				sec -= tzOffset.getSec();
 				if (sec < 0) {
@@ -410,7 +438,7 @@ public class TimeTools {
 			tzOffset = null;
 		}
 		
-		return new CompositeOverflowAndHMSU(overflow, new HMSU(hour, min, sec, usec));
+		return new CompositeOverflowAndHMSU(overflow, new HMSF(hour, min, sec, fsec));
 	}
 
 	

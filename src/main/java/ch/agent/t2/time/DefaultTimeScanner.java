@@ -22,20 +22,21 @@ import java.util.regex.Pattern;
 import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
 import ch.agent.t2.T2Msg.K;
-import ch.agent.t2.time.TimeParts.HMSU;
+import ch.agent.t2.time.TimeParts.HMSF;
 import ch.agent.t2.time.TimeParts.TimeZoneOffset;
 
 /**
- * The default time scanner supports the ISO 8601:2004 international
- * standard for the representation of calendar dates and times. Week
- * dates and ordinal dates are not supported.
+ * The default time scanner supports the ISO 8601:2004 international standard
+ * for the representation of calendar dates and times. Week dates and ordinal
+ * dates are not supported.
  * <p>
  * The page <a href="http://en.wikipedia.org/wiki/ISO_8601">ISO 8601</a> at
- * Wikipedia describes the standard and provides a link to the official document.
+ * Wikipedia describes the standard and provides a link to the official
+ * document.
  * <p>
- * DefaultExternalFormat scans combined dates and times  
- * agreeing with the following syntax (here in pseudo-code) :
- * <blockquote>
+ * DefaultExternalFormat scans combined dates and times agreeing with the
+ * following syntax (here in pseudo-code) : <blockquote>
+ * 
  * <pre>
  * <em>date-time</em> := <em>date-time-basic</em>|<em>date-time-extended</em>
  * <em>date-time-basic</em> := <em>date-basic</em>[<u>T</u><em>time-basic</em>[<u>Z</u>|(<u>+</u>|<u>-</u><em>time-basic</em>)]]
@@ -43,26 +44,26 @@ import ch.agent.t2.time.TimeParts.TimeZoneOffset;
  * <em>time-basic</em> := hh[mm[ss[<u>,</u>|<u>.</u>u{1,6}]]]
  * <em>date-time-extended</em> := <em>date-extended</em>[<u>T</u>|<u> </u><em>time-extended</em>[<u>Z</u>|(<u>+</u>|<u>-</u><em>time-extended</em>)]]
  * <em>date-extended</em> := (<u>+</u>y+)?yyyy[<u>-</u>mm[<u>-</u>dd]]
- * <em>time-extended</em> := hh[<u>:</u>mm[<u>:</u>ss[<u>,</u>|<u>.</u>u{1-6}]]]</pre>
+ * <em>time-extended</em> := hh[<u>:</u>mm[<u>:</u>ss[<u>,</u>|<u>.</u>u{1-6}]]]
+ * </pre>
  * 
  * 
- * <div style="font-size:smaller">
- * Meta syntax: meta elements in italic; literals underlined; 
- * a single lowercase letter represents a single digit;
- * * means zero or more; + means one or more; ? means zero or one; 
- * {n,m} means n to m times; optional elements in square brackets; 
- * alternatives separated by vertical bar; parentheses for grouping. 
+ * <div style="font-size:smaller"> Meta syntax: meta elements in italic;
+ * literals underlined; a single lowercase letter represents a single digit; *
+ * means zero or more; + means one or more; ? means zero or one; {n,m} means n
+ * to m times; optional elements in square brackets; alternatives separated by
+ * vertical bar; parentheses for grouping.
  * <p>
- * The fields represented by lowercase letters are year (y), month (m), day (d), 
- * hour (h), minute (m), second (s), fraction of a second (u). 
- * </div>
+ * The fields represented by lowercase letters are year (y), month (m), day (d),
+ * hour (h), minute (m), second (s), fraction of a second (u). </div>
  * </blockquote>
  * </p>
- * The scanner does not interpret numbers itself and from
- * its point of view, hour 42 and minute 88 are fine.
- * The {@link DefaultTimeScanner#scan(String) scan(String)} method returns a TimeParts object, but there is no
- * guarantee that the date and time components have already been validated when the method returns. 
- * The responsibility for validating numbers falls to {@link TimeTools#makeRawIndex}. 
+ * The scanner does not interpret numbers itself and from its point of view,
+ * hour 42 and minute 88 are fine. The {@link DefaultTimeScanner#scan} 
+ * method returns a TimeParts object, but there is no guarantee
+ * that the date and time components have already been validated when the method
+ * returns. The responsibility for validating numbers falls to
+ * {@link TimeTools#makeRawIndex}.
  * <p>
  * For the validation to succeed, the components must have the following values:
  * <ul>
@@ -71,17 +72,18 @@ import ch.agent.t2.time.TimeParts.TimeZoneOffset;
  * <li>day in [1, n], where n is the last day of the month;
  * <li>hour in [0, 24] with 24 valid only when minute and second are 0;
  * <li>minute in [0, 59];
- * <li>second in [0, 60], with 60 (leap second) only tolerated on last of June and
- * December;
+ * <li>second in [0, 60], with 60 (leap second) only tolerated on last of June
+ * and December;
  * <li>microsecond in [0, 999999].
  * </ul>
  * <p>
- * There are some differences between the calendar date and time representation supported here 
- * and ISO 8601:2004:
+ * There are some differences between the calendar date and time representation
+ * supported here and ISO 8601:2004:
  * <ul>
  * <li>years cannot be negative;
  * <li>years can only have more than 4 digits in the extended format;
- * <li>time can only be combined with a full date, with year, month, and day specified;
+ * <li>time can only be combined with a full date, with year, month, and day
+ * specified;
  * <li>in the extended format, date and time can be separated by a space;
  * <li>a decimal fraction can only be added to seconds;
  * <li>the time zone designator Z is redundant because the "local" time of the
@@ -89,6 +91,10 @@ import ch.agent.t2.time.TimeParts.TimeZoneOffset;
  * <li>a time zone offset can have microsecond precision.
  * </ul>
  * <p>
+ * The time resolution is only used to help the interpretation of fractional
+ * seconds. It could be used to decide which time parts to ignore, but this
+ * tasks is left to the "packing" step. On the other hand fractional seconds
+ * need to be interpreted by the scanner because of ambiguities.
  * 
  * @author Jean-Paul Vetterli
  */
@@ -104,7 +110,7 @@ public class DefaultTimeScanner implements TimeScanner {
 	}
 
 	@Override
-	public TimeParts scan(String datetime) throws T2Exception {
+	public TimeParts scan(Resolution unit, String datetime) throws T2Exception {
 		TimeParts tp = null;
 		if (datetime == null)
 			throw new IllegalArgumentException("date null");
@@ -128,7 +134,7 @@ public class DefaultTimeScanner implements TimeScanner {
 				long year = 0;
 				int month = 1; // allow to scan 2000 and 2000-01 as if 2000-01-01
 				int day = 1; // same remark
-				HMSU hmsu = new HMSU(0, 0, 0, 0);
+				HMSF hmsu = new HMSF(0, 0, 0, 0);
 				TimeZoneOffset tzo = null;
 				for (int i = 0; i < 5; i++) {
 					group = matcher.group(i + 1);
@@ -151,21 +157,21 @@ public class DefaultTimeScanner implements TimeScanner {
 						day = Integer.valueOf(group).intValue();
 						break;
 					case 3:
-						hmsu = scanTime(hyphenated ? TIME_PATTERN_1.matcher(group) : TIME_PATTERN_2.matcher(group));
+						hmsu = scanTime(unit, hyphenated ? TIME_PATTERN_1.matcher(group) : TIME_PATTERN_2.matcher(group));
 						if (hmsu == null)
 							throw T2Msg.exception(hyphenated ? K.T1083 : K.T1084, group);
 						break;
 					case 4:
-						HMSU hmsu2 = scanTime(hyphenated ? TIME_PATTERN_1.matcher(group.substring(1)) : TIME_PATTERN_2.matcher(group.substring(1)));
+						HMSF hmsu2 = scanTime(unit, hyphenated ? TIME_PATTERN_1.matcher(group.substring(1)) : TIME_PATTERN_2.matcher(group.substring(1)));
 						if (hmsu2 == null)
 							throw T2Msg.exception(hyphenated ? K.T1085 : K.T1086, group);
-						tzo = new TimeZoneOffset(group.startsWith("-"), hmsu2.h(), hmsu2.m(), hmsu2.s(), hmsu2.u());
+						tzo = new TimeZoneOffset(unit, group.startsWith("-"), hmsu2.h(), hmsu2.m(), hmsu2.s(), hmsu2.f());
 						break;
 					default:
 						throw new RuntimeException("bug: " + i);
 					}
 				}
-				tp = new TimeParts(year, month, day, hmsu.h(), hmsu.m(), hmsu.s(), hmsu.u(), tzo);
+				tp = new TimeParts(year, month, day, hmsu.h(), hmsu.m(), hmsu.s(), hmsu.f(), tzo);
 			} catch (NumberFormatException e) {
 				throw new RuntimeException("bug: group not numeric " + group);
 			}
@@ -175,11 +181,12 @@ public class DefaultTimeScanner implements TimeScanner {
 
 	/**
 	 * Return null if match fails.
+	 * @param unit the time resolution 
 	 * @param matcher initialized with the input
 	 * @return an HMSU object
 	 * @throws T2Exception
 	 */
-	private HMSU scanTime(Matcher matcher) throws T2Exception {
+	private HMSF scanTime(Resolution unit, Matcher matcher) throws T2Exception {
 		
 		if (!matcher.matches())
 			return null;
@@ -204,27 +211,15 @@ public class DefaultTimeScanner implements TimeScanner {
 						s = Integer.valueOf(group).intValue();
 						break;
 					case 3:
-						u = Integer.valueOf(group).intValue();
-						switch (group.length()) {
-						case 1:
-							u = u * 100000;
+						switch (unit) {
+						case MSEC:
+							u = Integer.valueOf((group + "000").substring(0,  3)).intValue();
 							break;
-						case 2:
-							u = u * 10000;
-							break;
-						case 3:
-							u = u * 1000;
-							break;
-						case 4:
-							u = u * 100;
-							break;
-						case 5:
-							u = u * 10;
-							break;
-						case 6:
+						case USEC:
+							u = Integer.valueOf((group + "000000").substring(0,  6)).intValue();
 							break;
 						default:
-							throw new RuntimeException("bug: " + group.length());
+							u = 0;
 						}
 						break;
 					default:
@@ -234,7 +229,7 @@ public class DefaultTimeScanner implements TimeScanner {
 			} catch (NumberFormatException e) {
 				throw new RuntimeException("bug: group not numeric " + group);
 			}
-			return new HMSU(h, m, s, u);
+			return new HMSF(h, m, s, u);
 		}
 	}
 

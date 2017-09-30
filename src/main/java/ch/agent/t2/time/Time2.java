@@ -156,7 +156,7 @@ public class Time2 implements TimeIndex {
 	 * @throws T2Exception
 	 */
 	public Time2(TimeDomain domain, String time, Adjustment adjustment) throws T2Exception {
-		this(domain, domain.getScanner().scan(time), adjustment);
+		this(domain, domain.getScanner().scan(domain.getResolution(), time), adjustment);
 	}
 	
 	/**
@@ -271,7 +271,7 @@ public class Time2 implements TimeIndex {
 
 	@Override
 	public int getMicrosecond() {
-		return getTP().getUsec();
+		return getTP().getFsec();
 	}
 
 	@Override
@@ -311,7 +311,7 @@ public class Time2 implements TimeIndex {
 		}
 		StringBuilder sb = new StringBuilder();
 		Formatter fmt = new Formatter(sb);
-		fmt.format(format, tp.getYear(), tp.getMonth(), tp.getDay(), tp.getHour(), tp.getMin(), tp.getSec(), tp.getUsec());
+		fmt.format(format, tp.getYear(), tp.getMonth(), tp.getDay(), tp.getHour(), tp.getMin(), tp.getSec(), tp.getFsec());
 		fmt.close();
 		return sb.toString();
 	}

@@ -21,7 +21,7 @@ import java.util.Arrays;
 import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
 import ch.agent.t2.T2Msg.K;
-import ch.agent.t2.time.TimeParts.HMSU;
+import ch.agent.t2.time.TimeParts.HMSF;
 
 /**
  * A SimpleSubPeriodPattern defines one or more sub periods within a base period.
@@ -213,14 +213,14 @@ public class SimpleSubPeriodPattern implements SubPeriodPattern {
 		TimeParts result = null;
 		switch (subPeriodUnit) {
 		case MONTH:
-			result = new TimeParts(tp.getYear(), ranks[subPeriod], tp.getDay(), tp.getHour(), tp.getMin(), tp.getSec(), tp.getUsec(), tp.getTZOffset());
+			result = new TimeParts(tp.getYear(), ranks[subPeriod], tp.getDay(), tp.getHour(), tp.getMin(), tp.getSec(), tp.getFsec(), tp.getTZOffset());
 			break;
 		case DAY:
-			result = new TimeParts(tp.getYear(), tp.getMonth(), ranks[subPeriod], tp.getHour(), tp.getMin(), tp.getSec(), tp.getUsec(), tp.getTZOffset());
+			result = new TimeParts(tp.getYear(), tp.getMonth(), ranks[subPeriod], tp.getHour(), tp.getMin(), tp.getSec(), tp.getFsec(), tp.getTZOffset());
 			break;
 		case SEC:
-			HMSU hmsu = TimeTools.computeHMS(ranks[subPeriod]);
-			result = new TimeParts(tp.getYear(), tp.getMonth(), tp.getDay(),hmsu.h(), hmsu.m(), hmsu.s(), hmsu.u(), tp.getTZOffset());
+			HMSF hmsu = TimeTools.computeHMS(ranks[subPeriod]);
+			result = new TimeParts(tp.getYear(), tp.getMonth(), tp.getDay(),hmsu.h(), hmsu.m(), hmsu.s(), hmsu.f(), tp.getTZOffset());
 			break;
 		default:
 			throw new RuntimeException("bug: " + subPeriodUnit.name());

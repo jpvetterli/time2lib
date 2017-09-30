@@ -26,16 +26,21 @@ import ch.agent.t2.T2Exception;
 public interface TimeScanner {
 
 	/**
-	 * Scan the date string into a time parts object. The scanner extracts
-	 * fields from the input and assigns them to time parts without checking
-	 * their validity. From the point of view of the scanner day 42 of month 99
-	 * is okay. 
+	 * Scan the date string into a time parts object. The scanner extracts fields
+	 * from the input and assigns them to time parts without checking their
+	 * validity. From the point of view of the scanner day 42 of month 99 is okay.
+	 * The time resolution is used for interpreting fractional seconds if present,
+	 * because in a decimal fraction, leading zeros are significant but trailing
+	 * zeros can be omitted (for example 1 corresponds to 100 milliseconds but
+	 * 100000 microseconds).
 	 * 
+	 * @param unit
+	 *            the time resolution
 	 * @param datetime
 	 *            a non-null string containing a date and time specification
 	 * @return a {@link TimeParts}
 	 * @throws Exception
 	 */
-	public TimeParts scan(String datetime) throws T2Exception;
+	public TimeParts scan(Resolution unit, String datetime) throws T2Exception;
 
 }

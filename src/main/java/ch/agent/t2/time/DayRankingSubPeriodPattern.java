@@ -125,13 +125,13 @@ public class DayRankingSubPeriodPattern implements SubPeriodPattern {
 						ranks[subPeriod].getDayOfWeek(),
 						ranks[subPeriod].getRank());
 				int[] md = TimeTools.computeMonthAndDay(tp.getYear(), yearDay);
-				result = new TimeParts(tp.getYear(), md[0], md[1], tp.getHour(), tp.getMin(), tp.getSec(), tp.getUsec(), tp.getTZOffset());
+				result = new TimeParts(tp.getYear(), md[0], md[1], tp.getHour(), tp.getMin(), tp.getSec(), tp.getFsec(), tp.getTZOffset());
 				break;
 			case MONTH:
 				int day = TimeTools.getDayByRank(tp.getYear(), tp.getMonth(),
 						ranks[subPeriod].getDayOfWeek(),
 						ranks[subPeriod].getRank());
-				result = new TimeParts(tp.getYear(), tp.getMonth(), day, tp.getHour(), tp.getMin(), tp.getSec(), tp.getUsec(), tp.getTZOffset());
+				result = new TimeParts(tp.getYear(), tp.getMonth(), day, tp.getHour(), tp.getMin(), tp.getSec(), tp.getFsec(), tp.getTZOffset());
 				break;
 			default:
 				throw T2Msg.exception(K.T1118, basePeriodUnit.name(),

@@ -19,7 +19,7 @@ package ch.agent.t2.time;
 import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
 import ch.agent.t2.T2Msg.K;
-import ch.agent.t2.time.TimeParts.HMSU;
+import ch.agent.t2.time.TimeParts.HMSF;
 import ch.agent.t2.time.TimeParts.YMD;
 
 /**
@@ -319,8 +319,8 @@ public class TimeFactory implements TimeDomain, TimePacker, TimeFormatter, TimeS
 	}
 
 	@Override
-	public TimeParts scan(String time) throws T2Exception {
-		return scanner.scan(time);
+	public TimeParts scan(Resolution unit, String time) throws T2Exception {
+		return scanner.scan(unit, time);
 	}
 
 	@Override
@@ -361,7 +361,7 @@ public class TimeFactory implements TimeDomain, TimePacker, TimeFormatter, TimeS
 		
 		Resolution unit = this.baseUnit;
 		YMD ymd = null;
-		HMSU hmsu = null;
+		HMSF hmsu = null;
 		switch (unit) {
 		case YEAR:
 			ymd = new YMD(time, 1, 1);
@@ -375,14 +375,14 @@ public class TimeFactory implements TimeDomain, TimePacker, TimeFormatter, TimeS
 			break;
 		case HOUR:
 			long days = time / 24;
-			hmsu = new HMSU((int) (time - days * 24), 0, 0, 0);
+			hmsu = new HMSF((int) (time - days * 24), 0, 0, 0);
 			ymd = TimeTools.computeYMD(days);
 			break;
 		case MIN:
 			days = time/ (24 * 60);
 			long minutes = time - days * 24 * 60;
 			int hours = (int)(minutes / 60);
-			hmsu = new HMSU(hours, (int) (minutes - hours * 60), 0, 0);
+			hmsu = new HMSF(hours, (int) (minutes - hours * 60), 0, 0);
 			ymd = TimeTools.computeYMD(days);
 			break;
 		case SEC:
@@ -418,9 +418,9 @@ public class TimeFactory implements TimeDomain, TimePacker, TimeFormatter, TimeS
 		return tp;
 	}
 	
-	private TimeParts makeTimeParts(YMD ymd, HMSU hmsu) {
+	private TimeParts makeTimeParts(YMD ymd, HMSF hmsu) {
 		return hmsu == null ? new TimeParts(ymd.y(), ymd.m(), ymd.d(), 0, 0, 0, 0) :
-			new TimeParts(ymd.y(), ymd.m(), ymd.d(), hmsu.h(), hmsu.m(), hmsu.s(), hmsu.u());
+			new TimeParts(ymd.y(), ymd.m(), ymd.d(), hmsu.h(), hmsu.m(), hmsu.s(), hmsu.f());
 	}
 
 	@Override
