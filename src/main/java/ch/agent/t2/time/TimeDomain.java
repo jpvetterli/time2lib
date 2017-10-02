@@ -30,14 +30,18 @@ import ch.agent.t2.T2Exception;
  * <p>
  * Another property of a time domain is the <b>origin</b>. To understand its
  * role it is necessary to know that time is internally represented by a
- * <em>long</em> and that time starts in year 0. To get an idea, the largest
- * time with microsecond resolution is
+ * <em>long</em> and that time starts in year in all resolutions, excepted
+ * nanosecond. To get an idea, the largest time with microsecond resolution is
  * <q>292277-01-09 04:00:54.775807</q> (yes, in the year 292277). In some
  * applications, however, it is useful to represent time with a 32 bit integer.
  * It is here that the origin comes into play: the method
  * {@link TimeIndex#asOffset()} returns time as an integer offset from the
  * origin and the method {@link TimeDomain#timeFromOffset(long)} does the
  * reverse.
+ * <p>
+ * With nanosecond resolution time starts on January 1st 2000 and ends in 2292.
+ * For technical reasons the start year needs to be a multiple of 400 and time
+ * must start on a Saturday.
  * <p>
  * Another important property of a time domain is its <b>label</b>. When an
  * application uses a {@link TimeDomainCatalog}, the label should uniquely
@@ -76,9 +80,11 @@ import ch.agent.t2.T2Exception;
  */
 public interface TimeDomain {
 
-	public static long DAYS_TO_19700101 = 719528L;
+	public static final long DAYS_TO_19700101 = 719528L;
 	
-	public static long DAYS_TO_20000101 = 730485L;
+	public static final long DAYS_TO_20000101 = 730485L;
+	
+	public static final long BASE_YEAR_FOR_NANO = 2000; // starts on a Saturday and is multiple of 400 
 	
 	/**
 	 * Compare to another time domain, ignoring label. Two time domains are similar
@@ -185,11 +191,21 @@ public interface TimeDomain {
 	TimeIndex maxTime(boolean offsetCompatible);
 	
 	/**
-	 * Return a new TimeIndex corresponding to the given date string. 
-	 * Adjustments are not allowed. The date syntax is the one implemented
-	 * by {@link DefaultTimeScanner}.
+	 * Return a new TimeIndex corresponding to the given date string. Adjustments
+	 * are not allowed. The date syntax is the one implemented by
+	 * {@link DefaultTimeScanner}.
+	 * <p>
+	 * Date and time components too precise for the resolution of the time domain
+	 * are discarded. As an example, all time components are discarded when the
+	 * resolution is daily or less. There are cases where the time components have
+	 * an effect on a date component. In such cases it is necessary to use first a
+	 * higher resolution time domain then to convert to the wanted domain. An
+	 * example of such a case is when the time component includes a time zone offset
+	 * which changes the day (and possibly the month and year, as on January first
+	 * or December 31).
 	 * 
-	 * @param date a non-null date string
+	 * @param date
+	 *            a non-null date string
 	 * @return a TimeIndex in the domain
 	 * @throws T2Exception
 	 */
@@ -200,6 +216,9 @@ public interface TimeDomain {
 	 * adjustments are made as specified. An exception is thrown if an adjustment is
 	 * required but not allowed. The date syntax is the one implemented by
 	 * {@link DefaultTimeScanner}.
+	 * <p>
+	 * See the comment in {@link #time(String)} for important details about
+	 * discarding unnecessary time components.
 	 * 
 	 * @param date
 	 *            a non-null date string
@@ -214,6 +233,9 @@ public interface TimeDomain {
 	 * Return a new TimeIndex corresponding to the list of parameters. 
 	 * If necessary, adjustments are made as specified. An
 	 * exception is thrown if an adjustment is required but not allowed.
+	 * <p>
+	 * See the comment in {@link #time(String)} for important details about
+	 * discarding unnecessary time components.
 	 * 
 	 * @param year the year
 	 * @param month the month

@@ -53,6 +53,14 @@ public class JavaDateUtilTest extends TestCase {
 		return getTimeDomain(new TimeDomainDefinition("time_usec", Resolution.USEC, 0L));
 	}
 	
+	private TimeDomain msec() {
+		return getTimeDomain(new TimeDomainDefinition("time_msec", Resolution.MSEC, 0L));
+	}
+	
+	private TimeDomain nsec() {
+		return getTimeDomain(new TimeDomainDefinition("time_nsec", Resolution.NSEC, 0L));
+	}
+	
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -144,6 +152,34 @@ public class JavaDateUtilTest extends TestCase {
 			assertEquals("1970-01-02 10:11:12.345", fullDateFormat.format(date));
 		} catch (Exception e) {
 			assertEquals(null, e);
+		}
+	}
+	
+	public void testAsDate1c() {
+		try {
+			TimeIndex time = msec().time("1970-01-02 10:11:12.345");
+			Date date = JavaDateUtil.toJavaDate(time);
+			assertEquals("1970-01-02 10:11:12.345", fullDateFormat.format(date));
+		} catch (Exception e) {
+			assertEquals(null, e);
+		}
+	}
+	
+	public void testAsDate1d() {
+		try {
+			nsec().time("1970-01-02 10:11:12.345678912");
+			fail("exception expected");
+		} catch (Exception e) {
+			assertEquals(K.T1013, ((KeyedException) e).getMsg().getKey());
+		}
+	}
+	
+	public void testAsDate1e() {
+		try {
+			nsec().time("2970-01-02 10:11:12.345678912");
+			fail("exception expected");
+		} catch (Exception e) {
+			assertEquals(K.T1079, ((KeyedException) e.getCause()).getMsg().getKey());
 		}
 	}
 	

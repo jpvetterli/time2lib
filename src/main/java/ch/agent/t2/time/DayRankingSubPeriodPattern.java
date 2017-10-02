@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011-2013 Hauser Olsson GmbH
+ *   Copyright 2011-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,15 +57,14 @@ public class DayRankingSubPeriodPattern implements SubPeriodPattern {
 	 * thrown.
 	 * 
 	 * @param basePeriod
-	 *            a non-null resolution
+	 *            a non-null resolution, yearly or monthly
 	 * @param ranks
 	 *            an array of day definitions
 	 * @throws T2Exception
 	 */
-	public DayRankingSubPeriodPattern(Resolution basePeriod,
-			DayByNameAndRank[] ranks) {
-		if (basePeriod == null)
-			throw new IllegalArgumentException("basePeriodUnit null");
+	public DayRankingSubPeriodPattern(Resolution basePeriod, DayByNameAndRank[] ranks) {
+		if (basePeriod != Resolution.YEAR && basePeriod != Resolution.MONTH)
+			throw new IllegalArgumentException("basePeriod must be either YEAR or MONTH");
 		if (ranks == null || ranks.length == 0)
 			throw new IllegalArgumentException("ranks null or empty");
 		this.basePeriodUnit = basePeriod;
@@ -125,13 +124,13 @@ public class DayRankingSubPeriodPattern implements SubPeriodPattern {
 						ranks[subPeriod].getDayOfWeek(),
 						ranks[subPeriod].getRank());
 				int[] md = TimeTools.computeMonthAndDay(tp.getYear(), yearDay);
-				result = new TimeParts(tp.getYear(), md[0], md[1], tp.getHour(), tp.getMin(), tp.getSec(), tp.getFsec(), tp.getTZOffset());
+				result = new TimeParts(getSubPeriod(), tp.getYear(), md[0], md[1], tp.getHour(), tp.getMin(), tp.getSec(), tp.getFsec(), tp.getTZOffset());
 				break;
 			case MONTH:
 				int day = TimeTools.getDayByRank(tp.getYear(), tp.getMonth(),
 						ranks[subPeriod].getDayOfWeek(),
 						ranks[subPeriod].getRank());
-				result = new TimeParts(tp.getYear(), tp.getMonth(), day, tp.getHour(), tp.getMin(), tp.getSec(), tp.getFsec(), tp.getTZOffset());
+				result = new TimeParts(getSubPeriod(), tp.getYear(), tp.getMonth(), day, tp.getHour(), tp.getMin(), tp.getSec(), tp.getFsec(), tp.getTZOffset());
 				break;
 			default:
 				throw T2Msg.exception(K.T1118, basePeriodUnit.name(),
@@ -176,12 +175,11 @@ public class DayRankingSubPeriodPattern implements SubPeriodPattern {
 	 * @throws T2Exception
 	 */
 	private long increment(long time, int inc) throws T2Exception {
-		long result = time;
-		time += inc;
-		// overflow?
-		if (result < 0 && time > 0 || result > 0 && time < 0)
+		try {
+			return TimeTools.sum(time, inc);
+		} catch (ArithmeticException e) {
 			throw T2Msg.exception(K.T1116);
-		return time;
+		}
 	}
 
 	/**
@@ -256,7 +254,6 @@ public class DayRankingSubPeriodPattern implements SubPeriodPattern {
 				}
 			}
 		}
-		// my first assert...
 		assert inc != Integer.MAX_VALUE;
 		return increment(time, inc);
 	}

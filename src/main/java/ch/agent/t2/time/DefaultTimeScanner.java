@@ -74,8 +74,9 @@ import ch.agent.t2.time.TimeParts.TimeZoneOffset;
  * <li>minute in [0, 59];
  * <li>second in [0, 60], with 60 (leap second) only tolerated on last of June
  * and December;
- * <li>microsecond in [0, 999999].
+ * <li>fraction of a second in [0, 999999999].
  * </ul>
+ * Components can be omitted, starting from fractional seconds towards months.
  * <p>
  * There are some differences between the calendar date and time representation
  * supported here and ISO 8601:2004:
@@ -88,7 +89,7 @@ import ch.agent.t2.time.TimeParts.TimeZoneOffset;
  * <li>a decimal fraction can only be added to seconds;
  * <li>the time zone designator Z is redundant because the "local" time of the
  * the Time2 Library is always UTC;
- * <li>a time zone offset can have microsecond precision.
+ * <li>a time zone offset can have sub-second precision.
  * </ul>
  * <p>
  * The time resolution is only used to help the interpretation of fractional
@@ -103,8 +104,8 @@ public class DefaultTimeScanner implements TimeScanner {
 	private static final Pattern PATTERN_1 = Pattern.compile("((?:\\+\\d+)?\\d\\d\\d\\d)(?:-(\\d\\d)(?:-(\\d\\d)(?:[T ]([0-9:.,]*)(?:Z|([+-][0-9:.,]*))?)?)?)?");
 	// note: colon intentionally allowed in time pattern, improves error diagnostics
 	private static final Pattern PATTERN_2 = Pattern.compile("(\\d\\d\\d\\d)(?:(\\d\\d)(?:(\\d\\d)(?:T([0-9:.,]*)(?:Z|([+-][0-9:.,]*))?)?)?)?");
-	private static final Pattern TIME_PATTERN_1 = Pattern.compile("(\\d\\d)(?::(\\d\\d)(?::(\\d\\d)(?:[.,](\\d\\d?\\d?\\d?\\d?\\d?))?)?)?");
-	private static final Pattern TIME_PATTERN_2 = Pattern.compile("(\\d\\d)(?:(\\d\\d)(?:(\\d\\d)(?:[.,](\\d\\d?\\d?\\d?\\d?\\d?))?)?)?");
+	private static final Pattern TIME_PATTERN_1 = Pattern.compile("(\\d\\d)(?::(\\d\\d)(?::(\\d\\d)(?:[.,](\\d\\d?\\d?\\d?\\d?\\d?\\d?\\d?\\d?))?)?)?");
+	private static final Pattern TIME_PATTERN_2 = Pattern.compile("(\\d\\d)(?:(\\d\\d)(?:(\\d\\d)(?:[.,](\\d\\d?\\d?\\d?\\d?\\d?\\d?\\d?\\d?))?)?)?");
 	
 	public DefaultTimeScanner() {
 	}
@@ -171,7 +172,14 @@ public class DefaultTimeScanner implements TimeScanner {
 						throw new RuntimeException("bug: " + i);
 					}
 				}
-				tp = new TimeParts(year, month, day, hmsu.h(), hmsu.m(), hmsu.s(), hmsu.f(), tzo);
+				
+				if (unit == Resolution.NSEC) {
+					year -= TimeDomain.BASE_YEAR_FOR_NANO;
+					if (year < 0)
+						throw T2Msg.exception(K.T1013, TimeDomain.BASE_YEAR_FOR_NANO);
+				}
+				
+				tp = new TimeParts(unit, year, month, day, hmsu.h(), hmsu.m(), hmsu.s(), hmsu.f(), tzo);
 			} catch (NumberFormatException e) {
 				throw new RuntimeException("bug: group not numeric " + group);
 			}
@@ -217,6 +225,9 @@ public class DefaultTimeScanner implements TimeScanner {
 							break;
 						case USEC:
 							u = Integer.valueOf((group + "000000").substring(0,  6)).intValue();
+							break;
+						case NSEC:
+							u = Integer.valueOf((group + "000000000").substring(0,  9)).intValue();
 							break;
 						default:
 							u = 0;

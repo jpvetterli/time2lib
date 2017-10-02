@@ -10,7 +10,6 @@ import ch.agent.t2.time.DateTime;
 import ch.agent.t2.time.Day;
 import ch.agent.t2.time.DayOfWeek;
 import ch.agent.t2.time.DefaultTimeDomainCatalog;
-import ch.agent.t2.time.FullTimeFormatter;
 import ch.agent.t2.time.Month;
 import ch.agent.t2.time.Resolution;
 import ch.agent.t2.time.SystemTime;
@@ -67,6 +66,23 @@ public class TimeTest extends TestCase {
 	
 	private TimeDomain usec() {
 		return getTimeDomain(new TimeDomainDefinition("time_usec", Resolution.USEC, 0L));
+	}
+	
+	private TimeDomain nsec() {
+		return getTimeDomain(new TimeDomainDefinition("time_nsec", Resolution.NSEC, 0L));
+	}
+	
+	public void test000() {
+		try {
+			// if this test fails, times stored numerically on external media (db) are now useless 
+			TimeIndex t = new Workday("2017-09-29");
+			assertEquals("2017-09-29", t.toString());
+			assertEquals(526404, t.asOffset());
+			assertEquals(526404, t.asLong());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("unexpected exception");
+		}
 	}
 	
 	public void testDay() {
@@ -238,9 +254,12 @@ public class TimeTest extends TestCase {
 
 	public void testSetString3e() {
 		try {
-			TimeIndex time = msec().time("8004-02-29 14:00:12.345678");
+			TimeIndex time = msec().time("8004-02-29 14:00:12.123456789");
 			String s = time.toString();
-			assertEquals("8004-02-29 14:00:12.345", s);
+			assertEquals("8004-02-29 14:00:12.123", s);
+			time = usec().time("8004-02-29 14:00:12.123456789");
+			s = time.toString();
+			assertEquals("8004-02-29 14:00:12.123456", s);
 		} catch (Exception e) {
 			assertEquals(null, e);
 		}
@@ -353,9 +372,25 @@ public class TimeTest extends TestCase {
 	
 	public void testSetStringTZO6() {
 		try {
-			TimeIndex time = hour().time("2004-02-29 14:00:12.500+02:30");
-			String s = time.toString();
-			assertEquals("2004-02-29 11", s);
+			String s = "2004-02-29 14:00:12.500+02:30";
+			TimeIndex time = hour().time(s);
+			assertEquals("2004-02-29 12", time.toString()); // loss of precision
+			time = msec().time(s);
+			time = time.convert(hour());
+			assertEquals("2004-02-29 11", time.toString()); // no loss
+		} catch (Exception e) {
+			assertEquals(null, e);
+		}
+	}
+	
+	public void testSetStringTZO6a() {
+		try {
+			String s = "2005-12-31 23:00:00-02";
+			TimeIndex time = Day.DOMAIN.time(s); // precision lost
+			assertEquals("2005-12-31", time.toString());
+			time = DateTime.DOMAIN.time(s); // no precision lost
+			time = time.convert(Day.DOMAIN); // correct date
+			assertEquals("2006-01-01", time.toString());
 		} catch (Exception e) {
 			assertEquals(null, e);
 		}
@@ -667,7 +702,7 @@ public class TimeTest extends TestCase {
 			new Day(date);
 			fail("exception expected");
 		} catch (Exception e) {
-			assertEquals(K.T1070, ((KeyedException)e.getCause()).getMsg().getKey());
+			assertEquals(K.T1079, ((KeyedException)e.getCause()).getMsg().getKey());
 		}
 
 	}
@@ -715,20 +750,7 @@ public class TimeTest extends TestCase {
 			domain.time(date);
 			fail("exception expected");
 		} catch (KeyedException e) {
-			assertEquals(K.T1070, ((KeyedException)e.getCause()).getMsg().getKey());
-		}
-	}
-	
-	public void testTime10e() {
-		try {
-			TimeDomain domain = Workday.DOMAIN;
-			TimeIndex time = domain.time(6588122883467697004L); // == getCycle().computeMaxCompressedTime());
-			String date = time.toString(); // "25252734927766554-07-26"
-			time = domain.time(date);
-			assertEquals(date + "T00:00:00.000000", ((Time2)time).toString(new FullTimeFormatter(true)));
-		} catch (Exception e) {
-			e.printStackTrace();
-			assertEquals(null, e);
+			assertEquals(K.T1079, ((KeyedException)e.getCause()).getMsg().getKey());
 		}
 	}
 	
@@ -933,6 +955,33 @@ public class TimeTest extends TestCase {
 		}
 	}
 
+	public void testNanoTime01() {
+		TimeIndex time = nsec().time(86400000000L);
+		assertEquals(86400000000L, time.asLong());
+		dump(time.toString());
+	}
+	
+	public void testNanoTime02() {
+		TimeIndex time = nsec().time(0L);
+		assertEquals("2000-01-01 00:00:00.000000000", time.toString());
+		dump(time.toString());
+	}
+	
+	public void testNanoTime03() {
+		TimeIndex time = nsec().time(Long.MAX_VALUE);
+		assertEquals("2292-04-10 23:47:16.854775807", time.toString());
+		dump(time.toString());
+	}
+	
+	public void testNanoTime04() {
+		try {
+			TimeIndex time = nsec().time("2020-01-01 00:00:00.1");
+			assertEquals("2020-01-01 00:00:00.100000000", time.toString());
+		} catch (Exception e) {
+			fail(e.toString());
+		}
+	}
+	
 	public void testTime1() {
 		TimeIndex time = usec().time(86400000000L);
 		assertEquals(86400000000L, time.asLong());
@@ -1505,7 +1554,6 @@ public class TimeTest extends TestCase {
 		try {
 			TimeIndex t1 = new Month(2009, 1);
 			Day d = new Day(t1.getDayByRank(Resolution.MONTH, DayOfWeek.Fri, 3));
-			dump(d.toString(new FullTimeFormatter()) + " " + d.getDayOfWeek());
 			assertEquals(DayOfWeek.Fri, d.getDayOfWeek());
 			TimeIndex t2 = d.add(-21);
 			assertEquals(t2.getMonth(), 12);

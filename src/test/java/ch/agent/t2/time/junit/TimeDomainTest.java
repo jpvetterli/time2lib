@@ -5,6 +5,7 @@ import ch.agent.t2.T2Msg.K;
 import ch.agent.t2.time.Adjustment;
 import ch.agent.t2.time.BasePeriodPattern;
 import ch.agent.t2.time.Cycle;
+import ch.agent.t2.time.DateTime;
 import ch.agent.t2.time.Day;
 import ch.agent.t2.time.DayByNameAndRank;
 import ch.agent.t2.time.DayOfWeek;
@@ -299,6 +300,63 @@ public class TimeDomainTest extends TestCase {
 		}
 	}
 	
+	public void testTimeDomain14() {
+		try {
+			TimeIndex t = Workday.DOMAIN.time("2017-10-02");
+			assertEquals("Mon", t.getDayOfWeek().name());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("unexpected exception");
+		}
+	}
+	
+	public void testTimeDomain15() {
+		try {
+			TimeIndex t = SystemTime.DOMAIN.time("2017-10-02");
+			assertEquals("2017-10-02 00:00:00.000", t.toString());
+			assertEquals(63674121600000L, t.asLong());
+			assertEquals("1970-01-25 20:31:23.647", SystemTime.DOMAIN.maxTime(true).toString());
+			assertEquals("Mon", t.getDayOfWeek().name());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("unexpected exception");
+		}
+	}
+	
+	public void testTimeDomain15a() {
+		try {
+			TimeIndex t = SystemTime.DOMAIN.time("2017-10-02");
+			assertEquals(42, t.asOffset());
+			fail("exception expected");
+		} catch (KeyedException e) {
+			assertEquals(K.T1076, e.getMsg().getKey());
+		}
+	}
+	
+	public void testTimeDomain15b() {
+		try {
+			TimeIndex t = SystemTime.DOMAIN.time(0);
+			assertEquals("0000-01-01 00:00:00.000", t.toString());
+			assertEquals(0L, t.asLong());
+			assertEquals("Sat", t.getDayOfWeek().name());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("unexpected exception");
+		}
+	}
+	
+	public void testTimeDomain16() {
+		try {
+			TimeIndex t = DateTime.DOMAIN.time("2017-10-02");
+			assertEquals(63674121600L, t.asLong());
+			assertEquals(560217600, t.asOffset());
+			assertEquals("Mon", t.getDayOfWeek().name());
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail("unexpected exception");
+		}
+	}
+
 	public void testMinTime1() {
 		TimeIndex time = Day.DOMAIN.minTime();
 		assertEquals("0000-01-01", time.toString());
@@ -385,6 +443,17 @@ public class TimeDomainTest extends TestCase {
 		}
 	}
 	
+	public void testMaxTime8() {
+		try {
+			TimeDomain nsec = new TimeDomainDefinition("nsec", Resolution.NSEC, 0L).asTimeDomain();
+			assertEquals("2000-01-01 00:00:00.000000000", nsec.minTime().toString());
+			assertEquals("2292-04-10 23:47:16.854775807", nsec.maxTime().toString());
+		} catch(Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+
 	private void helperSubPeriod01(String input, Adjustment adjust, String expected) {
 		try {
 			TimeDomain d = getTimeDomain(new TimeDomainDefinition("abc", Resolution.MONTH, 0L, null, 

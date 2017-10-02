@@ -31,10 +31,10 @@ import ch.agent.t2.T2Msg.K;
  * competitor to <a href="http://joda-time.sourceforge.net/">Joda Time</a>.
  * <em>Time2</em> has no time zones, no daylight savings, no locales, no
  * Gregorian cutover. Dates before October 15 1582 do not correspond to
- * historical dates. The base of <em>Time2</em> time is zero microseconds into
+ * historical dates. The base of <em>Time2</em> time is zero nanoseconds into
  * January 1st of year zero:
  * <p>
- * <blockquote> <code>0000-01-01 00:00:00.000000</code> </blockquote>
+ * <blockquote> <code>0000-01-01 00:00:00.000000000</code> </blockquote>
  * <p>
  * It corresponds to the numerical time index 0L.
  * <p>
@@ -97,6 +97,9 @@ public class Time2 implements TimeIndex {
 	 * <b>unchecked</b> exception is thrown if the time specified is not valid for
 	 * the domain. If necessary the time is adjusted as allowed by the last
 	 * argument.
+	 * <p>
+	 * See the comment in {@link TimeDomain#time(String)} for important details about
+	 * discarding unnecessary time components.
 	 * 
 	 * @param domain
 	 *            a non-null time domain
@@ -112,15 +115,15 @@ public class Time2 implements TimeIndex {
 	 *            a minute in the range 0-59
 	 * @param sec
 	 *            a second in the range 0-59
-	 * @param usec
-	 *            the number of microseconds in the current second in the range
-	 *            0-999999
+	 * @param fsec
+	 *            a fraction of a second in the current second in the range
+	 *            0-999999999
 	 * @param adjust
 	 *            a non-null allowed adjustment mode
 	 * @throws T2Exception
 	 */
-	public Time2(TimeDomain domain, long year, int month, int day, int hour, int min, int sec, int usec, Adjustment adjust) throws T2Exception {
-		this(domain, domain.getPacker().pack(new TimeParts(year, month, day, hour, min, sec, usec), adjust));
+	public Time2(TimeDomain domain, long year, int month, int day, int hour, int min, int sec, int fsec, Adjustment adjust) throws T2Exception {
+		this(domain, domain.getPacker().pack(new TimeParts(domain.getResolution(), year, month, day, hour, min, sec, fsec), adjust));
 	}
 	
 	/**
@@ -146,6 +149,9 @@ public class Time2 implements TimeIndex {
 	 * the time domain.
 	 * <p>
 	 * If necessary the time is adjusted as allowed by the last argument.
+	 * <p>
+	 * See the comment in {@link TimeDomain#time(String)} for important details about
+	 * discarding unnecessary time components.
 	 * 
 	 * @param domain
 	 *            a non-null time domain
@@ -164,6 +170,9 @@ public class Time2 implements TimeIndex {
 	 * interpreted by the {@link TimeScanner} defined in the time domain.
 	 * <p>
 	 * No adjustment is allowed.
+	 * <p>
+	 * See the comment in {@link TimeDomain#time(String)} for important details about
+	 * discarding unnecessary time components.
 	 * 
 	 * @param domain
 	 *            a non-null time domain
@@ -184,7 +193,9 @@ public class Time2 implements TimeIndex {
 	public TimeIndex convert(TimeDomain domain, Adjustment adjustment) throws T2Exception {
 		if (getTimeDomain().equals(domain))
 			return this;
-		return new Time2(domain, getTP(), adjustment);
+		TimeParts tp = getTP();
+		tp = new TimeParts(domain.getResolution(), tp.getYear(), tp.getMonth(), tp.getDay(), tp.getHour(), tp.getMin(), tp.getSec(), tp.getFsec(domain.getResolution()), tp.getTZOffset());
+		return new Time2(domain, tp, adjustment);
 	}
 
 	@Override
@@ -207,23 +218,24 @@ public class Time2 implements TimeIndex {
 	
 	@Override
 	public TimeIndex add(long increment) throws T2Exception {
-		long before = asLong();
-		long after = before + increment;
-		// overflow? (detected with numeric wraparound)
-		if (increment > 0 && after < before || increment < 0 && after > before)
-			throw T2Msg.exception(K.T1075, toString(), increment);
+		long sum = 0;
 		try {
-			domain.getPacker().valid(after, false);
-		} catch (T2Exception e) {
+			sum = TimeTools.sum(asLong(), increment);
+			domain.getPacker().valid(sum, false);
+		} catch (Exception e) {
 			throw T2Msg.exception(e, K.T1075, toString(), increment);
 		}
-		return new Time2(domain, after);
+		return new Time2(domain, sum);
 	}
 	
 	@Override
 	public long sub(TimeIndex time) throws T2Exception {
 		if (getTimeDomain().equals(time.getTimeDomain())) {
-			return asLong() - time.asLong();
+			try {
+				return TimeTools.diff(asLong(), time.asLong());
+			} catch (Exception e) {
+				throw T2Msg.exception(e, K.T1078, time.toString(), toString());
+			}
 		} else
 			throw T2Msg.exception(K.T1077, time.toString(), toString(), 
 					time.getTimeDomain().getLabel(), getTimeDomain().getLabel());
@@ -270,7 +282,7 @@ public class Time2 implements TimeIndex {
 	}
 
 	@Override
-	public int getMicrosecond() {
+	public int getFractionalSecond() {
 		return getTP().getFsec();
 	}
 

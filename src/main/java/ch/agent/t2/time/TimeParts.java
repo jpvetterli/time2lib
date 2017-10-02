@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011-2013 Hauser Olsson GmbH
+ *   Copyright 2011-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,10 +22,11 @@ import ch.agent.t2.T2Msg.K;
 
 /**
  * A TimeParts object groups the components of date and time, from the year down
- * to the microsecond. There is no guarantee that components are in a consistent
- * state at all times. It is for example possible to have hour 55 or month -378. The
- * class is intended for use by methods of the library for moving information
- * around. It is not meant to be used directly by applications.
+ * to the fraction of a second. There is no guarantee that components are in a
+ * consistent state at all times. It is for example possible to have hour 55 or
+ * month -378. The class is intended for use by methods of the library for
+ * moving information around. It is not meant to be used directly by
+ * applications.
  * <p>
  * Together with {@link DefaultTimeScanner}, TimeParts implements a subset of
  * ISO 8601, the international standard for representing dates and times. Refer
@@ -35,8 +36,38 @@ import ch.agent.t2.T2Msg.K;
  */
 public class TimeParts {
 	
+	// package private
 	/**
-	 * Immutable object encapsulating years, months and days.
+	 * Validate fractional seconds depending on the resolution.
+	 * 
+	 * @param unit time resolution 
+	 * @param fsec fractional seconds
+	 * @return true if valid
+	 */
+	static boolean good(Resolution unit, int fsec) {
+		boolean good = false;
+		if (fsec >= 0) {
+			switch (unit) {
+			case MSEC:
+				good = fsec < 1000;
+				break;
+			case USEC:
+				good = fsec < 1000000;
+				break;
+			case NSEC:
+				good = fsec < 1000000000;
+				break;
+			default:
+				good = fsec == 0;
+				break;
+			}
+		}
+		return good;
+	}
+	
+	/**
+	 * Immutable object encapsulating years, months and days. This object is
+	 * expected to be used in implementations but not applications.
 	 */
 	public static class YMD {
 
@@ -90,8 +121,9 @@ public class TimeParts {
 	}
 
 	/**
-	 * Immutable object encapsulating hours, minutes, seconds and fractional seconds.
-	 *
+	 * Immutable object encapsulating hours, minutes, seconds and fractional
+	 * seconds. This object is expected to be used in implementations but not
+	 * applications.
 	 */
 	public static class HMSF {
 
@@ -176,17 +208,39 @@ public class TimeParts {
 		private final int sign;
 		
 		/**
-		 * Constructor.
+		 * Constructor. Values insignificant for the resolution are discarded.
 		 * 
-		 * @param unit time unit resolution
-		 * @param negative negative time zone offset
-		 * @param hour offset hours
-		 * @param min offset minutes
-		 * @param sec offset seconds
-		 * @param fsec offset fractional seconds
+		 * @param unit
+		 *            time unit resolution
+		 * @param negative
+		 *            negative time zone offset
+		 * @param hour
+		 *            offset hours
+		 * @param min
+		 *            offset minutes
+		 * @param sec
+		 *            offset seconds
+		 * @param fsec
+		 *            offset fractional seconds (millis, micros, etc. depending on the
+		 *            resolution)
 		 * @throws T2Exception
 		 */
 		public TimeZoneOffset(Resolution unit, boolean negative, int hour, int min, int sec, int fsec) throws T2Exception {
+			if (unit == null)
+				throw new IllegalArgumentException("unit null");
+			if (unit.compareTo(Resolution.MSEC) < 0) {
+				fsec = 0;
+				if (unit.compareTo(Resolution.SEC) < 0) {
+					sec = 0;
+					if (unit.compareTo(Resolution.MIN) < 0) {
+						min = 0;
+						if (unit.compareTo(Resolution.HOUR) < 0) {
+							hour = 0;
+						}
+					}
+				}
+			}
+			
 			this.sign = negative ? -1 : 1;
 			if (hour < 0 || hour > 11)
 				throw T2Msg.exception(K.T1018, hour);
@@ -202,24 +256,6 @@ public class TimeParts {
 			this.fsec = sign * fsec;
 		}
 
-		private boolean good(Resolution unit, int fsec) {
-			boolean good = false;
-			if (fsec >= 0) {
-				switch (unit) {
-				case MSEC:
-					good = fsec < 1000;
-					break;
-				case USEC:
-					good = fsec < 1000000;
-					break;
-				default:
-					good = fsec == 0;
-					break;
-				}
-			}
-			return good;
-		}
-		
 		/**
 		 * Return true is offset is negative.
 		 * 
@@ -272,6 +308,7 @@ public class TimeParts {
 
 	}
 	
+	private final Resolution unit;
 	private final long year;
 	private final int month;
 	private final int day;
@@ -283,7 +320,11 @@ public class TimeParts {
 	
 	/**
 	 * Constructor. Any value can passed to parameters, no validation is done.
+	 * Values insignificant for the resolution are discarded. The time zone offset
+	 * is discarded unless the resolution is at least hourly.
 	 * 
+	 * @param unit
+	 *            a non-null time resolution
 	 * @param year
 	 *            the year
 	 * @param month
@@ -301,8 +342,30 @@ public class TimeParts {
 	 * @param tzOffset
 	 *            the time zone offset
 	 */
-	public TimeParts(long year, int month, int day, int hour, int min, int sec, int fsec, TimeZoneOffset tzOffset) {
+	public TimeParts(Resolution unit, long year, int month, int day, int hour, int min, int sec, int fsec, TimeZoneOffset tzOffset) {
 		super();
+		if (unit == null)
+			throw new IllegalArgumentException("unit null");
+		if (unit.compareTo(Resolution.MSEC) < 0) {
+			fsec = 0;
+			if (unit.compareTo(Resolution.SEC) < 0) {
+				sec = 0;
+				if (unit.compareTo(Resolution.MIN) < 0) {
+					min = 0;
+					if (unit.compareTo(Resolution.HOUR) < 0) {
+						hour = 0;
+						tzOffset = null;
+						if (unit.compareTo(Resolution.DAY) < 0) {
+							day = 1;
+							if (unit.compareTo(Resolution.MONTH) < 0) {
+								month = 1;
+							}
+						}
+					}
+				}
+			}
+		}
+		this.unit = unit;
 		this.year = year;
 		this.month = month;
 		this.day = day;
@@ -315,8 +378,11 @@ public class TimeParts {
 
 	/**
 	 * Constructor with a default time zone offset. Any value can passed to
-	 * parameters, no validation is done.
+	 * parameters, no validation is done. Values insignificant for the resolution
+	 * are discarded.
 	 * 
+	 * @param unit
+	 *            the time resolution
 	 * @param year
 	 *            the year
 	 * @param month
@@ -329,11 +395,20 @@ public class TimeParts {
 	 *            the minute
 	 * @param sec
 	 *            the second
-	 * @param usec
-	 *            the microsecond
+	 * @param fsec
+	 *            the fractional second
 	 */
-	public TimeParts(long year, int month, int day, int hour, int min, int sec, int usec) {
-		this(year, month, day, hour, min, sec, usec, null);
+	public TimeParts(Resolution unit, long year, int month, int day, int hour, int min, int sec, int fsec) {
+		this(unit, year, month, day, hour, min, sec, fsec, null);
+	}
+
+	/**
+	 * Return the time resolution.
+	 * 
+	 * @return the resolution
+	 */
+	public Resolution getResolution() {
+		return unit;
 	}
 
 	/**
@@ -406,6 +481,71 @@ public class TimeParts {
 	public int getFsec() {
 		return fsec;
 	}
+	
+	/**
+	 * Return the fractional second with a given resolution. The method returns zero
+	 * when the target resolution is less than millisecond, else it converts the
+	 * fractional second. As an example assume fsec is 123456 microseconds. For a
+	 * 
+	 * 
+	 * @param targetUnit
+	 *            the resolution to convert to
+	 * @return milliseconds, microseconds, or nanoseconds
+	 */
+	public int getFsec(Resolution targetUnit) {
+		int result = fsec;
+		switch (unit) {
+		case MSEC:
+			switch (targetUnit) {
+			case MSEC:
+				break;
+			case USEC:
+				result = fsec * 1000;
+				break;
+			case NSEC:
+				result = fsec * 1000 * 1000;
+				break;
+			default:
+				result = 0;
+				break;
+			}
+			break;
+		case USEC:
+			switch (targetUnit) {
+			case MSEC:
+				result = fsec / 1000;
+				break;
+			case USEC:
+				break;
+			case NSEC:
+				result = fsec * 1000;
+				break;
+			default:
+				result = 0;
+				break;
+			}
+			break;
+		case NSEC:
+			switch (targetUnit) {
+			case MSEC:
+				result = fsec / 1000000;
+				break;
+			case USEC:
+				result = fsec / 1000;
+				break;
+			case NSEC:
+				break;
+			default:
+				result = 0;
+				break;
+			}
+			break;
+		default:
+			result = 0;
+			break;
+		}
+		return result;
+	}
 
 	/**
 	 * Return the time zone offset. The result can be null.
@@ -418,7 +558,9 @@ public class TimeParts {
 	
 	@Override
 	public String toString() {
-		return String.format("%04d-%02d-%02d %02d:%02d:%02d.%06d", getYear(), getMonth(), getDay(), getHour(), getMin(), getSec(), getFsec());
+		return String.format("%04d-%02d-%02d %02d:%02d:%02d.%06d",
+				(unit == Resolution.NSEC ? TimeDomain.BASE_YEAR_FOR_NANO : 0) + getYear(), 
+				getMonth(), getDay(), getHour(), getMin(), getSec(), getFsec());
 	}
 
 }

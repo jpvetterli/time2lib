@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011-2013 Hauser Olsson GmbH
+ *   Copyright 2011-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -215,34 +215,38 @@ public class TimeTools {
 	}
 
 	/**
-	 * Return a long number representing a time parts object. The method
-	 * enforces rules on acceptable values of components. Two special features
-	 * of the ISO 8601 standard are supported:
+	 * Return a long number representing a time parts object. The method enforces
+	 * rules on acceptable values of components. Date and time parts not relevant
+	 * for the time domain are discarded without validation. For example, if the
+	 * time unit is the year, all other components are discarded, and month 33 or
+	 * day 42 are okay as far as this method is concerned.
+	 * <p>
+	 * Two special features of the ISO 8601 standard are supported:
 	 * <ol>
-	 * <li>Midnight can be represented either as hour 0 of the day or as hour 24
-	 * of the preceding day.
-	 * <li>A 61st second, known as a leap second, is tolerated on the last day
-	 * of June or the last day of the year. There is some confusion about when
-	 * leap seconds can be inserted; the last of June or December is mentioned
-	 * by the IERS, see <a
-	 * href="http://hpiers.obspm.fr/iers/bul/bulc/bulletinc.dat">IERS Bulletin C
-	 * 42, July 2011</a>, which should be authoritative since it is the official
-	 * "publisher" of leap seconds.
+	 * <li>Midnight can be represented either as hour 0 of the day or as hour 24 of
+	 * the preceding day.
+	 * <li>A 61st second, known as a leap second, is tolerated on the last day of
+	 * June or the last day of the year. There is some confusion about when leap
+	 * seconds can be inserted; the last of June or December is mentioned by the
+	 * IERS, see <a href="http://hpiers.obspm.fr/iers/bul/bulc/bulletinc.dat">IERS
+	 * Bulletin C 42, July 2011</a>, which should be authoritative since it is the
+	 * official "publisher" of leap seconds.
 	 * </ol>
 	 * <p>
 	 * <b>Note about leap seconds</b>
 	 * <p>
 	 * When a 61st second occurs in the input for a day when leap seconds are
-	 * tolerated, the software simply changes it into the 60th second. This is
-	 * the only case in the Time2 Library where leap seconds play a role. When
-	 * constructing a time with {@link TimeIndex#add(long)} for example, leap seconds play no
-	 * role. Adding 1 second to the {@link DateTime} domain TimeIndex
-	 * represented by 2008-12-31T23:59:59 yields 2009-01-01T00:00:00 instead of
-	 * the official leap second 2008-12-31T23:59:60.
+	 * tolerated, the software simply changes it into the 60th second. This is the
+	 * only case in the Time2 Library where leap seconds play a role. When
+	 * constructing a time with {@link TimeIndex#add(long)} for example, leap
+	 * seconds play no role. Adding 1 second to the {@link DateTime} domain
+	 * TimeIndex represented by 2008-12-31T23:59:59 yields 2009-01-01T00:00:00
+	 * instead of the official leap second 2008-12-31T23:59:60.
 	 * 
 	 * @param unit
 	 *            a non-null resolution
-	 * @param tp time represented in a time parts object
+	 * @param tp
+	 *            time represented in a time parts object
 	 * @return a numeric time index
 	 * @throws T2Exception
 	 */
@@ -260,59 +264,65 @@ public class TimeTools {
 		if (unit == Resolution.YEAR) {
 			time = year;
 		} else {
-			if (month < 1 || month > 12)
-				throw T2Msg.exception(K.T1015, month);
-			if (unit == Resolution.MONTH) {
-				time = year * 12 + month - 1; // -1: month 1-based
-			} else {
-				int daysInThisMonth = TimeTools.daysInMonth(year, month);
-				if (day < 1 || day > daysInThisMonth)
-					throw T2Msg.exception(K.T1016, day,	daysInThisMonth);
-				time = year * 365 + TimeTools.leapYears(year)
-						+ TimeTools.daysToMonth(year, month) + day - 1; // -1: day 1-based
-				if (unit != Resolution.DAY) {
-					// get 24 hour notation out of the way (ISO 8601 tolerates 24:00:00) 
-					if (hour == 24) {
-						if (min == 0 && sec == 0 && fsec == 0) {
-							hour = 0;
-							time += 1;
+			
+			try {
+				if (month < 1 || month > 12)
+					throw T2Msg.exception(K.T1015, month);
+				if (unit == Resolution.MONTH) {
+					time = sum (prod(year, 12), month - 1); // -1: month 1-based
+				} else {
+					int daysInThisMonth = TimeTools.daysInMonth(year, month);
+					if (day < 1 || day > daysInThisMonth)
+						throw T2Msg.exception(K.T1016, day, daysInThisMonth);
+					time = sum(prod(year, 365), TimeTools.leapYears(year) + TimeTools.daysToMonth(year, month) + day - 1); // -1: day 1-based
+					if (unit != Resolution.DAY) {
+						// get 24 hour notation out of the way (ISO 8601 tolerates 24:00:00)
+						if (hour == 24) {
+							if (min == 0 && sec == 0 && fsec == 0) {
+								hour = 0;
+								time += 1;
+							}
 						}
-					}
-					// get leap seconds out of the way
-					if (sec == 60) {
-						if (hour == 23 && min == 59 && fsec == 0 && 
-								(month == 12 && day == 31) || 
-								(month == 6 && day == 30)) {
-							sec = 59;
-						} else {
-							throw T2Msg.exception(K.T1025);
+						// get leap seconds out of the way
+						if (sec == 60) {
+							if (hour == 23 && min == 59 && fsec == 0 && (month == 12 && day == 31)
+									|| (month == 6 && day == 30)) {
+								sec = 59;
+							} else {
+								throw T2Msg.exception(K.T1025);
+							}
 						}
-					}
-					
-					CompositeOverflowAndHMSU checkResult = checkTimeComponentsAndApplyTimeZoneOffset(unit, hour, min, sec, fsec, tp.getTZOffset());
-					
-					time += checkResult.overflow;
-					hour = checkResult.hmsu.h();
-					min = checkResult.hmsu.m();
-					sec = checkResult.hmsu.s();
-					fsec = checkResult.hmsu.f();
-					
-					time = time * 24 + hour;
-					if (unit != Resolution.HOUR) {
-						time = time * 60 + min;
-						if (unit != Resolution.MIN) {
-							time = time * 60 + sec;
-							if (unit != Resolution.SEC) {
-								if (unit == Resolution.MSEC)
-									time = time * 1000L + fsec;
-								else if (unit == Resolution.USEC)
-									time = time * 1000000L + fsec;
-								else
-									throw new RuntimeException("bug: " + unit.name());
+
+						CompositeOverflowAndHMSU checkResult = checkTimeComponentsAndApplyTimeZoneOffset(unit, hour,
+								min, sec, fsec, tp.getTZOffset());
+
+						time = sum(time, checkResult.overflow);
+						hour = checkResult.hmsu.h();
+						min = checkResult.hmsu.m();
+						sec = checkResult.hmsu.s();
+						fsec = checkResult.hmsu.f();
+
+						time = sum(prod(time, 24), hour);
+						if (unit != Resolution.HOUR) {
+							time = sum(prod(time, 60), min);
+							if (unit != Resolution.MIN) {
+								time = sum(prod(time, 60), sec);
+								if (unit != Resolution.SEC) {
+									if (unit == Resolution.MSEC)
+										time = sum(prod(time, 1000L), fsec);
+									else if (unit == Resolution.USEC)
+										time = sum(prod(time, 1000000L), fsec);
+									else if (unit == Resolution.NSEC)
+										time = sum(prod(time, 1000000000L), fsec);
+									else
+										throw new RuntimeException("bug: " + unit.name());
+								}
 							}
 						}
 					}
 				}
+			} catch (ArithmeticException e) {
+				throw T2Msg.exception(K.T1079, new DefaultTimeFormatter(true).format(unit, tp));
 			}
 		}
 		return time;
@@ -354,13 +364,17 @@ public class TimeTools {
 	 */
 	private static CompositeOverflowAndHMSU checkTimeComponentsAndApplyTimeZoneOffset(Resolution unit, int hour, int min, int sec, int fsec, TimeZoneOffset tzOffset) throws T2Exception {
 		
+		if (unit.compareTo(Resolution.HOUR) < 0) 
+			throw new IllegalStateException("resolution too low for this method: " + unit.name());
+		
 		if (hour < 0 || hour > 23)
 			throw T2Msg.exception(K.T1017, hour);
 		if (min < 0 || min > 59)
 			throw T2Msg.exception(K.T1019, min);
 		if (sec < 0 || sec > 59)
 			throw T2Msg.exception(K.T1022, sec);
-		if (fsec < 0 || fsec > 999999)
+	    //NOTE: excess digits discarded from fractional second by TimeScanner#scan
+		if (!TimeParts.good(unit, fsec))
 			throw T2Msg.exception(K.T1026, fsec);
 		
 		int overflow = 0;
@@ -379,6 +393,13 @@ public class TimeTools {
 					fsec -= tzOffset.getFsec();
 					if (fsec > 999999) {
 						fsec -= 1000000;
+						sec += 1;
+					}
+					break;
+				case NSEC:
+					fsec -= tzOffset.getFsec();
+					if (fsec > 999999999) {
+						fsec -= 1000000000;
 						sec += 1;
 					}
 					break;
@@ -416,6 +437,13 @@ public class TimeTools {
 						sec -= 1;
 					}
 					break;
+				case NSEC:
+					fsec -= tzOffset.getFsec();
+					if (fsec < 0) {
+						fsec += 1000000000;
+						sec -= 1;
+					}
+					break;
 				default:
 					// ignore
 				}
@@ -437,7 +465,6 @@ public class TimeTools {
 			}
 			tzOffset = null;
 		}
-		
 		return new CompositeOverflowAndHMSU(overflow, new HMSF(hour, min, sec, fsec));
 	}
 
@@ -471,6 +498,9 @@ public class TimeTools {
 		case USEC:
 			dayIndex = time / (24L * 60L * 60L * 1000000L);
 			break;
+		case NSEC:
+			dayIndex = time / (24L * 60L * 60L * 1000000000L);
+			break;
 		default:
 			throw T2Msg.exception(K.T1060, unit);
 		}
@@ -486,6 +516,7 @@ public class TimeTools {
 	 * @throws T2Exception
 	 */
 	public static DayOfWeek getDayOfWeek(Resolution unit, long time) throws T2Exception {
+		// the two base year of the system, 2000 (NSEC) and 2000 (all others), start on a Sat
 		int day = (int)(TimeTools.dayIndex(unit, time) % 7); // 0 -> Saturday
 		if (day == 0)
 			day = 6;
@@ -597,6 +628,65 @@ public class TimeTools {
 			int[] md = computeMonthAndDay(y, yearDay);
 			return new Day(y, md[0], md[1]);
 		}
+	}
+	
+	/**
+	 * Return the sum of two positive or negative long integers. Throw an exception
+	 * if the addition fails.
+	 * 
+	 * @param a
+	 *            first term
+	 * @param b
+	 *            second term
+	 * @return sum
+	 * @throws ArithmeticException if the sum is too large
+	 */
+	public static long sum(long a, long b) {
+		long sum = a + b;
+		// wrap around?
+        if ((a > 0 && b > 0 && sum < 0) || (a < 0 && b > 0 && sum > 0))
+            throw new ArithmeticException(a + "+" + b + " cannot be represented in a long integer");
+        return sum;
+	}
+	
+	/**
+	 * Return the difference between two positive or negative long integers. Throw an exception
+	 * if the subtraction fails.
+	 * 
+	 * @param a
+	 *            first term
+	 * @param b
+	 *            second term
+	 * @return difference
+	 * @throws ArithmeticException if the difference is too large
+	 */
+	public static long diff(long a, long b) {
+		long diff = a - b;
+		// wrap around?
+        if ((a > 0 && b < 0 && diff < 0) || (a < 0 && b > 0 && diff > 0))
+            throw new ArithmeticException(a + "-" + b + " cannot be represented in a long integer");
+        return diff;
+	}
+
+	/**
+	 * Return the product of two positive or negative long integers. Throw an exception
+	 * if the multiplication fails.
+	 * 
+	 * @param a
+	 *            first factor
+	 * @param b
+	 *            second factor
+	 * @return product
+	 * @throws ArithmeticException if the product is too large
+	 */
+	public static long prod(long a, long b) {
+	       long prod = a * b;
+	        if (((Math.abs(a) | Math.abs(b)) >>> 31 != 0)) {
+	        	// potential failure
+	           if (b != 0 && prod/b != a || b == -1 && a == Long.MIN_VALUE)
+	                throw new ArithmeticException(a + "*" + b + " cannot be represented in a long integer");
+	        }
+	        return prod;
 	}
 
 }

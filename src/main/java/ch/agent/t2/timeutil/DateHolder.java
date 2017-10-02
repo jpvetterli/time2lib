@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011-2013 Hauser Olsson GmbH
+ *   Copyright 2011-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -95,6 +95,9 @@ public class DateHolder {
 			break;
 		case USEC:
 			incr = 24 * 60 * 60 * 1000 * 1000;
+			break;
+		case NSEC:
+			incr = 24 * 60 * 60 * 1000 * 1000 * 1000;
 			break;
 		default:
 			throw new RuntimeException("bug: " + unit.name());

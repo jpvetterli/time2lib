@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011-2013 Hauser Olsson GmbH
+ *   Copyright 2011-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,11 +84,11 @@ public interface TimeIndex extends Comparable<TimeIndex> {
 	TimeIndex getDayByRank(Resolution referencePeriod, DayOfWeek day, int rank) throws T2Exception;
 	
 	/**
-	 * Return the microsecond component of the time.
+	 * Return the sub-second component of the time.
 	 * 
-	 * @return a number between 0 and 999999
+	 * @return a number between 0 and 999999999
 	 */
-	int getMicrosecond();
+	int getFractionalSecond();
 	
 	/**
 	 * Return the second component of the time.
@@ -185,7 +185,7 @@ public interface TimeIndex extends Comparable<TimeIndex> {
 	
 	/**
 	 * Return a string representation of the time. The order of the time components
-	 * is: year, month, day, hour, minute, second, microsecond. Because the format
+	 * is: year, month, day, hour, minute, second, sub-second. Because the format
 	 * string is a Formatter format, it is possible to reorder these components.
 	 * <p>
 	 * For example <code>"%04d%02d%02d"</code> would produce 19700401 and

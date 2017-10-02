@@ -396,7 +396,7 @@ public class TimeFactory implements TimeDomain, TimePacker, TimeFormatter, TimeS
 			long millis = time - days * 24L * 60L * 60L * 1000L;
 			seconds = millis / 1000L;
 			ymd = TimeTools.computeYMD(days);
-			hmsu = TimeTools.computeHMS(seconds, (int) (millis - seconds * 1000L) * 1000);
+			hmsu = TimeTools.computeHMS(seconds, (int) (millis - seconds * 1000L));
 			break;
 		case USEC:
 			days = time / (24L * 60L * 60L * 1000000L);
@@ -405,11 +405,18 @@ public class TimeFactory implements TimeDomain, TimePacker, TimeFormatter, TimeS
 			ymd = TimeTools.computeYMD(days);
 			hmsu = TimeTools.computeHMS(seconds, (int) (micros - seconds * 1000000L));
 			break;
+		case NSEC:
+			days = time / (24L * 60L * 60L * 1000000000L);
+			long nanos = time - days * 24L * 60L * 60L * 1000000000L;
+			seconds = nanos / 1000000000L;
+			ymd = TimeTools.computeYMD(days);
+			hmsu = TimeTools.computeHMS(seconds, (int) (nanos - seconds * 1000000000L));
+			break;
 		default:
 			throw new RuntimeException("bug: " + unit.name());
 		}
 		
-		TimeParts tp = makeTimeParts(ymd, hmsu);
+		TimeParts tp = makeTimeParts(unit, ymd, hmsu);
 		if (subPeriodPattern != null) {
 			// there is something to do even when subPeriod = 0
 			tp = subPeriodPattern.fillInSubPeriod(subPeriod, tp);
@@ -418,9 +425,9 @@ public class TimeFactory implements TimeDomain, TimePacker, TimeFormatter, TimeS
 		return tp;
 	}
 	
-	private TimeParts makeTimeParts(YMD ymd, HMSF hmsu) {
-		return hmsu == null ? new TimeParts(ymd.y(), ymd.m(), ymd.d(), 0, 0, 0, 0) :
-			new TimeParts(ymd.y(), ymd.m(), ymd.d(), hmsu.h(), hmsu.m(), hmsu.s(), hmsu.f());
+	private TimeParts makeTimeParts(Resolution unit, YMD ymd, HMSF hmsu) {
+		return hmsu == null ? new TimeParts(unit, ymd.y(), ymd.m(), ymd.d(), 0, 0, 0, 0) :
+			new TimeParts(unit, ymd.y(), ymd.m(), ymd.d(), hmsu.h(), hmsu.m(), hmsu.s(), hmsu.f());
 	}
 
 	@Override

@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011-2013 Hauser Olsson GmbH
+ *   Copyright 2011-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +17,14 @@
 package ch.agent.t2.time;
 
 /**
- * Resolution defines the available units of time, from years to microseconds.
+ * Resolution defines the available units of time, from years to nanoseconds.
  * Weeks are not supported directly. However a time domain for weeks is provided
  * by {@link Week}.
  * <p>
- * Values are declared in order of increasing resolution, starting with YEAR, and finishing
- * with USEC (microseconds). It is however recommended to compare resolutions with 
- * {@link TimeDomain#compareResolutionTo(Resolution)}, rather than relying on the natural ordering of this enum.
+ * Values are declared in order of increasing resolution, starting with YEAR,
+ * and finishing with NSEC (nanoseconds). It is however recommended to compare
+ * resolutions with {@link TimeDomain#compareResolutionTo(Resolution)}, rather
+ * than relying on the natural ordering of this enum.
  * 
  * @author Jean-Paul Vetterli
  */
@@ -59,5 +60,10 @@ public enum Resolution {
 	/**
 	 * The smallest unit is a microsecond.
 	 */
-	USEC
+	USEC,
+	/**
+	 * The smallest unit is a nanosecond.
+	 */
+	NSEC
+
 }

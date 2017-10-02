@@ -89,10 +89,15 @@ public class DefaultTimeFormatter implements TimeFormatter {
 			break;
 		case MSEC:
 			fmt.format("%s%04d-%02d-%02d%c%02d:%02d:%02d.%03d", plus, tp.getYear(),
-					tp.getMonth(), tp.getDay(), T, tp.getHour(), tp.getMin(), tp.getSec(), tp.getFsec() / 1000);
+					tp.getMonth(), tp.getDay(), T, tp.getHour(), tp.getMin(), tp.getSec(), tp.getFsec());
 			break;
 		case USEC:
 			fmt.format("%s%04d-%02d-%02d%c%02d:%02d:%02d.%06d", plus, tp.getYear(),
+					tp.getMonth(), tp.getDay(), T, tp.getHour(), tp.getMin(), tp.getSec(), tp.getFsec());
+			break;
+		case NSEC:
+			fmt.format("%s%04d-%02d-%02d%c%02d:%02d:%02d.%09d", plus, 
+					TimeDomain.BASE_YEAR_FOR_NANO + tp.getYear(),
 					tp.getMonth(), tp.getDay(), T, tp.getHour(), tp.getMin(), tp.getSec(), tp.getFsec());
 			break;
 		default:

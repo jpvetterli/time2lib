@@ -1,5 +1,5 @@
 /*
- *   Copyright 2011-2013 Hauser Olsson GmbH
+ *   Copyright 2011-2017 Hauser Olsson GmbH
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -197,12 +197,11 @@ public class SimpleSubPeriodPattern implements SubPeriodPattern {
 	 * @throws T2Exception
 	 */
 	private long increment(long time, int inc) throws T2Exception {
-		long result = time;
-		time += inc;
-		// overflow?
-		if (result < 0 && time > 0 || result > 0 && time < 0)
+		try {
+			return TimeTools.sum(time, inc);
+		} catch (ArithmeticException e) {
 			throw T2Msg.exception(K.T1116);
-		return time;
+		}
 	}
 	
 	@Override
@@ -213,14 +212,14 @@ public class SimpleSubPeriodPattern implements SubPeriodPattern {
 		TimeParts result = null;
 		switch (subPeriodUnit) {
 		case MONTH:
-			result = new TimeParts(tp.getYear(), ranks[subPeriod], tp.getDay(), tp.getHour(), tp.getMin(), tp.getSec(), tp.getFsec(), tp.getTZOffset());
+			result = new TimeParts(getSubPeriod(), tp.getYear(), ranks[subPeriod], tp.getDay(), tp.getHour(), tp.getMin(), tp.getSec(), tp.getFsec(), tp.getTZOffset());
 			break;
 		case DAY:
-			result = new TimeParts(tp.getYear(), tp.getMonth(), ranks[subPeriod], tp.getHour(), tp.getMin(), tp.getSec(), tp.getFsec(), tp.getTZOffset());
+			result = new TimeParts(getSubPeriod(), tp.getYear(), tp.getMonth(), ranks[subPeriod], tp.getHour(), tp.getMin(), tp.getSec(), tp.getFsec(), tp.getTZOffset());
 			break;
 		case SEC:
 			HMSF hmsu = TimeTools.computeHMS(ranks[subPeriod]);
-			result = new TimeParts(tp.getYear(), tp.getMonth(), tp.getDay(),hmsu.h(), hmsu.m(), hmsu.s(), hmsu.f(), tp.getTZOffset());
+			result = new TimeParts(getSubPeriod(), tp.getYear(), tp.getMonth(), tp.getDay(),hmsu.h(), hmsu.m(), hmsu.s(), hmsu.f(), tp.getTZOffset());
 			break;
 		default:
 			throw new RuntimeException("bug: " + subPeriodUnit.name());
