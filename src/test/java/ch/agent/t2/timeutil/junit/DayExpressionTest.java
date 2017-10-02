@@ -3,13 +3,13 @@ package ch.agent.t2.timeutil.junit;
 import junit.framework.TestCase;
 import ch.agent.core.KeyedException;
 import ch.agent.t2.T2Msg.K;
+import ch.agent.t2.applied.Month;
+import ch.agent.t2.applied.Workday;
+import ch.agent.t2.applied.Year;
 import ch.agent.t2.time.Adjustment;
 import ch.agent.t2.time.Day;
-import ch.agent.t2.time.Month;
 import ch.agent.t2.time.Range;
 import ch.agent.t2.time.TimeIndex;
-import ch.agent.t2.time.Workday;
-import ch.agent.t2.time.Year;
 import ch.agent.t2.timeutil.DayExpression;
 
 

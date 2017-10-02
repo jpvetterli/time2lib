@@ -4,12 +4,12 @@ import java.util.Iterator;
 
 import ch.agent.core.KeyedException;
 import ch.agent.t2.T2Msg.K;
+import ch.agent.t2.applied.Workday;
 import ch.agent.t2.time.Adjustment;
 import ch.agent.t2.time.Day;
 import ch.agent.t2.time.Range;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeIndex;
-import ch.agent.t2.time.Workday;
 import ch.agent.t2.timeseries.AbstractTimeSeries;
 import ch.agent.t2.timeseries.Filler;
 import ch.agent.t2.timeseries.Observation;

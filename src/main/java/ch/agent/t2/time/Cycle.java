@@ -24,8 +24,7 @@ import ch.agent.t2.T2Msg.K;
 
 /**
  * A Cycle is a {@link BasePeriodPattern} with a repeating sequence of ON and
- * OFF time points. For simple examples of use, see {@link Week} and {@link Workday}. 
- * A cycle is defined using a boolean array. 
+ * OFF time points. A cycle is defined using a boolean array.
  * 
  * @author Jean-Paul Vetterli
  */

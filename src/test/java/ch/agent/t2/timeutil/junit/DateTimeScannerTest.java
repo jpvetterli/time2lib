@@ -3,7 +3,7 @@ package ch.agent.t2.timeutil.junit;
 import junit.framework.TestCase;
 import ch.agent.core.KeyedException;
 import ch.agent.t2.T2Msg.K;
-import ch.agent.t2.time.DateTime;
+import ch.agent.t2.applied.DateTime;
 import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.timeutil.DateTimeScanner;
 import ch.agent.t2.timeutil.TimeUtil;

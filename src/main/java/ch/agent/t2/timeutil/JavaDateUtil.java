@@ -25,9 +25,9 @@ import java.util.TimeZone;
 import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
 import ch.agent.t2.T2Msg.K;
+import ch.agent.t2.applied.SystemTime;
 import ch.agent.t2.time.Adjustment;
 import ch.agent.t2.time.Day;
-import ch.agent.t2.time.SystemTime;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeIndex;
 

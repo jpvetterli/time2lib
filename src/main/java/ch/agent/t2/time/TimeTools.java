@@ -239,7 +239,7 @@ public class TimeTools {
 	 * tolerated, the software simply changes it into the 60th second. This is the
 	 * only case in the Time2 Library where leap seconds play a role. When
 	 * constructing a time with {@link TimeIndex#add(long)} for example, leap
-	 * seconds play no role. Adding 1 second to the {@link DateTime} domain
+	 * seconds play no role. Adding 1 second to a "second-by-second" domain
 	 * TimeIndex represented by 2008-12-31T23:59:59 yields 2009-01-01T00:00:00
 	 * instead of the official leap second 2008-12-31T23:59:60.
 	 * 

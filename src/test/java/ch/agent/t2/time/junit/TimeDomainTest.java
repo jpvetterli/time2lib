@@ -2,28 +2,28 @@ package ch.agent.t2.time.junit;
 
 import ch.agent.core.KeyedException;
 import ch.agent.t2.T2Msg.K;
+import ch.agent.t2.applied.DateTime;
+import ch.agent.t2.applied.DayByNameAndRank;
+import ch.agent.t2.applied.DayRankingSubPeriodPattern;
+import ch.agent.t2.applied.DefaultTimeDomainCatalog;
+import ch.agent.t2.applied.Month;
+import ch.agent.t2.applied.SystemTime;
+import ch.agent.t2.applied.ThirdFriday;
+import ch.agent.t2.applied.Workday;
 import ch.agent.t2.time.Adjustment;
 import ch.agent.t2.time.BasePeriodPattern;
 import ch.agent.t2.time.Cycle;
-import ch.agent.t2.time.DateTime;
 import ch.agent.t2.time.Day;
-import ch.agent.t2.time.DayByNameAndRank;
 import ch.agent.t2.time.DayOfWeek;
-import ch.agent.t2.time.DayRankingSubPeriodPattern;
-import ch.agent.t2.time.DefaultTimeDomainCatalog;
-import ch.agent.t2.time.Month;
 import ch.agent.t2.time.Range;
 import ch.agent.t2.time.Resolution;
 import ch.agent.t2.time.SimpleSubPeriodPattern;
 import ch.agent.t2.time.SubPeriodPattern;
-import ch.agent.t2.time.SystemTime;
-import ch.agent.t2.time.ThirdFriday;
 import ch.agent.t2.time.Time2;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeDomainCatalog;
 import ch.agent.t2.time.TimeDomainDefinition;
 import ch.agent.t2.time.TimeIndex;
-import ch.agent.t2.time.Workday;
 import junit.framework.TestCase;
 
 public class TimeDomainTest extends TestCase {

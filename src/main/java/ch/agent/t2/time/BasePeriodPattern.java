@@ -22,9 +22,6 @@ import ch.agent.t2.T2Exception;
  * A BasePeriodPattern defines a repeating pattern of time points.
  * The pattern defines which time points are ON and which are OFF in a
  * sequence of points of a well defined size.
- * A base period pattern eliminating all Saturdays and Sundays from a
- * daily domain is used in the definition of the working week time domain in
- * {@link Workday}.
  * 
  * @author Jean-Paul Vetterli
  * @see TimePacker

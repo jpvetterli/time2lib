@@ -3,7 +3,7 @@ package ch.agent.t2.timeutil.junit;
 import java.util.Date;
 
 import junit.framework.TestCase;
-import ch.agent.t2.time.DateTime;
+import ch.agent.t2.applied.DateTime;
 import ch.agent.t2.time.Day;
 import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.time.junit.CalendarUtil;

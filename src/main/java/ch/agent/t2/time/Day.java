@@ -21,8 +21,9 @@ import ch.agent.t2.T2Msg;
 import ch.agent.t2.T2Msg.K;
 
 /**
- * A Day is a {@link Time2} with day resolution.
- * The domain label is <b>daily</b>.
+ * A Day is a {@link Time2} with day resolution. The domain label is
+ * <b>daily</b>. This is the only "user-friendy" domain object provided by this
+ * package, because it is needed in the implementation.
  *
  * @author Jean-Paul Vetterli
  */

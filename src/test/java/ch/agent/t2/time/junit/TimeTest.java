@@ -4,24 +4,24 @@ import java.util.Date;
 
 import ch.agent.core.KeyedException;
 import ch.agent.t2.T2Msg.K;
+import ch.agent.t2.applied.DateTime;
+import ch.agent.t2.applied.DefaultTimeDomainCatalog;
+import ch.agent.t2.applied.Month;
+import ch.agent.t2.applied.SystemTime;
+import ch.agent.t2.applied.Week;
+import ch.agent.t2.applied.Workday;
+import ch.agent.t2.applied.Year;
 import ch.agent.t2.time.Adjustment;
 import ch.agent.t2.time.Cycle;
-import ch.agent.t2.time.DateTime;
 import ch.agent.t2.time.Day;
 import ch.agent.t2.time.DayOfWeek;
-import ch.agent.t2.time.DefaultTimeDomainCatalog;
-import ch.agent.t2.time.Month;
 import ch.agent.t2.time.Resolution;
-import ch.agent.t2.time.SystemTime;
 import ch.agent.t2.time.Time2;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeDomainCatalog;
 import ch.agent.t2.time.TimeDomainDefinition;
 import ch.agent.t2.time.TimeIndex;
 import ch.agent.t2.time.TimeTools;
-import ch.agent.t2.time.Week;
-import ch.agent.t2.time.Workday;
-import ch.agent.t2.time.Year;
 import junit.framework.TestCase;
 
 public class TimeTest extends TestCase {

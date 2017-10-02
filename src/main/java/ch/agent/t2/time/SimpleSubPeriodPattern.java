@@ -33,7 +33,6 @@ import ch.agent.t2.time.TimeParts.HMSF;
  * another one: "at 10:15, 14:20, and 22:40 every working day".
  * 
  * @author Jean-Paul Vetterli
- * @see DayRankingSubPeriodPattern
  */
 public class SimpleSubPeriodPattern implements SubPeriodPattern {
 	

@@ -14,60 +14,65 @@
  * limitations under the License.
  * 
  */
-package ch.agent.t2.time;
+package ch.agent.t2.applied;
 
 import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
 import ch.agent.t2.T2Msg.K;
+import ch.agent.t2.time.Adjustment;
+import ch.agent.t2.time.Resolution;
+import ch.agent.t2.time.Time2;
+import ch.agent.t2.time.TimeDomain;
+import ch.agent.t2.time.TimeDomainDefinition;
+import ch.agent.t2.time.TimeIndex;
 
 /**
- * A Month is a {@link Time2} with month resolution.
- * The domain label is <b>monthly</b>.
+ * A Year is a {@link Time2} with year resolution.
+ * The domain label is <em>yearly</em>.
  *
  * @author Jean-Paul Vetterli
  */
-public class Month extends Time2 {
+public class Year extends Time2 {
 
 	/**
 	 * A constant holding the domain label.
 	 */
-	public static final String LABEL = "monthly";
+	public static final String LABEL = "yearly";
 	
 	/**
 	 * A constant holding the domain.
 	 */
-	public static final TimeDomain DOMAIN = new TimeDomainDefinition(LABEL, Resolution.MONTH, 0L).asTimeDomain();
-
+	public static final TimeDomain DOMAIN = new TimeDomainDefinition(LABEL, Resolution.YEAR, 0L).asTimeDomain();
+	
 	/**
-	 * Construct a <q>monthly</q> time from another time object. 
-	 * @param time a non-null time in the domain <q>monthly</q>
+	 * Construct a <q>yearly</q> time from another time object. 
+	 * @param time a non-null time in the domain <q>yearly</q>
 	 * @throws T2Exception
 	 */
-	public Month(TimeIndex time) throws T2Exception {
+	public Year(TimeIndex time) throws T2Exception {
 		super(DOMAIN, time.asLong());
 		if (DOMAIN != time.getTimeDomain())
 			throw T2Msg.exception(K.T1073, time.getTimeDomain().getLabel(), DOMAIN.getLabel());
 	}
 	
 	/**
-	 * Construct a <q>monthly</q> time from a string.
+	 * Construct a <q>yearly</q> time from a string.
 	 *  
 	 * @param date a non-null string
 	 * @throws T2Exception
 	 */
-	public Month(String date) throws T2Exception {
+	public Year(String date) throws T2Exception {
 		super(DOMAIN, date);
 	}
 	
 	/**
-	 * Construct a <q>monthly</q> time from the given time components.
+	 * Construct a <q>yearly</q> time from the given time components.
 	 * 
 	 * @param year a non-negative number
-	 * @param month a number in [1-12]
 	 * @throws T2Exception
 	 */
-	public Month(long year, int month) throws T2Exception { 
-		super(DOMAIN, year, month, 0, 0, 0, 0, 0, Adjustment.NONE);
+	public Year(long year) throws T2Exception { 
+		super(DOMAIN, year, 0, 0, 0, 0, 0, 0, Adjustment.NONE);
 	}
 
 }

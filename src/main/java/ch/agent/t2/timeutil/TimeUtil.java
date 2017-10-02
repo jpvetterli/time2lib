@@ -17,8 +17,8 @@
 package ch.agent.t2.timeutil;
 
 import ch.agent.t2.T2Exception;
+import ch.agent.t2.applied.SystemTime;
 import ch.agent.t2.time.Adjustment;
-import ch.agent.t2.time.SystemTime;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeIndex;
 

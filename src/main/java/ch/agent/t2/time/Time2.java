@@ -22,7 +22,6 @@ import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
 import ch.agent.t2.T2Msg.K;
 
-
 /**
  * Time2 implements the behavior of {@link TimeIndex} as an immutable object. 
  * <p>
@@ -46,13 +45,11 @@ import ch.agent.t2.T2Msg.K;
  * following fashion:
  * <ul>
  * <li>If resolutions differ, the time with the lowest resolution is converted
- * to the one with the highest resolution. For example comparing a {@link Day}
- * to a {@link Year} will compare the day specified to the implicit default day
+ * to the one with the highest resolution. For example comparing a "daily" time
+ * with y yearly time will compare the day specified to the implicit default day
  * of the year specified (which is January 1).
  * <li>If resolutions do not differ, the times are converted to the unrestricted
- * time domain for their resolution. For example the comparison of a
- * {@link Workday} to a {@link ThirdFriday} will convert both to a {@link Day}
- * before comparing.
+ * time domain for their resolution.
  * </ul>
  * These semantics are not meaningful for all possible time domains.
  * Applications using "exotic" time domains should consider writing a subclass

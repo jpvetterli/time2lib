@@ -14,13 +14,19 @@
  * limitations under the License.
  * 
  */
-package ch.agent.t2.time;
+package ch.agent.t2.applied;
 
 import java.util.Arrays;
 
 import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
 import ch.agent.t2.T2Msg.K;
+import ch.agent.t2.time.Adjustment;
+import ch.agent.t2.time.Resolution;
+import ch.agent.t2.time.SimpleSubPeriodPattern;
+import ch.agent.t2.time.SubPeriodPattern;
+import ch.agent.t2.time.TimeParts;
+import ch.agent.t2.time.TimeTools;
 
 /**
  * A DayRankingSubperiodPattern defines sub periods within a base period in

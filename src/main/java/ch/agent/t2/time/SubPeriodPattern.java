@@ -24,8 +24,6 @@ import ch.agent.t2.T2Exception;
  * to define a time domain like "at 10:00, 12:30, and 16:45 on every working day" for example,
  * where the base pattern is used to model working days and the sub period pattern is used
  * to define the within day times.  
- * A sub period pattern is used in the definition of the time domain
- * implementing "the 3d Friday of the month" in {@link ThirdFriday}.
  * 
  * @author Jean-Paul Vetterli
  * @see TimePacker

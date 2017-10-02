@@ -2,19 +2,19 @@ package ch.agent.t2.time.junit;
 
 import ch.agent.core.KeyedException;
 import ch.agent.t2.T2Msg.K;
+import ch.agent.t2.applied.DateTime;
+import ch.agent.t2.applied.Month;
+import ch.agent.t2.applied.ThirdFriday;
+import ch.agent.t2.applied.Week;
+import ch.agent.t2.applied.Workday;
+import ch.agent.t2.applied.Year;
 import ch.agent.t2.time.Adjustment;
 import ch.agent.t2.time.Cycle;
-import ch.agent.t2.time.DateTime;
 import ch.agent.t2.time.Day;
-import ch.agent.t2.time.Month;
 import ch.agent.t2.time.Resolution;
-import ch.agent.t2.time.ThirdFriday;
 import ch.agent.t2.time.TimeDomain;
 import ch.agent.t2.time.TimeDomainDefinition;
 import ch.agent.t2.time.TimeIndex;
-import ch.agent.t2.time.Week;
-import ch.agent.t2.time.Workday;
-import ch.agent.t2.time.Year;
 import junit.framework.TestCase;
 
 public class TimeConversionTest extends TestCase {

@@ -14,11 +14,17 @@
  * limitations under the License.
  * 
  */
-package ch.agent.t2.time;
+package ch.agent.t2.applied;
 
 import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
 import ch.agent.t2.T2Msg.K;
+import ch.agent.t2.time.Adjustment;
+import ch.agent.t2.time.Resolution;
+import ch.agent.t2.time.Time2;
+import ch.agent.t2.time.TimeDomain;
+import ch.agent.t2.time.TimeDomainDefinition;
+import ch.agent.t2.time.TimeIndex;
 
 /**
  * A SystemTime is a {@link Time2} time with millisecond resolution and the

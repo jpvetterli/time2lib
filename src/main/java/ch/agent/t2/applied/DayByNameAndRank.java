@@ -14,11 +14,13 @@
  * limitations under the License.
  * 
  */
-package ch.agent.t2.time;
+package ch.agent.t2.applied;
 
 import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
 import ch.agent.t2.T2Msg.K;
+import ch.agent.t2.time.DayOfWeek;
+import ch.agent.t2.time.Resolution;
 
 /**
  * DayByNameAndRank defines a day by its name and its rank within a month or a

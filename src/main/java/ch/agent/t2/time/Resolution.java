@@ -18,8 +18,7 @@ package ch.agent.t2.time;
 
 /**
  * Resolution defines the available units of time, from years to nanoseconds.
- * Weeks are not supported directly. However a time domain for weeks is provided
- * by {@link Week}.
+ * Weeks are not supported directly. However a time domain for weeks is easy to implement.
  * <p>
  * Values are declared in order of increasing resolution, starting with YEAR,
  * and finishing with NSEC (nanoseconds). It is however recommended to compare

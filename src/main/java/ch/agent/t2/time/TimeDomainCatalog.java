@@ -19,7 +19,6 @@ package ch.agent.t2.time;
 import java.util.Collection;
 
 import ch.agent.t2.T2Exception;
-import ch.agent.t2.timeseries.Observation;
 
 /**
  * TimeDomainCatalog is an interface for retrieving {@link TimeDomain} objects.
@@ -27,36 +26,9 @@ import ch.agent.t2.timeseries.Observation;
  * with a given set of properties. A catalog provides built-in domains guaranteed
  * to be available whenever the catalog is present. The labels of such domains
  * can be used as external identifiers.
- * <p>
- * There are different ways to access a time domain. If the catalog is
- * implemented correctly, all methods should give the same object. Because time
- * domains are immutable it is not wrong in principle to use different objects
- * for the same time domain, but it has performance consequences. As an example,
- * an {@link Observation} encapsulates a time domain and processing observations
- * often involves comparing their time domains with #equals. As applications can
- * have thousands or even millions of observations, using the same object for
- * the same time domain makes applications faster. The following example code
- * shows 4 different ways to get the same domain object, in this case the
- * <em>daily</em> domain implemented by {@link Day}:
- * <p>
- * <blockquote>
- * 
- * <pre>
- * TimeDomainCatalog catalog = new DefaultTimeDomainCatalog();
- * TimeDomain d1 = new Day(&quot;0102-03-04&quot;).getTimeDomain();
- * TimeDomain d2 = Day.DOMAIN;
- * TimeDomain d3 = catalog.get(&quot;daily&quot;);
- * TimeDomain d4 = catalog.get(new TimeDomainDefinition(null, Resolution.DAY, 0L));
- * assertSame(d1, d2);
- * assertSame(d1, d3);
- * assertSame(d1, d4);
- * </pre>
- * 
- * </blockquote>
  * 
  * @author Jean-Paul Vetterli
  * @see TimeDomainDefinition
- * @see DefaultTimeDomainCatalog
  */
 public interface TimeDomainCatalog {
 	
