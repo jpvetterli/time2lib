@@ -19,8 +19,7 @@ package ch.agent.t2.time;
 /**
  * A time formatter is used to turn a time into a string. It supports the ISO
  * 8601:2004 international standard for the representation of calendar dates and
- * times, except week dates and ordinal dates. It does not insert a "T" between
- * the date and the time.
+ * times, except week dates and ordinal dates.
  * 
  * @author Jean-Paul Vetterli
  */
@@ -28,17 +27,12 @@ public interface TimeFormatter {
 
 	
 	/**
-	 * Generate a string representing the time in the time parts object. The actual
-	 * format can depend on the time resolution. For example, a time with day
-	 * resolution could be formatted as "yyyy-mm-dd"; with second resolution it could 
-	 * be formatted as "yyyy-mm-dd hh:MM:ss" (without a "T" between date and time).
+	 * Generate a string representing the time in the time parts object.
 	 * 
-	 * @param unit
-	 *            the time resolution 
 	 * @param tp
 	 *            a non-null time parts object
 	 * @return a string with the external representation of the time
 	 */
-	public String format(Resolution unit, TimeParts tp);
+	public String format(TimeParts tp);
 	
 }

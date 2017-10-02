@@ -324,8 +324,8 @@ public class TimeFactory implements TimeDomain, TimePacker, TimeFormatter, TimeS
 	}
 
 	@Override
-	public String format(Resolution unit, TimeParts timeParts) {
-		return formatter.format(unit, timeParts);
+	public String format(TimeParts timeParts) {
+		return formatter.format(timeParts);
 	}
 
 	@Override

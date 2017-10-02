@@ -305,8 +305,7 @@ public class Time2 implements TimeIndex {
 	
 	@Override
 	public String toString(TimeFormatter formatter) {
-		return formatter == null ? domain.getFormatter().format(domain.getResolution(), getTP())
-				: formatter.format(domain.getResolution(), getTP());
+		return formatter == null ? domain.getFormatter().format(getTP()) : formatter.format(getTP());
 	}
 	
 	@Override

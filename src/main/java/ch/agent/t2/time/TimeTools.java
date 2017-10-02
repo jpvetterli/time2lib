@@ -322,7 +322,7 @@ public class TimeTools {
 					}
 				}
 			} catch (ArithmeticException e) {
-				throw T2Msg.exception(K.T1079, new DefaultTimeFormatter(true).format(unit, tp));
+				throw T2Msg.exception(K.T1079, new DefaultTimeFormatter(true).format(tp));
 			}
 		}
 		return time;
