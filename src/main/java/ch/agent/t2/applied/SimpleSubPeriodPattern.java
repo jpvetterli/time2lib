@@ -14,13 +14,18 @@
  * limitations under the License.
  * 
  */
-package ch.agent.t2.time;
+package ch.agent.t2.applied;
 
 import java.util.Arrays;
 
 import ch.agent.t2.T2Exception;
 import ch.agent.t2.T2Msg;
 import ch.agent.t2.T2Msg.K;
+import ch.agent.t2.time.Adjustment;
+import ch.agent.t2.time.Resolution;
+import ch.agent.t2.time.SubPeriodPattern;
+import ch.agent.t2.time.TimeParts;
+import ch.agent.t2.time.TimeTools;
 import ch.agent.t2.time.TimeParts.HMSF;
 
 /**
@@ -51,9 +56,8 @@ public class SimpleSubPeriodPattern implements SubPeriodPattern {
 	 * @param basePeriod a non-null resolution
 	 * @param subPeriod a non-null resolution
 	 * @param ranks a non-null non-empty array of integers
-	 * @throws T2Exception
 	 */
-	public SimpleSubPeriodPattern(Resolution basePeriod, Resolution subPeriod, int[] ranks) throws T2Exception {
+	public SimpleSubPeriodPattern(Resolution basePeriod, Resolution subPeriod, int[] ranks) {
 		if (basePeriod == null)
 			throw new IllegalArgumentException("basePeriod null");
 		if (subPeriod == null)
@@ -63,7 +67,11 @@ public class SimpleSubPeriodPattern implements SubPeriodPattern {
 		this.basePeriodUnit = basePeriod;
 		this.subPeriodUnit = subPeriod;
 		this.ranks = ranks;
-		validateRanks();
+		try {
+			validateRanks();
+		} catch (T2Exception e) {
+			throw new IllegalArgumentException("ranks invalid", e);
+		}
 	}
 
 	/**

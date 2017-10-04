@@ -7,6 +7,7 @@ import ch.agent.t2.applied.DayByNameAndRank;
 import ch.agent.t2.applied.DayRankingSubPeriodPattern;
 import ch.agent.t2.applied.DefaultTimeDomainCatalog;
 import ch.agent.t2.applied.Month;
+import ch.agent.t2.applied.SimpleSubPeriodPattern;
 import ch.agent.t2.applied.SystemTime;
 import ch.agent.t2.applied.ThirdFriday;
 import ch.agent.t2.applied.Workday;
@@ -17,7 +18,6 @@ import ch.agent.t2.time.Day;
 import ch.agent.t2.time.DayOfWeek;
 import ch.agent.t2.time.Range;
 import ch.agent.t2.time.Resolution;
-import ch.agent.t2.time.SimpleSubPeriodPattern;
 import ch.agent.t2.time.SubPeriodPattern;
 import ch.agent.t2.time.Time2;
 import ch.agent.t2.time.TimeDomain;
@@ -587,8 +587,8 @@ public class TimeDomainTest extends TestCase {
 					new Cycle(true, false, false, false), 
 					new SimpleSubPeriodPattern(Resolution.DAY, Resolution.MIN, new int[]{3, 9})));			
 			fail("exception expected");
-		} catch (KeyedException e) {
-			assertEquals(K.T1112, e.getMsg().getKey());
+		} catch (IllegalArgumentException e) {
+			assertEquals(K.T1112, ((KeyedException) e.getCause()).getMsg().getKey());
 		}
 	}
 	
