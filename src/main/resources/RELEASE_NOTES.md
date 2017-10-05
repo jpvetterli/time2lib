@@ -1,7 +1,7 @@
 T2 LIBRARY RELEASE NOTES
 ========================
 
-	Copyright 2011-2013 Hauser Olsson GmbH.
+	Copyright 2011-2017 Hauser Olsson GmbH.
 	
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
@@ -26,6 +26,62 @@ modified in such a way that clients using it need to be recoded or even
 redesigned. The medium number is incremented when modifications break 
 backward compatibility. For all other modifications, only the minor 
 number is incremented.
+
+*************************************************************
+
+<a name="v2_0_0">2017-10-05/jpv</a>
+
+Version 2.0.0 &mdash; Elimination of singletons and support for nanoseconds
+---------------------------------------------------------------------------
+
+This is a major release which breaks compatibility with version 1.
+Applications moving to version 2 need to reorganize their imports.
+If they use factory methods to create time domains or time series, 
+some recoding is necessary.
+
+The release consists of three JARs:
+
+- `t2-2.0.0.jar` (binaries)
+- `t2-2.0.0-javadoc.jar`
+- `t2-2.0.0-sources.jar`
+
+There is also a new version of the __Time2 Library Demos__:
+
+- `t2-demo-2.0.0.jar` (binaries)
+- `t2-demo-2.0.0-javadoc.jar`
+- `t2-demo-2.0.0-sources.jar`
+
+The following points summarize the changes.
+
+1. Time domain factories, which were implemented as singletons, and
+had some synchronized methods, have been eliminated. Similar functionality 
+is now provided by `TimeDomainCatalog`. Applications create a subclass 
+of `ImmutableTimeDomainCatalog` and pass it to the relevant constructor.
+A catalog is provided out the box in `DefaultTimeDomainCatalog`. Refer
+to `SummerWinterOlympics` in `t2-demo` for a simple example of using
+a time domain catalog.
+
+1. `ExternalTimeFormat` has been replaced by `TimeScanner` and `TimeFormatter`.
+
+1. `TimeSeriesFactory` has been eliminated. Time series are now created
+with public constructors of `RegularTimeSeries` and `SparseTimeSeries`. 
+A static factory method is provided by `AbstractTimeSeries#make`.
+
+1. A `TimeParts` object is now immutable.
+
+1. All classes of package `ch.agent.t2.time.engine` have been moved up one
+package and the package eliminated.
+
+1. All non-essential classes in package `ch.agent.t2.time` have been moved
+to package `ch.agent.t2.applied`. 
+
+1. Nanosecond resolution is now supported (`Resolution#NSEC`). Nanosecond
+time starts in year 2000 and extends a few years beyond 2200. 
+
+1. All Maven plugins have been upgraded (`pom.xml`).
+
+1. The release includes various other fixes and improvements. 
+
 
 *************************************************************
 

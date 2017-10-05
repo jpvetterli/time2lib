@@ -1,7 +1,7 @@
 time2lib : The Time2 Library
 ============================
 
-	Copyright 2011-2013 Hauser Olsson GmbH.
+	Copyright 2011-2017 Hauser Olsson GmbH.
 	
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
@@ -17,14 +17,18 @@ time2lib : The Time2 Library
 
 ***
 
-The Time2 Library is a Java library providing 
-generic time series with configurable time domains.
+The Time2 Library is a Java library providing generic time series with 
+configurable time domains. __Version 2__ is not plug-compatible with version 1,
+because factories and singletons have been removed. Time2 applications must
+now use injection, which increases reliability and testability. More details 
+about what has changed is available from the release notes distributed with 
+the software.
 
 Distribution
 ------------
 
-Starting with version 1.1.6, the distribution consists of a binary JAR with 
-compiled classes, of a javadoc JAR and of a source JAR. For version x.y.z:
+The distribution consists of a binary JAR with compiled classes, of a javadoc 
+JAR and of a source JAR. For version x.y.z:
 
 	t2-x.y.z.jar
 	t2-x.y.z-javadoc.jar
@@ -37,9 +41,8 @@ For Maven users
 ---------------
 
 Starting with version 1.1.6, the software is available from the 
-<a href="http://repo.maven.apache.org/maven2/ch/agent/t2/">Maven central 
-repository</a>. To use version x.y.z, insert the following dependency into your 
-`pom.xml` file:
+[Maven central repository](http://repo.maven.apache.org/maven2/ch/agent/t2/).
+To use version x.y.z, insert the following dependency into your `pom.xml` file:
 
     <dependency>
       <groupId>ch.agent</groupId>
@@ -69,50 +72,60 @@ A simple example using the library
 Here is a simple example of an application using the Time2 Library. 
 It's called `Olympics.java`:
 
-import ch.agent.t2.time.TimeDomain;
-import ch.agent.t2.timeseries.Observation;
-import ch.agent.t2.timeseries.TimeAddressable;
-import ch.agent.t2.timeseries.TimeSeriesFactory;
+    import ch.agent.t2.time.Cycle;
+    import ch.agent.t2.time.Resolution;
+    import ch.agent.t2.time.TimeDomain;
+    import ch.agent.t2.time.TimeDomainDefinition;
+    import ch.agent.t2.timeseries.Observation;
+    import ch.agent.t2.timeseries.RegularTimeSeries;
+    import ch.agent.t2.timeseries.TimeAddressable;
 
-/**
- * Olympics is a (very) little demo for the Time2 library.
- *
- * @author Jean-Paul Vetterli
- */
-public class Olympics {
+    /**
+     * Olympics is a mini demo for the Time2 library.
+     *
+     * @author Jean-Paul Vetterli
+     */
+    public class Olympics {
 
-  public static void main(String[] args) {
-    try {
-      TimeDomain year4 = new EveryFourYears();
-      
-      // define "missing value" for String (else, the default is null)
-      String missingValue = "(missing)";
-      TimeSeriesFactory.getInstance().define(String.class, missingValue);
-
-      TimeAddressable<String> olympics = TimeSeriesFactory.make(year4, String.class);
-      olympics.put(year4.time("1896"), new String[] {"Athens", "Paris", "Saint-Louis", "London", "Stockholm"});
-      olympics.put(year4.time("1920"), new String[] {"Antwerp", "Paris", "Amsterdam", "Los Angeles", "Berlin"});
-      
-      for (Observation<String> oly : olympics) {
-        System.out.println(oly.toString());
-      }
-      
-    } catch (Exception e) {
-      System.err.println("Oops...\n" + e.getMessage());
+    	public static void main(String[] args) {
+    		try {
+    			// create a time domain with one point every 4th year starting in year 0000
+    			TimeDomain year4 = new TimeDomainDefinition(
+    					"year4",
+    					Resolution.YEAR,
+    					0L,
+    					new Cycle(true, false, false, false)
+    			).asTimeDomain();
+    			
+    			// define "missing value" for String (else, the default is null)
+    			String missingValue = "(missing)";
+    			TimeAddressable<String> olympics = new RegularTimeSeries<String>(String.class, year4, missingValue);
+    			
+    			olympics.put(year4.time("1896"), new String[] {"Athens", "Paris", "Saint-Louis", "London", "Stockholm"});
+    			olympics.put(year4.time("1920"), new String[] {"Antwerp", "Paris", "Amsterdam", "Los Angeles", "Berlin"});
+    			
+    			// notice: no games in 1916, during WW I
+    			
+    			for (Observation<String> oly : olympics) {
+    				System.out.println(oly.toString());
+    			}
+    			
+    		} catch (Exception e) {
+    			System.err.println("Oops...\n" + e.getMessage());
+    		}
+    	}
     }
-  }
-}
 
 Create file `Olympics.java` in some directory and put a copy of 
-`t2-1.0.0.jar` (or a later version) in the same directory.
+`t2-2.0.0.jar` (or a later version) in the same directory.
 
 Compile:
 
-	$ javac -cp t2-1.0.0.jar Olympics.java
+	$ javac -cp t2-2.0.0.jar Olympics.java
 
 Execute:
 
-	$ java -cp .:t2-1.0.0.jar Olympics
+	$ java -cp .:t2-2.0.0.jar Olympics
 	1896=Athens
 	1900=Paris
 	1904=Saint-Louis
@@ -128,16 +141,15 @@ Execute:
 Browsing the source code
 ------------------------
 
-The source is available on GitHub at 
-<http://github.com/jpvetterli/time2lib.git>.
+The source is available on [GitHub](http://github.com/jpvetterli/time2lib.git).
 
 Finding more information
 ------------------------
 
-More information on the Time2 Library is available at 
-<http://agent.ch/timeseries/t2/>.
+More information on the Time2 Library is available at the 
+[project website](http://agent.ch/timeseries/t2/).
 
-<small>Updated: 2013-01-07/jpv</small>
+<small>Updated: 2017-10-04/jpv</small>
 
 <link rel="stylesheet" type="text/css" href="README.css"/>
 
