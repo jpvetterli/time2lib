@@ -32,7 +32,7 @@ import ch.agent.t2.time.TimeIndex;
  * AbstractTimeseries is the basis for {@link RegularTimeSeries} and {@link SparseTimeSeries}.
  *
  * @author Jean-Paul Vetterli
- * @param <T>
+ * @param <T> the value type
  */
 public abstract class AbstractTimeSeries<T> implements TimeAddressable<T> {
 
